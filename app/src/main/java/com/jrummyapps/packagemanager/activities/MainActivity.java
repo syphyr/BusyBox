@@ -15,7 +15,7 @@
  *
  */
 
-package com.jrummyapps.packagemanager;
+package com.jrummyapps.packagemanager.activities;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;
@@ -42,6 +42,7 @@ import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.ReflectUtils;
+import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.fragments.BusyBoxInstaller;
 
 import java.io.File;
