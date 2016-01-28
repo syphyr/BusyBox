@@ -17,4 +17,5 @@
 
 <resources>
   <string name="activity_busybox_installer">Busybox Installer</string>
+  <string name="choose_a_directory">Choose a directory…</string>
 </resources>
