@@ -70,13 +70,4 @@ public class Utils {
     return binaries;
   }
 
-  private static ABI getAbi(String name) {
-    for (ABI abi : ABI.values()) {
-      if (TextUtils.equals(abi.name, name)) {
-        return abi;
-      }
-    }
-    return null;
-  }
-
 }
