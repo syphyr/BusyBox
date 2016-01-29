@@ -25,9 +25,13 @@ import android.view.ViewGroup;
 
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jrummyapps.android.base.BaseFragment;
+import com.jrummyapps.android.common.Toasts;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.io.Storage;
+import com.jrummyapps.android.os.ABI;
 import com.jrummyapps.packagemanager.R;
+import com.jrummyapps.packagemanager.models.AssetBinary;
+import com.jrummyapps.packagemanager.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,8 +43,12 @@ public class BusyBoxInstaller extends BaseFragment implements
 
   private static final String DEFAULT_INSTALL_PATH = "/system/xbin";
 
+  private ArrayList<AssetBinary> binaries;
   private ArrayList<String> paths;
+
+  private MaterialSpinner binarySpinner;
   private MaterialSpinner directorySpinner;
+
   private int selectedDirectoryPosition;
 
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,7 +59,17 @@ public class BusyBoxInstaller extends BaseFragment implements
 
     onRestoreInstanceState(savedInstanceState);
 
+    binarySpinner = findById(R.id.spinner1);
     directorySpinner = findById(R.id.spinner2);
+
+    binarySpinner.setItems(binaries);
+    binarySpinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<AssetBinary>() {
+
+      @Override public void onItemSelected(MaterialSpinner view, int position, long id, AssetBinary item) {
+        Toasts.show(item.name);
+      }
+    });
+
     directorySpinner.setItems(paths);
     directorySpinner.setSelectedIndex(selectedDirectoryPosition);
     directorySpinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
@@ -70,6 +88,7 @@ public class BusyBoxInstaller extends BaseFragment implements
     super.onSaveInstanceState(outState);
     outState.putInt("selected_directory_position", selectedDirectoryPosition);
     outState.putStringArrayList("paths", paths);
+    outState.putParcelableArrayList("binaries", binaries);
   }
 
   @Override public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
@@ -77,10 +96,14 @@ public class BusyBoxInstaller extends BaseFragment implements
     if (savedInstanceState != null) {
       selectedDirectoryPosition = savedInstanceState.getInt("selected_directory_position", -1);
       paths = savedInstanceState.getStringArrayList("paths");
+      binaries = savedInstanceState.getParcelableArrayList("binaries");
     } else {
       paths = new ArrayList<>();
       paths.addAll(Arrays.asList(Storage.PATH));
       paths.add(getString(R.string.choose_a_directory));
+
+      binaries = Utils.getBinariesFromAssets(ABI.getAbi());
+
       selectedDirectoryPosition = 0;
       for (int i = 0; i < paths.size(); i++) {
         if (paths.get(i).equals(DEFAULT_INSTALL_PATH)) {

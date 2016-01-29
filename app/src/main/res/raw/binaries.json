@@ -1,0 +1,17 @@
+[
+  {
+    "name": "BusyBox 1.24.1",
+    "abi": "arm",
+    "path": "busybox/arm/busybox"
+  },
+  {
+    "name": "BusyBox 1.24.1",
+    "abi": "mips",
+    "path": "busybox/mips/busybox"
+  },
+  {
+    "name": "BusyBox 1.24.1",
+    "abi": "x86",
+    "path": "busybox/x86/busybox"
+  }
+]
