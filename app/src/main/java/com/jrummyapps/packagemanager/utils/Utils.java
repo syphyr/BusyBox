@@ -35,6 +35,11 @@ import java.util.Iterator;
 
 public class Utils {
 
+  /**
+   * Get a list of binaries in the assets directory
+   *
+   * @return a list of binaries from the assets in this APK file.
+   */
   public static ArrayList<AssetBinary> getBinariesFromAssets() {
     ArrayList<AssetBinary> binaries = new ArrayList<>();
     try {
@@ -60,6 +65,12 @@ public class Utils {
     return binaries;
   }
 
+  /**
+   * Get a list of supported binaries for the given ABI.
+   *
+   * @param abi the {@link ABI} to filter
+   * @return a list of binaries from the assets in this APK file.
+   */
   public static ArrayList<AssetBinary> getBinariesFromAssets(ABI abi) {
     ArrayList<AssetBinary> binaries = getBinariesFromAssets();
     for (Iterator<AssetBinary> iterator = binaries.iterator(); iterator.hasNext(); ) {
