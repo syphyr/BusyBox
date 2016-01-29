@@ -87,7 +87,7 @@ android {
 }
 
 dependencies {
-    compile 'com.jaredrummler:material-spinner:1.0.2'
+    compile 'com.jaredrummler:material-spinner:1.0.3'
     compile project(':lib-texteditor')
 }
 

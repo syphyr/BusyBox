@@ -24,8 +24,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.jaredrummler.materialspinner.MaterialSpinner;
+import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
+import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListener;
+import com.jrummyapps.android.animations.Technique;
 import com.jrummyapps.android.base.BaseFragment;
-import com.jrummyapps.android.common.Toasts;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.os.ABI;
@@ -59,27 +61,50 @@ public class BusyBoxInstaller extends BaseFragment implements
 
     onRestoreInstanceState(savedInstanceState);
 
+    final View backgroundShadow = findById(R.id.background_shadow);
     binarySpinner = findById(R.id.binary_spinner);
     directorySpinner = findById(R.id.directory_spinner);
 
-    binarySpinner.setItems(binaries);
-    binarySpinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<AssetBinary>() {
+    final View.OnClickListener onClickListener = new View.OnClickListener() {
 
-      @Override public void onItemSelected(MaterialSpinner view, int position, long id, AssetBinary item) {
-        Toasts.show(item.name);
+      @Override public void onClick(View v) {
+        backgroundShadow.setVisibility(View.VISIBLE);
+        Technique.FADE_IN.getComposer().duration(500).playOn(backgroundShadow);
       }
-    });
+    };
+
+    final OnNothingSelectedListener onNothingSelectedListener = new OnNothingSelectedListener() {
+
+      @Override public void onNothingSelected(MaterialSpinner spinner) {
+        Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
+      }
+    };
+
+    binarySpinner.setItems(binaries);
+    binarySpinner.setOnClickListener(onClickListener);
+    binarySpinner.setOnNothingSelectedListener(onNothingSelectedListener);
 
     directorySpinner.setItems(paths);
+    directorySpinner.setOnClickListener(onClickListener);
+    directorySpinner.setOnNothingSelectedListener(onNothingSelectedListener);
     directorySpinner.setSelectedIndex(selectedDirectoryPosition);
-    directorySpinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
+
+    directorySpinner.setOnItemSelectedListener(new OnItemSelectedListener<String>() {
 
       @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+        Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
         if (item.equals(getString(R.string.choose_a_directory))) {
           DirectoryPickerDialog.show(getActivity(), new File("/"));
         } else {
           selectedDirectoryPosition = view.getSelectedIndex();
         }
+      }
+    });
+
+    binarySpinner.setOnItemSelectedListener(new OnItemSelectedListener<AssetBinary>() {
+
+      @Override public void onItemSelected(MaterialSpinner view, int position, long id, AssetBinary item) {
+        Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
       }
     });
   }
