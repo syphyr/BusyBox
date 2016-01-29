@@ -55,9 +55,10 @@ public class Utils {
       for (int i = 0; i < jsonArray.length(); i++) {
         JSONObject jsonObject = jsonArray.getJSONObject(i);
         String name = jsonObject.getString("name");
+        String filename = jsonObject.getString("filename");
         String path = jsonObject.getString("path");
         String abi = jsonObject.getString("abi");
-        binaries.add(new AssetBinary(name, abi, path));
+        binaries.add(new AssetBinary(name, filename, abi, path));
       }
     } catch (Exception e) {
       Crashlytics.logException(e);
@@ -68,7 +69,8 @@ public class Utils {
   /**
    * Get a list of supported binaries for the given ABI.
    *
-   * @param abi the {@link ABI} to filter
+   * @param abi
+   *     the {@link ABI} to filter
    * @return a list of binaries from the assets in this APK file.
    */
   public static ArrayList<AssetBinary> getBinariesFromAssets(ABI abi) {

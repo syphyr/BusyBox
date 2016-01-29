@@ -128,7 +128,7 @@ public class BusyBoxInstaller extends BaseFragment implements
       paths.add(getString(R.string.choose_a_directory));
 
       binaries = Utils.getBinariesFromAssets(ABI.getAbi());
-      binaries.add(new AssetBinary("Download...", ABI.getAbi().name, "http://jrummyapps.com"));
+      binaries.add(new AssetBinary("Download...", null, ABI.getAbi().name, "http://jrummyapps.com"));
 
       selectedDirectoryPosition = 0;
       for (int i = 0; i < paths.size(); i++) {
