@@ -22,6 +22,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
@@ -62,6 +63,9 @@ public class BusyBoxInstaller extends BaseFragment implements
     onRestoreInstanceState(savedInstanceState);
 
     final View backgroundShadow = findById(R.id.background_shadow);
+    final Button installButton = findById(R.id.button_install);
+    final Button uninstallButton = findById(R.id.button_uninstall);
+
     binarySpinner = findById(R.id.binary_spinner);
     directorySpinner = findById(R.id.directory_spinner);
 

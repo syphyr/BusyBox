@@ -34,6 +34,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.jaredrummler.materialspinner.MaterialSpinner;
@@ -71,7 +72,16 @@ public class MainActivity extends BaseDrawerActivity implements
 
   @TargetApi(Build.VERSION_CODES.M)
   @Override public View onViewCreated(@NonNull View view, @Nullable AttributeSet attrs) {
-    if (view instanceof TextView) {
+    if (view instanceof Button) {
+      Button button = (Button) view;
+      ColorStateList textColors = button.getTextColors();
+      ColorScheme.applyColorScheme(textColors);
+      button.setTextColor(textColors);
+      ColorStateList csl = button.getBackgroundTintList();
+      if (csl != null) {
+        button.setBackgroundTintList(ColorScheme.applyColorScheme(csl));
+      }
+    } else if (view instanceof TextView) {
       TextView textView = (TextView) view;
       ColorStateList textColors = textView.getTextColors();
       ColorScheme.applyColorScheme(textColors);
