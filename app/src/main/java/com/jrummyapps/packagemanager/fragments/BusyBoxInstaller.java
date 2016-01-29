@@ -59,8 +59,8 @@ public class BusyBoxInstaller extends BaseFragment implements
 
     onRestoreInstanceState(savedInstanceState);
 
-    binarySpinner = findById(R.id.spinner1);
-    directorySpinner = findById(R.id.spinner2);
+    binarySpinner = findById(R.id.binary_spinner);
+    directorySpinner = findById(R.id.directory_spinner);
 
     binarySpinner.setItems(binaries);
     binarySpinner.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<AssetBinary>() {
@@ -103,6 +103,7 @@ public class BusyBoxInstaller extends BaseFragment implements
       paths.add(getString(R.string.choose_a_directory));
 
       binaries = Utils.getBinariesFromAssets(ABI.getAbi());
+      binaries.add(new AssetBinary("Download...", ABI.getAbi().name, "http://jrummyapps.com"));
 
       selectedDirectoryPosition = 0;
       for (int i = 0; i < paths.size(); i++) {

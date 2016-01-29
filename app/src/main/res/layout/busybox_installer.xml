@@ -34,7 +34,7 @@
       app:cardBackgroundColor="?backgroundColorLight">
 
     <com.jaredrummler.materialspinner.MaterialSpinner
-        android:id="@+id/spinner1"
+        android:id="@+id/binary_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:ms_background_color="?backgroundColorLight"/>
@@ -49,7 +49,7 @@
       app:cardBackgroundColor="?backgroundColorLight">
 
     <com.jaredrummler.materialspinner.MaterialSpinner
-        android:id="@+id/spinner2"
+        android:id="@+id/directory_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:ms_background_color="?backgroundColorLight"/>
