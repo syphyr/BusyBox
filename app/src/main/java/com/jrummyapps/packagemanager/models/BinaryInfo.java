@@ -20,18 +20,20 @@ package com.jrummyapps.packagemanager.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class AssetBinary implements Parcelable {
+public class BinaryInfo implements Parcelable {
 
   public final String name;
   public final String filename;
   public final String abi;
   public final String path;
+  public final long size;
 
-  public AssetBinary(String name, String filename, String abi, String path) {
+  public BinaryInfo(String name, String filename, String abi, String path, long size) {
     this.name = name;
     this.filename = filename;
     this.abi = abi;
     this.path = path;
+    this.size = size;
   }
 
   @Override public String toString() {
@@ -47,23 +49,25 @@ public class AssetBinary implements Parcelable {
     dest.writeString(filename);
     dest.writeString(abi);
     dest.writeString(path);
+    dest.writeLong(size);
   }
 
-  protected AssetBinary(Parcel in) {
+  protected BinaryInfo(Parcel in) {
     name = in.readString();
     filename = in.readString();
     abi = in.readString();
     path = in.readString();
+    size = in.readLong();
   }
 
-  public static final Parcelable.Creator<AssetBinary> CREATOR = new Parcelable.Creator<AssetBinary>() {
+  public static final Parcelable.Creator<BinaryInfo> CREATOR = new Parcelable.Creator<BinaryInfo>() {
 
-    @Override public AssetBinary createFromParcel(Parcel source) {
-      return new AssetBinary(source);
+    @Override public BinaryInfo createFromParcel(Parcel source) {
+      return new BinaryInfo(source);
     }
 
-    @Override public AssetBinary[] newArray(int size) {
-      return new AssetBinary[size];
+    @Override public BinaryInfo[] newArray(int size) {
+      return new BinaryInfo[size];
     }
 
   };

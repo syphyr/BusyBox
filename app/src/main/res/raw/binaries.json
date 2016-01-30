@@ -3,18 +3,21 @@
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "arm",
-    "path": "busybox/arm/busybox"
+    "path": "busybox/arm/busybox",
+    "size": 739264
   },
   {
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "mips",
-    "path": "busybox/mips/busybox"
+    "path": "busybox/mips/busybox",
+    "size": 1455672
   },
   {
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "x86",
-    "path": "busybox/x86/busybox"
+    "path": "busybox/x86/busybox",
+    "size": 863192
   }
 ]

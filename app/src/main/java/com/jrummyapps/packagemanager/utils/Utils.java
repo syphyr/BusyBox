@@ -23,7 +23,7 @@ import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.os.ABI;
 import com.jrummyapps.packagemanager.R;
-import com.jrummyapps.packagemanager.models.AssetBinary;
+import com.jrummyapps.packagemanager.models.BinaryInfo;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,8 +40,8 @@ public class Utils {
    *
    * @return a list of binaries from the assets in this APK file.
    */
-  public static ArrayList<AssetBinary> getBinariesFromAssets() {
-    ArrayList<AssetBinary> binaries = new ArrayList<>();
+  public static ArrayList<BinaryInfo> getBinariesFromAssets() {
+    ArrayList<BinaryInfo> binaries = new ArrayList<>();
     try {
       ByteArrayOutputStream output = new ByteArrayOutputStream();
       InputStream input = App.getContext().getResources().openRawResource(R.raw.binaries);
@@ -58,7 +58,8 @@ public class Utils {
         String filename = jsonObject.getString("filename");
         String path = jsonObject.getString("path");
         String abi = jsonObject.getString("abi");
-        binaries.add(new AssetBinary(name, filename, abi, path));
+        long size = jsonObject.getLong("size");
+        binaries.add(new BinaryInfo(name, filename, abi, path, size));
       }
     } catch (Exception e) {
       Crashlytics.logException(e);
@@ -73,9 +74,9 @@ public class Utils {
    *     the {@link ABI} to filter
    * @return a list of binaries from the assets in this APK file.
    */
-  public static ArrayList<AssetBinary> getBinariesFromAssets(ABI abi) {
-    ArrayList<AssetBinary> binaries = getBinariesFromAssets();
-    for (Iterator<AssetBinary> iterator = binaries.iterator(); iterator.hasNext(); ) {
+  public static ArrayList<BinaryInfo> getBinariesFromAssets(ABI abi) {
+    ArrayList<BinaryInfo> binaries = getBinariesFromAssets();
+    for (Iterator<BinaryInfo> iterator = binaries.iterator(); iterator.hasNext(); ) {
       if (!TextUtils.equals(iterator.next().abi, abi.base)) {
         iterator.remove();
       }
