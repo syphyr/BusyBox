@@ -17,21 +17,26 @@
 
 package com.jrummyapps.packagemanager.fragments;
 
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StatFs;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListener;
 import com.jrummyapps.android.animations.Technique;
+import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.base.BaseFragment;
 import com.jrummyapps.android.colors.Color;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
@@ -42,11 +47,14 @@ import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.fileproperties.charts.PieChart;
 import com.jrummyapps.android.fileproperties.charts.PieModel;
 import com.jrummyapps.android.html.HtmlBuilder;
+import com.jrummyapps.android.io.FilePermissions;
 import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.os.ABI;
+import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.roottools.utils.Mount;
 import com.jrummyapps.android.theme.ColorScheme;
+import com.jrummyapps.android.util.DateUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.dialogs.ConfirmUninstallDialog;
@@ -55,8 +63,10 @@ import com.jrummyapps.packagemanager.models.BinaryInfo;
 import com.jrummyapps.packagemanager.utils.Utils;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 public class BusyBoxInstaller extends BaseFragment implements
@@ -152,6 +162,11 @@ public class BusyBoxInstaller extends BaseFragment implements
     installButton.setOnClickListener(this);
 
     updateDiskUsagePieChart();
+
+    if (file != null) {
+      new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
+    }
+
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
@@ -230,6 +245,86 @@ public class BusyBoxInstaller extends BaseFragment implements
     BinaryInfo binaryInfo = binaries.get(binarySpinner.getSelectedIndex());
     String path = paths.get(directorySpinner.getSelectedIndex());
     new DiskUsageUpdater(binaryInfo, path).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+  }
+
+  private final class PropertiesUpdater extends AsyncTask<AFile, Void, List<String[]>> {
+
+    @Override protected List<String[]> doInBackground(AFile... params) {
+      if (params == null || params.length == 0 || !params[0].exists()) {
+        return null;
+      }
+
+      AFile file = params[0];
+
+      List<String[]> properties = new ArrayList<>();
+
+      properties.add(new String[]{getString(R.string.path), file.path});
+
+      if (file.filename.equals("busybox")) {
+        BusyBox busyBox = BusyBox.from(file.path);
+        String version = busyBox.getVersion();
+        if (!TextUtils.isEmpty(version)) {
+          properties.add(new String[]{getString(R.string.version), version});
+        }
+      }
+
+      FilePermissions permissions = file.getFilePermissions();
+      if (permissions != null) {
+        String value = Integer.toString(permissions.mode) + " (" + permissions.symbolicNotation + ")";
+        properties.add(new String[]{getString(R.string.permissions), value});
+      }
+
+      properties.add(new String[]{getString(R.string.size), Formatter.formatFileSize(App.getContext(), file.length())});
+
+      SimpleDateFormat sdf = DateUtils.getInstance().getDateTimeFormatter();
+      properties.add(new String[]{getString(R.string.last_modified), sdf.format(file.lastModified())});
+
+      return properties;
+    }
+
+    @Override protected void onPostExecute(List<String[]> properties) {
+      if (properties == null) {
+        findById(R.id.properties_layout).setVisibility(View.GONE);
+        return;
+      }
+
+      TableLayout tableLayout = findById(R.id.table_properties);
+
+      int width = ResUtils.dpToPx(128);
+      int left = ResUtils.dpToPx(16);
+      int top = ResUtils.dpToPx(6);
+      int bottom = ResUtils.dpToPx(6);
+
+      int i = 0;
+      for (String[] arr : properties) {
+        TableRow tableRow = new TableRow(getActivity());
+        TextView nameText = new TextView(getActivity());
+        TextView valueText = new TextView(getActivity());
+
+        if (i % 2 == 0) {
+          tableRow.setBackgroundColor(0x0D000000);
+        } else {
+          tableRow.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        nameText.setLayoutParams(new TableRow.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT));
+        nameText.setPadding(left, top, 0, bottom);
+        nameText.setAllCaps(true);
+        nameText.setTypeface(Typeface.DEFAULT_BOLD);
+        nameText.setText(arr[0]);
+
+        valueText.setPadding(left, top, 0, bottom);
+        valueText.setText(arr[1]);
+
+        tableRow.addView(nameText);
+        tableRow.addView(valueText);
+        tableLayout.addView(tableRow);
+
+        i++;
+      }
+
+    }
+
   }
 
   private final class DiskUsageUpdater extends AsyncTask<Void, Void, Long[]> {
