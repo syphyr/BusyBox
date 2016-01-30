@@ -37,15 +37,20 @@ import com.jrummyapps.android.colors.Color;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.drawable.CircleDrawable;
 import com.jrummyapps.android.drawable.TextDrawable;
+import com.jrummyapps.android.eventbus.EventBusHook;
+import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.fileproperties.charts.PieChart;
 import com.jrummyapps.android.fileproperties.charts.PieModel;
 import com.jrummyapps.android.html.HtmlBuilder;
 import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.os.ABI;
+import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.roottools.utils.Mount;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
+import com.jrummyapps.packagemanager.dialogs.ConfirmUninstallDialog;
+import com.jrummyapps.packagemanager.events.RequestUninstallBinaryEvent;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
 import com.jrummyapps.packagemanager.utils.Utils;
 
@@ -56,11 +61,13 @@ import java.util.Locale;
 
 public class BusyBoxInstaller extends BaseFragment implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
-    DirectoryPickerDialog.OnDirectoryPickerCancelledListener {
+    DirectoryPickerDialog.OnDirectoryPickerCancelledListener, View.OnClickListener {
 
   private static final String TAG = "BusyBoxInstaller";
 
   private static final String DEFAULT_INSTALL_PATH = "/system/xbin";
+
+  private static final String REPO = ""; // TODO: add URL to install utilities
 
   private ArrayList<BinaryInfo> binaries;
   private ArrayList<String> paths;
@@ -78,6 +85,18 @@ public class BusyBoxInstaller extends BaseFragment implements
   private PieModel freeSlice;
   private PieModel itemSlice;
 
+  private AFile file;
+
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    Events.register(this);
+  }
+
+  @Override public void onDestroy() {
+    super.onDestroy();
+    Events.unregister(this);
+  }
+
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     return inflater.inflate(R.layout.busybox_installer, container, false);
   }
@@ -92,14 +111,6 @@ public class BusyBoxInstaller extends BaseFragment implements
 
     onRestoreInstanceState(savedInstanceState);
 
-    final View.OnClickListener onClickListener = new View.OnClickListener() {
-
-      @Override public void onClick(View v) {
-        backgroundShadow.setVisibility(View.VISIBLE);
-        Technique.FADE_IN.getComposer().duration(500).playOn(backgroundShadow);
-      }
-    };
-
     final OnNothingSelectedListener onNothingSelectedListener = new OnNothingSelectedListener() {
 
       @Override public void onNothingSelected(MaterialSpinner spinner) {
@@ -108,11 +119,11 @@ public class BusyBoxInstaller extends BaseFragment implements
     };
 
     binarySpinner.setItems(binaries);
-    binarySpinner.setOnClickListener(onClickListener);
+    binarySpinner.setOnClickListener(this);
     binarySpinner.setOnNothingSelectedListener(onNothingSelectedListener);
 
     directorySpinner.setItems(paths);
-    directorySpinner.setOnClickListener(onClickListener);
+    directorySpinner.setOnClickListener(this);
     directorySpinner.setOnNothingSelectedListener(onNothingSelectedListener);
     directorySpinner.setSelectedIndex(selectedDirectoryPosition);
 
@@ -136,6 +147,10 @@ public class BusyBoxInstaller extends BaseFragment implements
       }
     });
 
+    uninstallButton.setEnabled(file != null && file.exists());
+    uninstallButton.setOnClickListener(this);
+    installButton.setOnClickListener(this);
+
     updateDiskUsagePieChart();
   }
 
@@ -144,6 +159,7 @@ public class BusyBoxInstaller extends BaseFragment implements
     outState.putInt("selected_directory_position", selectedDirectoryPosition);
     outState.putStringArrayList("paths", paths);
     outState.putParcelableArrayList("binaries", binaries);
+    outState.putParcelable("file", file);
   }
 
   @Override public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
@@ -152,22 +168,35 @@ public class BusyBoxInstaller extends BaseFragment implements
       selectedDirectoryPosition = savedInstanceState.getInt("selected_directory_position", -1);
       paths = savedInstanceState.getStringArrayList("paths");
       binaries = savedInstanceState.getParcelableArrayList("binaries");
+      file = savedInstanceState.getParcelable("file");
     } else {
       paths = new ArrayList<>();
       paths.addAll(Arrays.asList(Storage.PATH));
       paths.add(getString(R.string.choose_a_directory));
-
       binaries = Utils.getBinariesFromAssets(ABI.getAbi());
-      binaries.add(new BinaryInfo("Download...", null, ABI.getAbi().name, "http://jrummyapps.com", 0));
-
+      binaries.add(new BinaryInfo(getString(R.string.download_), null, ABI.getAbi().base, REPO, 0));
+      String filename = binaries.get(0).filename;
       selectedDirectoryPosition = 0;
       for (int i = 0; i < Storage.PATH.length; i++) {
         String path = Storage.PATH[i];
+        if (filename != null && new File(path, filename).exists()) {
+          file = new AFile(path, filename);
+          selectedDirectoryPosition = i;
+          break;
+        }
         if (path.equals(DEFAULT_INSTALL_PATH)) {
           selectedDirectoryPosition = i;
         }
       }
+    }
+  }
 
+  @Override public void onClick(View v) {
+    if (v == directorySpinner || v == binarySpinner) {
+      backgroundShadow.setVisibility(View.VISIBLE);
+      Technique.FADE_IN.getComposer().duration(500).playOn(backgroundShadow);
+    } else if (v == uninstallButton) {
+      ConfirmUninstallDialog.show(getActivity(), file);
     }
   }
 
@@ -191,6 +220,10 @@ public class BusyBoxInstaller extends BaseFragment implements
 
   @Override public void onDirectoryPickerCancelledListener() {
     directorySpinner.setSelectedIndex(selectedDirectoryPosition);
+  }
+
+  @EventBusHook public void onEvent(RequestUninstallBinaryEvent event) {
+    // TODO: uninstall the binary
   }
 
   private void updateDiskUsagePieChart() {

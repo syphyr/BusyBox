@@ -19,5 +19,10 @@
   <string name="activity_busybox_installer">Busybox Installer</string>
   <string name="choose_a_directory">Choose a directory…</string>
   <string name="install">Install</string>
+  <string name="confirm_before_deleting">Confirm before deleting</string>
   <string name="uninstall">Uninstall</string>
+  <string name="download_">Download…</string>
+  <string name="yes">Yes</string>
+  <string name="delete">Delete</string>
+  <string name="are_you_sure_you_want_to_uninstall_s">Are you sure you want to uninstall %s</string>
 </resources>
