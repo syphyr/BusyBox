@@ -244,6 +244,12 @@ public class InstallerFragment extends BaseFragment implements
       Technique.FADE_IN.getComposer().duration(500).playOn(backgroundShadow);
     } else if (v == uninstallButton) {
       ConfirmUninstallDialog.show(getActivity(), file);
+    } else if (v == installButton) {
+      BinaryInfo binaryInfo = binaries.get(binarySpinner.getSelectedIndex());
+      String path = paths.get(directorySpinner.getSelectedIndex());
+      Utils.installFromAssets(binaryInfo, path, false, false);
+      file = new AFile(path, binaryInfo.filename);
+      new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
     }
   }
 

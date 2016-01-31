@@ -21,7 +21,14 @@ import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
+import com.jrummyapps.android.io.PermissionsHelper;
+import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.os.ABI;
+import com.jrummyapps.android.roottools.RootTools;
+import com.jrummyapps.android.roottools.box.BusyBox;
+import com.jrummyapps.android.roottools.shell.stericson.Shell;
+import com.jrummyapps.android.roottools.utils.Assets;
+import com.jrummyapps.android.roottools.utils.Mount;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
 
@@ -29,9 +36,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class Utils {
 
@@ -82,6 +91,80 @@ public class Utils {
       }
     }
     return binaries;
+  }
+
+  public static final int RWXR_XR_X = PermissionsHelper.S_IRUSR
+      | PermissionsHelper.S_IWUSR
+      | PermissionsHelper.S_IXUSR
+      | PermissionsHelper.S_IRGRP
+      | PermissionsHelper.S_IXGRP
+      | PermissionsHelper.S_IROTH
+      | PermissionsHelper.S_IXOTH;
+
+  public static void installFromAssets(BinaryInfo binaryInfo, String path, boolean symlink, boolean overwrite) {
+
+    // TODO: clean up!
+
+    Assets.transferAsset(App.getContext(), binaryInfo.path, binaryInfo.filename, RWXR_XR_X);
+
+    Mount mount = Mount.getMount(path);
+    if (mount == null) {
+      throw new RuntimeException("Error getting mount point for " + path);
+    }
+
+    boolean mountedReadWrite = mount.isMountedReadWrite();
+
+    if (!mount.remountReadWrite()) {
+      throw new RuntimeException("Failed mounting " + mount.mountPoint + " read/write");
+    }
+
+    File srFile = new File(App.getContext().getFilesDir(), binaryInfo.filename);
+    File dtFile = new File(path, binaryInfo.filename);
+
+    // remove old busybox binaries
+    for (String systemPath : Storage.PATH) {
+      File file = new File(systemPath, binaryInfo.filename);
+      if (file.exists() && file.equals(dtFile) && !systemPath.equals(path)) {
+        RootTools.rm(file);
+      }
+    }
+
+    if (!RootTools.cp(srFile, dtFile)) {
+      throw new RuntimeException("Failed copying " + srFile + " to " + dtFile);
+    }
+    if (!RootTools.chmod("0755", dtFile)) {
+      throw new RuntimeException("Failed to give permissions to " + dtFile);
+    }
+    if (!RootTools.chown("root", "root", dtFile)) {
+      throw new RuntimeException("Failed to set user/group to root/root for " + dtFile);
+    }
+
+    BusyBox busyBox = BusyBox.from(dtFile.getAbsolutePath());
+
+    if (overwrite && symlink) {
+      List<String> applets = busyBox.getApplets();
+      for (String applet : applets) {
+        File file = new File(path, applet);
+        if (file.exists()) {
+          RootTools.rm(file);
+        }
+      }
+    }
+
+    if (symlink) {
+      if (!Shell.SU.run("\"" + busyBox.path + "\" --install -s \"" + path + "\"").success()) {
+        List<String> applets = busyBox.getApplets();
+        for (String applet : applets) {
+          File file = new File(path, applet);
+          RootTools.ln(busyBox, file);
+        }
+      }
+    }
+
+    if (!mountedReadWrite) {
+      mount.remountReadOnly();
+    }
+
   }
 
 }
