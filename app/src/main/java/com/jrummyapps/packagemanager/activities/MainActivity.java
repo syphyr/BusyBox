@@ -45,7 +45,7 @@ import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.ReflectUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.dialogs.ConfirmUninstallDialog;
-import com.jrummyapps.packagemanager.fragments.BusyBoxInstaller;
+import com.jrummyapps.packagemanager.fragments.InstallerFragment;
 
 import java.io.File;
 
@@ -59,7 +59,7 @@ public class MainActivity extends BaseDrawerActivity implements
     if (savedInstanceState == null) {
       getFragmentManager()
           .beginTransaction()
-          .add(R.id.content_frame, new BusyBoxInstaller())
+          .add(R.id.content_frame, new InstallerFragment())
           .commit();
     }
   }
