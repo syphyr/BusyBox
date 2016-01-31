@@ -16,7 +16,7 @@
   -->
 
 <resources>
-  <string name="activity_busybox_installer">Busybox Installer</string>
+  <string name="activity_busybox_installer">BusyBox</string>
   <string name="choose_a_directory">Choose a directory…</string>
   <string name="install">Install</string>
   <string name="confirm_before_deleting">Confirm before deleting</string>
