@@ -24,10 +24,8 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
-import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.packagemanager.R;
-import com.jrummyapps.packagemanager.events.RequestUninstallBinaryEvent;
 
 public class ConfirmUninstallDialog extends DialogFragment {
 
@@ -48,11 +46,18 @@ public class ConfirmUninstallDialog extends DialogFragment {
         .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
           @Override public void onClick(DialogInterface dialog, int which) {
+            if (getActivity() instanceof ConfirmUninstallListener) {
+              ((ConfirmUninstallListener) getActivity()).onConfirmUninstall(file);
+            }
             dialog.dismiss();
-            Events.post(new RequestUninstallBinaryEvent(file));
           }
         })
         .create();
+  }
+
+  public interface ConfirmUninstallListener {
+
+    void onConfirmUninstall(AFile file);
   }
 
 }

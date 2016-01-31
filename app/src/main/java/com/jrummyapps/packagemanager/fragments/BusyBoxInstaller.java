@@ -51,8 +51,6 @@ import com.jrummyapps.android.common.Toasts;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.drawable.CircleDrawable;
 import com.jrummyapps.android.drawable.TextDrawable;
-import com.jrummyapps.android.eventbus.EventBusHook;
-import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.fileproperties.activities.FilePropertiesActivity;
 import com.jrummyapps.android.fileproperties.charts.PieChart;
 import com.jrummyapps.android.fileproperties.charts.PieModel;
@@ -71,7 +69,6 @@ import com.jrummyapps.android.util.DateUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.dialogs.ConfirmUninstallDialog;
-import com.jrummyapps.packagemanager.events.RequestUninstallBinaryEvent;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
 import com.jrummyapps.packagemanager.utils.Utils;
 
@@ -84,7 +81,9 @@ import java.util.Locale;
 
 public class BusyBoxInstaller extends BaseFragment implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
-    DirectoryPickerDialog.OnDirectoryPickerCancelledListener, View.OnClickListener {
+    DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
+    ConfirmUninstallDialog.ConfirmUninstallListener,
+    View.OnClickListener {
 
   private static final String TAG = "BusyBoxInstaller";
 
@@ -116,12 +115,10 @@ public class BusyBoxInstaller extends BaseFragment implements
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-    Events.register(this);
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
-    Events.unregister(this);
   }
 
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -272,7 +269,11 @@ public class BusyBoxInstaller extends BaseFragment implements
     directorySpinner.setSelectedIndex(selectedDirectoryPosition);
   }
 
-  @EventBusHook public void onEvent(RequestUninstallBinaryEvent event) {
+  @Override public void onConfirmUninstall(AFile aFile) {
+    if (file == null || !file.equals(aFile)) {
+      return;
+    }
+
     new AsyncTask<Void, Void, Boolean>() {
 
       @Override protected void onPreExecute() {
@@ -292,7 +293,7 @@ public class BusyBoxInstaller extends BaseFragment implements
         file = null;
         progressItem.setVisible(false);
         uninstallButton.setEnabled(false);
-        Technique.FADE_OUT.getComposer().hideOnFinished().playOn(propertiesCard);
+        propertiesCard.setVisibility(View.GONE);
       }
 
     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

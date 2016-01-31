@@ -40,16 +40,19 @@ import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jrummyapps.android.base.BaseDrawerActivity;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
+import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.ReflectUtils;
 import com.jrummyapps.packagemanager.R;
+import com.jrummyapps.packagemanager.dialogs.ConfirmUninstallDialog;
 import com.jrummyapps.packagemanager.fragments.BusyBoxInstaller;
 
 import java.io.File;
 
 public class MainActivity extends BaseDrawerActivity implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
-    DirectoryPickerDialog.OnDirectoryPickerCancelledListener {
+    DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
+    ConfirmUninstallDialog.ConfirmUninstallListener {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -129,6 +132,14 @@ public class MainActivity extends BaseDrawerActivity implements
     Fragment fragment = getFragmentManager().findFragmentById(R.id.content_frame);
     if (fragment instanceof DirectoryPickerDialog.OnDirectoryPickerCancelledListener) {
       ((DirectoryPickerDialog.OnDirectoryPickerCancelledListener) fragment).onDirectoryPickerCancelledListener();
+    }
+  }
+
+  @Override public void onConfirmUninstall(AFile file) {
+    Fragment fragment = getFragmentManager().findFragmentById(R.id.content_frame);
+    if (fragment instanceof ConfirmUninstallDialog.ConfirmUninstallListener) {
+      ((ConfirmUninstallDialog.ConfirmUninstallListener) fragment).onConfirmUninstall(file);
+
     }
   }
 
