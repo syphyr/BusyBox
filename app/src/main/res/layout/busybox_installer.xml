@@ -204,6 +204,7 @@
           android:layout_marginLeft="1dp"
           android:layout_marginRight="1dp"
           android:layout_marginTop="16dp"
+          android:visibility="gone"
           app:cardBackgroundColor="?backgroundColorLight">
 
         <LinearLayout

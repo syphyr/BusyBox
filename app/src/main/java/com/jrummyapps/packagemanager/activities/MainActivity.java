@@ -30,7 +30,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,14 +59,6 @@ public class MainActivity extends BaseDrawerActivity implements
           .add(R.id.content_frame, new BusyBoxInstaller())
           .commit();
     }
-  }
-
-  @Override public boolean onCreateOptionsMenu(Menu menu) {
-    menu.add(0, Menu.FIRST, 0, R.string.settings)
-        .setIcon(R.drawable.ic_settings_white_24dp)
-        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-    ColorScheme.newMenuTint(menu).forceIcons().apply(this);
-    return super.onCreateOptionsMenu(menu);
   }
 
   @TargetApi(Build.VERSION_CODES.M)
@@ -115,7 +106,7 @@ public class MainActivity extends BaseDrawerActivity implements
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     int itemId = item.getItemId();
-    if (itemId == Menu.FIRST) {
+    if (itemId == R.id.action_settings) {
       startActivity(new Intent(this, MainPreferenceActivity.class));
     } else {
       return super.onOptionsItemSelected(item);

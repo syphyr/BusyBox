@@ -22,9 +22,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StatFs;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.CardView;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -49,7 +53,9 @@ import com.jrummyapps.android.fileproperties.charts.PieModel;
 import com.jrummyapps.android.html.HtmlBuilder;
 import com.jrummyapps.android.io.FilePermissions;
 import com.jrummyapps.android.io.Storage;
+import com.jrummyapps.android.io.external.ExternalStorageHelper;
 import com.jrummyapps.android.os.ABI;
+import com.jrummyapps.android.roottools.RootTools;
 import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.roottools.utils.Mount;
@@ -85,9 +91,12 @@ public class BusyBoxInstaller extends BaseFragment implements
   private MaterialSpinner binarySpinner;
   private MaterialSpinner directorySpinner;
   private PieChart pieChart;
+  private CardView propertiesCard;
   private Button installButton;
   private Button uninstallButton;
   private View backgroundShadow;
+
+  private MenuItem progressItem;
 
   private int selectedDirectoryPosition;
 
@@ -99,6 +108,7 @@ public class BusyBoxInstaller extends BaseFragment implements
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    setHasOptionsMenu(true);
     Events.register(this);
   }
 
@@ -116,6 +126,7 @@ public class BusyBoxInstaller extends BaseFragment implements
     installButton = findById(R.id.button_install);
     uninstallButton = findById(R.id.button_uninstall);
     pieChart = findById(R.id.piechart);
+    propertiesCard = findById(R.id.properties_layout);
     binarySpinner = findById(R.id.binary_spinner);
     directorySpinner = findById(R.id.directory_spinner);
 
@@ -163,9 +174,7 @@ public class BusyBoxInstaller extends BaseFragment implements
 
     updateDiskUsagePieChart();
 
-    if (file != null) {
-      new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
-    }
+    new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
 
   }
 
@@ -206,6 +215,14 @@ public class BusyBoxInstaller extends BaseFragment implements
     }
   }
 
+  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    inflater.inflate(R.menu.busybox_installer_menu, menu);
+    progressItem = menu.findItem(R.id.menu_item_progress);
+    progressItem.setVisible(false);
+    ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
+    super.onCreateOptionsMenu(menu, inflater);
+  }
+
   @Override public void onClick(View v) {
     if (v == directorySpinner || v == binarySpinner) {
       backgroundShadow.setVisibility(View.VISIBLE);
@@ -238,7 +255,24 @@ public class BusyBoxInstaller extends BaseFragment implements
   }
 
   @EventBusHook public void onEvent(RequestUninstallBinaryEvent event) {
-    // TODO: uninstall the binary
+    new AsyncTask<Void, Void, Boolean>() {
+
+      @Override protected void onPreExecute() {
+        progressItem.setVisible(true);
+      }
+
+      @Override protected Boolean doInBackground(Void... params) {
+        return file.isOnRemovableStorage() && ExternalStorageHelper.delete(file) || file.delete() || RootTools.rm(file);
+      }
+
+      @Override protected void onPostExecute(Boolean aBoolean) {
+        file = null;
+        progressItem.setVisible(false);
+        uninstallButton.setEnabled(false);
+        Technique.FADE_OUT.getComposer().hideOnFinished().playOn(propertiesCard);
+      }
+
+    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
 
   private void updateDiskUsagePieChart() {
@@ -250,11 +284,10 @@ public class BusyBoxInstaller extends BaseFragment implements
   private final class PropertiesUpdater extends AsyncTask<AFile, Void, List<String[]>> {
 
     @Override protected List<String[]> doInBackground(AFile... params) {
-      if (params == null || params.length == 0 || !params[0].exists()) {
+      AFile file = params[0];
+      if (file == null || !file.exists()) {
         return null;
       }
-
-      AFile file = params[0];
 
       List<String[]> properties = new ArrayList<>();
 
@@ -284,8 +317,11 @@ public class BusyBoxInstaller extends BaseFragment implements
 
     @Override protected void onPostExecute(List<String[]> properties) {
       if (properties == null) {
-        findById(R.id.properties_layout).setVisibility(View.GONE);
+        propertiesCard.setVisibility(View.GONE);
         return;
+      }
+      if (propertiesCard.getVisibility() != View.VISIBLE) {
+        propertiesCard.setVisibility(View.VISIBLE);
       }
 
       TableLayout tableLayout = findById(R.id.table_properties);
@@ -322,9 +358,7 @@ public class BusyBoxInstaller extends BaseFragment implements
 
         i++;
       }
-
     }
-
   }
 
   private final class DiskUsageUpdater extends AsyncTask<Void, Void, Long[]> {
