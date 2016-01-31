@@ -39,6 +39,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListener;
@@ -46,6 +47,7 @@ import com.jrummyapps.android.animations.Technique;
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.base.BaseFragment;
 import com.jrummyapps.android.colors.Color;
+import com.jrummyapps.android.common.Toasts;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.drawable.CircleDrawable;
 import com.jrummyapps.android.drawable.TextDrawable;
@@ -281,7 +283,12 @@ public class BusyBoxInstaller extends BaseFragment implements
         return file.isOnRemovableStorage() && ExternalStorageHelper.delete(file) || file.delete() || RootTools.rm(file);
       }
 
-      @Override protected void onPostExecute(Boolean aBoolean) {
+      @Override protected void onPostExecute(Boolean result) {
+        if (!result) {
+          Toasts.show(getString(R.string.error_uninstalling_s, file.filename));
+          Crashlytics.log("Error uninstalling " + file.path);
+          return;
+        }
         file = null;
         progressItem.setVisible(false);
         uninstallButton.setEnabled(false);
