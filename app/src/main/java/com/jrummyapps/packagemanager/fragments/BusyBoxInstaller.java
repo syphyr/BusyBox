@@ -17,9 +17,11 @@
 
 package com.jrummyapps.packagemanager.fragments;
 
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.StatFs;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
@@ -32,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -48,9 +51,11 @@ import com.jrummyapps.android.drawable.CircleDrawable;
 import com.jrummyapps.android.drawable.TextDrawable;
 import com.jrummyapps.android.eventbus.EventBusHook;
 import com.jrummyapps.android.eventbus.Events;
+import com.jrummyapps.android.fileproperties.activities.FilePropertiesActivity;
 import com.jrummyapps.android.fileproperties.charts.PieChart;
 import com.jrummyapps.android.fileproperties.charts.PieModel;
 import com.jrummyapps.android.html.HtmlBuilder;
+import com.jrummyapps.android.io.FileHelper;
 import com.jrummyapps.android.io.FilePermissions;
 import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.io.external.ExternalStorageHelper;
@@ -171,6 +176,17 @@ public class BusyBoxInstaller extends BaseFragment implements
     uninstallButton.setEnabled(file != null && file.exists());
     uninstallButton.setOnClickListener(this);
     installButton.setOnClickListener(this);
+
+    ImageButton propertiesButton = findById(R.id.properties_button);
+    propertiesButton.setColorFilter(ColorScheme.getSubMenuIcon());
+    propertiesButton.setOnClickListener(new View.OnClickListener() {
+
+      @Override public void onClick(View v) {
+        Intent intent = new Intent(getActivity(), FilePropertiesActivity.class);
+        intent.putExtra(FileHelper.INTENT_EXTRA_FILE, (Parcelable) file);
+        startActivity(intent);
+      }
+    });
 
     updateDiskUsagePieChart();
 
