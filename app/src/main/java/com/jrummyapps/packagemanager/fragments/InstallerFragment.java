@@ -352,6 +352,10 @@ public class InstallerFragment extends BaseFragment implements
 
       TableLayout tableLayout = findById(R.id.table_properties);
 
+      if (tableLayout.getChildCount() > 0) {
+        tableLayout.removeAllViews();
+      }
+
       int width = ResUtils.dpToPx(128);
       int left = ResUtils.dpToPx(16);
       int top = ResUtils.dpToPx(6);
