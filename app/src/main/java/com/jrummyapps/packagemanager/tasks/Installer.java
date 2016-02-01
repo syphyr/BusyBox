@@ -19,9 +19,11 @@ package com.jrummyapps.packagemanager.tasks;
 
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.eventbus.Events;
+import com.jrummyapps.android.io.external.ExternalStorageHelper;
 import com.jrummyapps.android.roottools.RootTools;
 import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.files.AFile;
+import com.jrummyapps.android.roottools.files.FileLister;
 import com.jrummyapps.android.roottools.shell.stericson.Shell;
 import com.jrummyapps.android.roottools.utils.Assets;
 import com.jrummyapps.android.roottools.utils.Mount;
@@ -81,6 +83,23 @@ public class Installer implements Runnable {
 
     AFile srFile = new AFile(App.getContext().getFilesDir(), filename);
     AFile dtFile = new AFile(path, filename);
+    AFile parent = dtFile.getParentFile();
+
+    if (parent != null && !parent.isDirectory()) {
+      if (parent.isOnRemovableStorage()) {
+        ExternalStorageHelper.mkdir(parent);
+      } else if (parent.isOnExternalStorage()) {
+        parent.mkdirs(); // TODO: add storage permission
+      } else {
+        RootTools.mkdir(parent);
+        RootTools.chmod("0755", parent);
+        RootTools.chown("root", "shell", parent);
+      }
+    }
+
+    if (dtFile.path.equals("/sbin/busybox")) {
+      dtFile.setFileInfo(FileLister.getFileInfo(dtFile.path));
+    }
 
     if (dtFile.exists()) {
       Uninstaller.uninstall(dtFile);
