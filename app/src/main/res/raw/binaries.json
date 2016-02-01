@@ -4,44 +4,44 @@
     "filename": "busybox",
     "abi": "arm",
     "path": "busybox/arm/pie/busybox",
-    "size": 739264,
-    "maxsdk": 20
+    "size": 739264
   },
   {
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "mips",
     "path": "busybox/mips/pie/busybox",
-    "size": 1455672,
-    "maxsdk": 20
+    "size": 1455672
   },
   {
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "x86",
     "path": "busybox/x86/pie/busybox",
-    "size": 863192,
-    "maxsdk": 20
+    "size": 863192
   },
   {
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "arm",
     "path": "busybox/arm/nopie/busybox",
-    "size": 731072
+    "size": 731072,
+    "maxsdk": 20
   },
   {
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "mips",
     "path": "busybox/mips/nopie/busybox",
-    "size": 1455668
+    "size": 1455668,
+    "maxsdk": 20
   },
   {
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "x86",
     "path": "busybox/x86/nopie/busybox",
-    "size": 850904
+    "size": 850904,
+    "maxsdk": 20
   }
 ]
