@@ -22,42 +22,18 @@ import android.text.TextUtils;
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.os.ABI;
-import com.jrummyapps.android.roottools.RootTools;
-import com.jrummyapps.android.roottools.box.BusyBox;
-import com.jrummyapps.android.roottools.files.AFile;
-import com.jrummyapps.android.roottools.shell.stericson.Shell;
-import com.jrummyapps.android.roottools.utils.Assets;
-import com.jrummyapps.android.roottools.utils.Mount;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
-import com.jrummyapps.packagemanager.tasks.Uninstaller;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-
-import static com.jrummyapps.android.io.PermissionsHelper.S_IRGRP;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IROTH;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IRUSR;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IWUSR;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IXGRP;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IXOTH;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IXUSR;
 
 public class Utils {
-
-  private static final String TAG = "Utils";
-
-  /**
-   * 0755 (rwxr-xr-x)
-   */
-  public static final int MODE_EXECUTABLE = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 
   /**
    * Get a list of binaries in the assets directory
@@ -106,70 +82,6 @@ public class Utils {
       }
     }
     return binaries;
-  }
-
-  public static void installBusyboxFromAsset(BinaryInfo binaryInfo, String path, boolean symlink, boolean overwrite) {
-
-    // TODO: clean up!
-
-    Assets.transferAsset(App.getContext(), binaryInfo.path, binaryInfo.filename, MODE_EXECUTABLE);
-
-    Mount mount = Mount.getMount(path);
-    if (mount == null) {
-      throw new RuntimeException("Error getting mount point for " + path);
-    }
-
-    boolean mountedReadWrite = mount.isMountedReadWrite();
-
-    if (!mount.remountReadWrite()) {
-      throw new RuntimeException("Failed mounting " + mount.mountPoint + " read/write");
-    }
-
-    AFile srFile = new AFile(App.getContext().getFilesDir(), binaryInfo.filename);
-    AFile dtFile = new AFile(path, binaryInfo.filename);
-
-    if (dtFile.exists()) {
-      Uninstaller.uninstall(dtFile);
-    }
-
-    if (!RootTools.cp(srFile, dtFile)) {
-      throw new RuntimeException("Failed copying " + srFile + " to " + dtFile);
-    }
-    if (!RootTools.chmod("0755", dtFile)) {
-      throw new RuntimeException("Failed to give permissions to " + dtFile);
-    }
-    if (!RootTools.chown("root", "root", dtFile)) {
-      throw new RuntimeException("Failed to set user/group to root/root for " + dtFile);
-    }
-
-    BusyBox busyBox = BusyBox.from(dtFile.getAbsolutePath());
-
-    if (overwrite && symlink) {
-      mount.remountReadWrite();
-      List<String> applets = busyBox.getApplets();
-      for (String applet : applets) {
-        File file = new File(path, applet);
-        if (file.exists()) {
-          RootTools.rm(file);
-        }
-      }
-    }
-
-    if (symlink) {
-      mount.remountReadWrite();
-      if (!Shell.SU.run("\"" + busyBox.path + "\" --install -s \"" + path + "\"").success()) {
-        // "--install" is not a command, symlink applets one by one.
-        List<String> applets = busyBox.getApplets();
-        for (String applet : applets) {
-          AFile file = new AFile(path, applet);
-          RootTools.ln(busyBox, file);
-        }
-      }
-    }
-
-    if (!mountedReadWrite) {
-      mount.remountReadOnly();
-    }
   }
 
 }

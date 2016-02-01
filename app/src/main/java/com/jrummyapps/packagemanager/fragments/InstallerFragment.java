@@ -69,6 +69,7 @@ import com.jrummyapps.android.util.DateUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
+import com.jrummyapps.packagemanager.tasks.Installer;
 import com.jrummyapps.packagemanager.tasks.Uninstaller;
 import com.jrummyapps.packagemanager.utils.Utils;
 
@@ -110,6 +111,9 @@ public class InstallerFragment extends BaseFragment implements
   private PieModel itemSlice;
 
   private AFile file;
+
+  private boolean uninstalling;
+  private boolean installing;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -176,6 +180,8 @@ public class InstallerFragment extends BaseFragment implements
     uninstallButton.setEnabled(file != null && file.exists());
     uninstallButton.setOnClickListener(this);
     installButton.setOnClickListener(this);
+    uninstallButton.setEnabled(!uninstalling && !installing);
+    installButton.setEnabled(!uninstalling && !installing);
 
     ImageButton propertiesButton = findById(R.id.properties_button);
     propertiesButton.setColorFilter(ColorScheme.getSubMenuIcon());
@@ -200,6 +206,8 @@ public class InstallerFragment extends BaseFragment implements
     outState.putStringArrayList("paths", paths);
     outState.putParcelableArrayList("binaries", binaries);
     outState.putParcelable("file", file);
+    outState.putBoolean("uninstalling", uninstalling);
+    outState.putBoolean("installing", installing);
   }
 
   @Override public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
@@ -209,6 +217,8 @@ public class InstallerFragment extends BaseFragment implements
       paths = savedInstanceState.getStringArrayList("paths");
       binaries = savedInstanceState.getParcelableArrayList("binaries");
       file = savedInstanceState.getParcelable("file");
+      uninstalling = savedInstanceState.getBoolean("uninstalling");
+      installing = savedInstanceState.getBoolean("installing");
     } else {
       paths = new ArrayList<>();
       paths.addAll(Arrays.asList(Storage.PATH));
@@ -234,7 +244,7 @@ public class InstallerFragment extends BaseFragment implements
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     inflater.inflate(R.menu.busybox_installer_menu, menu);
     progressItem = menu.findItem(R.id.menu_item_progress);
-    progressItem.setVisible(false);
+    progressItem.setVisible(uninstalling || installing);
     ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
     super.onCreateOptionsMenu(menu, inflater);
   }
@@ -246,12 +256,17 @@ public class InstallerFragment extends BaseFragment implements
     } else if (v == uninstallButton) {
       Uninstaller.showConfirmationDialog(getActivity(), file);
     } else if (v == installButton) {
-      BinaryInfo binaryInfo = binaries.get(binarySpinner.getSelectedIndex());
+      BinaryInfo binary = binaries.get(binarySpinner.getSelectedIndex());
       String path = paths.get(directorySpinner.getSelectedIndex());
-      Utils.installBusyboxFromAsset(binaryInfo, path, true, false);
-      file = new AFile(path, binaryInfo.filename);
-      uninstallButton.setEnabled(true);
-      new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
+      file = new AFile(path, binary.filename);
+      Installer installer = new Installer.Builder()
+          .setAsset(binary.path)
+          .setFilename(binary.filename)
+          .setPath(path)
+          .setSymlink(true)
+          .setOverwrite(false)
+          .create();
+      new Thread(installer).start();
     }
   }
 
@@ -277,23 +292,39 @@ public class InstallerFragment extends BaseFragment implements
     directorySpinner.setSelectedIndex(selectedDirectoryPosition);
   }
 
+  @EventBusHook public void onEventMainThread(Installer installer) {
+    if (installer.isRunning()) {
+      installing = true;
+    } else {
+      installing = false;
+      new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
+    }
+    progressItem.setVisible(installing || uninstalling);
+    uninstallButton.setEnabled(!installing && !uninstalling);
+    installButton.setEnabled(!installing && !uninstalling);
+
+  }
+
   @EventBusHook public void onEventMainThread(Uninstaller.StartEvent event) {
     if (file == null || !file.equals(event.file)) {
       return;
     }
-
-    progressItem.setVisible(true);
+    uninstalling = true;
+    uninstallButton.setEnabled(!uninstalling && !installing);
+    installButton.setEnabled(!uninstalling && !installing);
+    progressItem.setVisible(uninstalling || installing);
   }
 
   @EventBusHook public void onEventMainThread(Uninstaller.FinishedEvent event) {
     if (file == null || !file.equals(event.file)) {
       return;
     }
-
+    uninstalling = false;
+    installButton.setEnabled(!uninstalling && !installing);
     if (event.success) {
       file = null;
-      progressItem.setVisible(false);
-      uninstallButton.setEnabled(false);
+      progressItem.setVisible(uninstalling || installing);
+      uninstallButton.setEnabled(!uninstalling && !installing);
       propertiesCard.setVisibility(View.GONE);
     } else {
       Toasts.show(getString(R.string.error_uninstalling_s, file.filename));
