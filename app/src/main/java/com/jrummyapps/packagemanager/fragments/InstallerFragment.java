@@ -58,9 +58,7 @@ import com.jrummyapps.android.html.HtmlBuilder;
 import com.jrummyapps.android.io.FileHelper;
 import com.jrummyapps.android.io.FilePermissions;
 import com.jrummyapps.android.io.Storage;
-import com.jrummyapps.android.io.external.ExternalStorageHelper;
 import com.jrummyapps.android.os.ABI;
-import com.jrummyapps.android.roottools.RootTools;
 import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.roottools.utils.Mount;
@@ -247,8 +245,9 @@ public class InstallerFragment extends BaseFragment implements
     } else if (v == installButton) {
       BinaryInfo binaryInfo = binaries.get(binarySpinner.getSelectedIndex());
       String path = paths.get(directorySpinner.getSelectedIndex());
-      Utils.installFromAssets(binaryInfo, path, false, false);
+      Utils.installBusyboxFromAsset(binaryInfo, path, true, false);
       file = new AFile(path, binaryInfo.filename);
+      uninstallButton.setEnabled(true);
       new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
     }
   }
@@ -287,7 +286,7 @@ public class InstallerFragment extends BaseFragment implements
       }
 
       @Override protected Boolean doInBackground(Void... params) {
-        return file.isOnRemovableStorage() && ExternalStorageHelper.delete(file) || file.delete() || RootTools.rm(file);
+        return Utils.uninstallBinary(file);
       }
 
       @Override protected void onPostExecute(Boolean result) {

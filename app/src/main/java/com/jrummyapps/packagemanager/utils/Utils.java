@@ -21,14 +21,15 @@ import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
-import com.jrummyapps.android.io.PermissionsHelper;
-import com.jrummyapps.android.io.Storage;
+import com.jrummyapps.android.io.external.ExternalStorageHelper;
 import com.jrummyapps.android.os.ABI;
 import com.jrummyapps.android.roottools.RootTools;
 import com.jrummyapps.android.roottools.box.BusyBox;
+import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.roottools.shell.stericson.Shell;
 import com.jrummyapps.android.roottools.utils.Assets;
 import com.jrummyapps.android.roottools.utils.Mount;
+import com.jrummyapps.android.roottools.utils.RootUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
 
@@ -42,7 +43,22 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.jrummyapps.android.io.PermissionsHelper.S_IRGRP;
+import static com.jrummyapps.android.io.PermissionsHelper.S_IROTH;
+import static com.jrummyapps.android.io.PermissionsHelper.S_IRUSR;
+import static com.jrummyapps.android.io.PermissionsHelper.S_IWUSR;
+import static com.jrummyapps.android.io.PermissionsHelper.S_IXGRP;
+import static com.jrummyapps.android.io.PermissionsHelper.S_IXOTH;
+import static com.jrummyapps.android.io.PermissionsHelper.S_IXUSR;
+
 public class Utils {
+
+  private static final String TAG = "Utils";
+
+  /**
+   * 0755 (rwxr-xr-x)
+   */
+  public static final int MODE_EXECUTABLE = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 
   /**
    * Get a list of binaries in the assets directory
@@ -93,19 +109,61 @@ public class Utils {
     return binaries;
   }
 
-  public static final int RWXR_XR_X = PermissionsHelper.S_IRUSR
-      | PermissionsHelper.S_IWUSR
-      | PermissionsHelper.S_IXUSR
-      | PermissionsHelper.S_IRGRP
-      | PermissionsHelper.S_IXGRP
-      | PermissionsHelper.S_IROTH
-      | PermissionsHelper.S_IXOTH;
+  private static boolean deleteFile(AFile file) {
+    return file.isOnRemovableStorage() && ExternalStorageHelper.delete(file) || file.delete() || RootTools.rm(file);
+  }
 
-  public static void installFromAssets(BinaryInfo binaryInfo, String path, boolean symlink, boolean overwrite) {
+  public static List<AFile> getSymlinks(AFile binary) {
+    List<AFile> symlinks = new ArrayList<>();
+    AFile parent = binary.getParentFile();
+    if (parent != null) {
+      AFile[] files = parent.listFiles();
+      if (files != null) {
+        for (AFile file : files) {
+          if (file.isSymbolicLink() && file.readlink().equals(binary)) {
+            symlinks.add(file);
+          }
+        }
+      }
+    }
+    return symlinks;
+  }
+
+  public static boolean deleteSymlinks(AFile binary) {
+    List<AFile> symlinks = getSymlinks(binary);
+    if (symlinks.isEmpty()) {
+      return true;
+    }
+
+    String rm = RootUtils.getUtil("rm");
+    if (rm != null) {
+      StringBuilder command = new StringBuilder(rm);
+      for (AFile symlink : symlinks) {
+        command.append(" \"").append(symlink.path).append("\"");
+      }
+      if (Mount.remountThenRun(binary, command.toString()).success()) {
+        return true;
+      }
+    }
+
+    for (AFile symlink : symlinks) {
+      if (!deleteFile(symlink)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  public static boolean uninstallBinary(AFile binary) {
+    return deleteFile(binary) && deleteSymlinks(binary);
+  }
+
+  public static void installBusyboxFromAsset(BinaryInfo binaryInfo, String path, boolean symlink, boolean overwrite) {
 
     // TODO: clean up!
 
-    Assets.transferAsset(App.getContext(), binaryInfo.path, binaryInfo.filename, RWXR_XR_X);
+    Assets.transferAsset(App.getContext(), binaryInfo.path, binaryInfo.filename, MODE_EXECUTABLE);
 
     Mount mount = Mount.getMount(path);
     if (mount == null) {
@@ -118,15 +176,11 @@ public class Utils {
       throw new RuntimeException("Failed mounting " + mount.mountPoint + " read/write");
     }
 
-    File srFile = new File(App.getContext().getFilesDir(), binaryInfo.filename);
-    File dtFile = new File(path, binaryInfo.filename);
+    AFile srFile = new AFile(App.getContext().getFilesDir(), binaryInfo.filename);
+    AFile dtFile = new AFile(path, binaryInfo.filename);
 
-    // remove old busybox binaries
-    for (String systemPath : Storage.PATH) {
-      File file = new File(systemPath, binaryInfo.filename);
-      if (file.exists() && file.equals(dtFile) && !systemPath.equals(path)) {
-        RootTools.rm(file);
-      }
+    if (dtFile.exists()) {
+      uninstallBinary(dtFile);
     }
 
     if (!RootTools.cp(srFile, dtFile)) {
@@ -142,6 +196,7 @@ public class Utils {
     BusyBox busyBox = BusyBox.from(dtFile.getAbsolutePath());
 
     if (overwrite && symlink) {
+      mount.remountReadWrite();
       List<String> applets = busyBox.getApplets();
       for (String applet : applets) {
         File file = new File(path, applet);
@@ -152,10 +207,12 @@ public class Utils {
     }
 
     if (symlink) {
+      mount.remountReadWrite();
       if (!Shell.SU.run("\"" + busyBox.path + "\" --install -s \"" + path + "\"").success()) {
+        // "--install" is not a command, symlink applets one by one.
         List<String> applets = busyBox.getApplets();
         for (String applet : applets) {
-          File file = new File(path, applet);
+          AFile file = new AFile(path, applet);
           RootTools.ln(busyBox, file);
         }
       }
@@ -164,7 +221,6 @@ public class Utils {
     if (!mountedReadWrite) {
       mount.remountReadOnly();
     }
-
   }
 
 }
