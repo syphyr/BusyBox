@@ -204,7 +204,7 @@
           android:layout_marginLeft="1dp"
           android:layout_marginRight="1dp"
           android:layout_marginTop="16dp"
-          android:visibility="visible"
+          android:visibility="gone"
           app:cardBackgroundColor="?backgroundColorLight">
 
         <LinearLayout
@@ -242,9 +242,7 @@
                 android:minHeight="48dp"
                 android:minWidth="48dp"
                 android:src="@drawable/ic_information_white_24dp"/>
-
           </RelativeLayout>
-
 
           <View
               android:layout_width="match_parent"
