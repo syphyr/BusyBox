@@ -19,6 +19,7 @@ package com.jrummyapps.packagemanager.tasks;
 
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.eventbus.Events;
+import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.io.external.ExternalStorageHelper;
 import com.jrummyapps.android.roottools.RootTools;
 import com.jrummyapps.android.roottools.box.BusyBox;
@@ -117,7 +118,7 @@ public class Installer implements Runnable {
 
     BusyBox busyBox = BusyBox.from(dtFile.getAbsolutePath());
 
-    if (overwrite && symlink) {
+    if (overwrite && symlink && Storage.isSystemFile(dtFile)) {
       mount.remountReadWrite();
       List<String> applets = busyBox.getApplets();
       for (String applet : applets) {
@@ -128,7 +129,7 @@ public class Installer implements Runnable {
       }
     }
 
-    if (symlink) {
+    if (symlink && Storage.isSystemFile(dtFile)) {
       mount.remountReadWrite();
       if (!Shell.SU.run("\"" + busyBox.path + "\" --install -s \"" + path + "\"").success()) {
         // "--install" is not a command, symlink applets one by one.
