@@ -27,13 +27,15 @@ public class BinaryInfo implements Parcelable {
   public final String abi;
   public final String path;
   public final long size;
+  public final int maxSdk;
 
-  public BinaryInfo(String name, String filename, String abi, String path, long size) {
+  public BinaryInfo(String name, String filename, String abi, String path, long size, int maxSdk) {
     this.name = name;
     this.filename = filename;
     this.abi = abi;
     this.path = path;
     this.size = size;
+    this.maxSdk = maxSdk;
   }
 
   @Override public String toString() {
@@ -50,6 +52,7 @@ public class BinaryInfo implements Parcelable {
     dest.writeString(abi);
     dest.writeString(path);
     dest.writeLong(size);
+    dest.writeInt(maxSdk);
   }
 
   protected BinaryInfo(Parcel in) {
@@ -58,6 +61,7 @@ public class BinaryInfo implements Parcelable {
     abi = in.readString();
     path = in.readString();
     size = in.readLong();
+    maxSdk = in.readInt();
   }
 
   public static final Parcelable.Creator<BinaryInfo> CREATOR = new Parcelable.Creator<BinaryInfo>() {

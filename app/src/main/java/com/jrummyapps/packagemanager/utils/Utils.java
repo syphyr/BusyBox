@@ -17,6 +17,7 @@
 
 package com.jrummyapps.packagemanager.utils;
 
+import android.os.Build;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
@@ -59,7 +60,8 @@ public class Utils {
         String path = jsonObject.getString("path");
         String abi = jsonObject.getString("abi");
         long size = jsonObject.getLong("size");
-        binaries.add(new BinaryInfo(name, filename, abi, path, size));
+        int minSdk = jsonObject.optInt("maxsdk", Build.VERSION.SDK_INT);
+        binaries.add(new BinaryInfo(name, filename, abi, path, size, minSdk));
       }
     } catch (Exception e) {
       Crashlytics.logException(e);
@@ -77,9 +79,13 @@ public class Utils {
   public static ArrayList<BinaryInfo> getBinariesFromAssets(ABI abi) {
     ArrayList<BinaryInfo> binaries = getBinariesFromAssets();
     for (Iterator<BinaryInfo> iterator = binaries.iterator(); iterator.hasNext(); ) {
-      if (!TextUtils.equals(iterator.next().abi, abi.base)) {
+      BinaryInfo binaryInfo = iterator.next();
+      if (!TextUtils.equals(binaryInfo.abi, abi.base) || binaryInfo.maxSdk < Build.VERSION.SDK_INT) {
         iterator.remove();
       }
+    }
+    for (BinaryInfo binary : binaries) {
+      System.out.println(binary.path);
     }
     return binaries;
   }

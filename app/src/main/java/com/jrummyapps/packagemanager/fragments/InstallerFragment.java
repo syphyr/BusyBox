@@ -221,7 +221,7 @@ public class InstallerFragment extends BaseFragment implements
       paths.addAll(Arrays.asList(Storage.PATH));
       paths.add(getString(R.string.choose_a_directory));
       binaries = Utils.getBinariesFromAssets(ABI.getAbi());
-      binaries.add(new BinaryInfo(getString(R.string.download_), null, ABI.getAbi().base, REPO, 0));
+      binaries.add(new BinaryInfo(getString(R.string.download_), null, ABI.getAbi().base, REPO, 0, 0));
 
       // find busybox in a background thread because it runs a command as root to check if busybox is installed to /sbin
       new AsyncTask<Void, Void, AFile>() {
