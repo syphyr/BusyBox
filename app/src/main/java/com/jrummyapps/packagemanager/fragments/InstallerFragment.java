@@ -63,6 +63,8 @@ import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.os.ABI;
 import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.files.AFile;
+import com.jrummyapps.android.roottools.files.FileInfo;
+import com.jrummyapps.android.roottools.files.FileLister;
 import com.jrummyapps.android.roottools.utils.Mount;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.DateUtils;
@@ -155,7 +157,6 @@ public class InstallerFragment extends BaseFragment implements
     directorySpinner.setItems(paths);
     directorySpinner.setOnClickListener(this);
     directorySpinner.setOnNothingSelectedListener(onNothingSelectedListener);
-    directorySpinner.setSelectedIndex(selectedDirectoryPosition);
 
     directorySpinner.setOnItemSelectedListener(new OnItemSelectedListener<String>() {
 
@@ -194,10 +195,6 @@ public class InstallerFragment extends BaseFragment implements
       }
     });
 
-    updateDiskUsagePieChart();
-
-    new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
-
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
@@ -225,19 +222,30 @@ public class InstallerFragment extends BaseFragment implements
       paths.add(getString(R.string.choose_a_directory));
       binaries = Utils.getBinariesFromAssets(ABI.getAbi());
       binaries.add(new BinaryInfo(getString(R.string.download_), null, ABI.getAbi().base, REPO, 0));
-      String filename = binaries.get(0).filename;
-      selectedDirectoryPosition = 0;
-      for (int i = 0; i < Storage.PATH.length; i++) {
-        String path = Storage.PATH[i];
-        if (filename != null && new File(path, filename).exists()) {
-          file = new AFile(path, filename);
-          selectedDirectoryPosition = i;
-          break;
+
+      // find busybox in a background thread because it runs a command as root to check if busybox is installed to /sbin
+      new AsyncTask<Void, Void, AFile>() {
+
+        @Override protected AFile doInBackground(Void... params) {
+          return getInstalledBusyBox();
         }
-        if (path.equals(DEFAULT_INSTALL_PATH)) {
-          selectedDirectoryPosition = i;
+
+        @Override protected void onPostExecute(AFile result) {
+          file = result;
+          String defaultInstallPath = file == null ? DEFAULT_INSTALL_PATH : file.getParent();
+          for (int i = 0; i < Storage.PATH.length; i++) {
+            String path = Storage.PATH[i];
+            if (path.equals(defaultInstallPath)) {
+              selectedDirectoryPosition = i;
+              directorySpinner.setSelectedIndex(selectedDirectoryPosition);
+              break;
+            }
+          }
+          new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
+          updateDiskUsagePieChart();
         }
-      }
+
+      }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
   }
 
@@ -322,10 +330,10 @@ public class InstallerFragment extends BaseFragment implements
     uninstalling = false;
     installButton.setEnabled(!installing);
     if (event.success) {
-      file = null;
+      file = getInstalledBusyBox();
       progressItem.setVisible(uninstalling || installing);
       uninstallButton.setEnabled(!uninstalling && !installing);
-      propertiesCard.setVisibility(View.GONE);
+      new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
     } else {
       Toasts.show(getString(R.string.error_uninstalling_s, file.filename));
       Crashlytics.log("Error uninstalling " + file.path);
@@ -338,13 +346,31 @@ public class InstallerFragment extends BaseFragment implements
     new DiskUsageUpdater(binaryInfo, path).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
 
+  private BusyBox getInstalledBusyBox() {
+    for (String path : Storage.PATH) {
+      BusyBox busybox = BusyBox.from(new File(path, "busybox").getAbsolutePath());
+      if (path.equals("/sbin")) {
+        // /sbin is not readable. Get file info with root
+        FileInfo fileInfo = FileLister.getFileInfo("/sbin/busybox");
+        if (fileInfo != null) {
+          busybox.setFileInfo(fileInfo);
+          return busybox;
+        }
+      }
+      if (busybox.exists()) {
+        return busybox;
+      }
+    }
+    return null;
+  }
+
   private final class PropertiesUpdater extends AsyncTask<AFile, Void, List<String[]>> {
 
     @Override protected List<String[]> doInBackground(AFile... params) {
       AFile file = params[0];
-      if (file == null || !file.exists()) {
-        return null;
-      }
+      if (file == null) return null;
+      if (!file.exists() && file.path.equals("/sbin/busybox")) file.getFileInfo();
+      if (!file.exists()) return null;
 
       List<String[]> properties = new ArrayList<>();
 
