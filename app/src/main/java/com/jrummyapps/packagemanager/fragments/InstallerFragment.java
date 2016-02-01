@@ -51,6 +51,8 @@ import com.jrummyapps.android.common.Toasts;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.drawable.CircleDrawable;
 import com.jrummyapps.android.drawable.TextDrawable;
+import com.jrummyapps.android.eventbus.EventBusHook;
+import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.fileproperties.activities.FilePropertiesActivity;
 import com.jrummyapps.android.fileproperties.charts.PieChart;
 import com.jrummyapps.android.fileproperties.charts.PieModel;
@@ -66,8 +68,8 @@ import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.DateUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
-import com.jrummyapps.packagemanager.dialogs.ConfirmUninstallDialog;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
+import com.jrummyapps.packagemanager.tasks.Uninstaller;
 import com.jrummyapps.packagemanager.utils.Utils;
 
 import java.io.File;
@@ -80,7 +82,6 @@ import java.util.Locale;
 public class InstallerFragment extends BaseFragment implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
-    ConfirmUninstallDialog.ConfirmUninstallListener,
     View.OnClickListener {
 
   private static final String TAG = "BusyBoxInstaller";
@@ -112,11 +113,13 @@ public class InstallerFragment extends BaseFragment implements
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    Events.register(this);
     setHasOptionsMenu(true);
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
+    Events.unregister(this);
   }
 
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -241,7 +244,7 @@ public class InstallerFragment extends BaseFragment implements
       backgroundShadow.setVisibility(View.VISIBLE);
       Technique.FADE_IN.getComposer().duration(500).playOn(backgroundShadow);
     } else if (v == uninstallButton) {
-      ConfirmUninstallDialog.show(getActivity(), file);
+      Uninstaller.showConfirmationDialog(getActivity(), file);
     } else if (v == installButton) {
       BinaryInfo binaryInfo = binaries.get(binarySpinner.getSelectedIndex());
       String path = paths.get(directorySpinner.getSelectedIndex());
@@ -274,34 +277,28 @@ public class InstallerFragment extends BaseFragment implements
     directorySpinner.setSelectedIndex(selectedDirectoryPosition);
   }
 
-  @Override public void onConfirmUninstall(AFile aFile) {
-    if (file == null || !file.equals(aFile)) {
+  @EventBusHook public void onEventMainThread(Uninstaller.StartEvent event) {
+    if (file == null || !file.equals(event.file)) {
       return;
     }
 
-    new AsyncTask<Void, Void, Boolean>() {
+    progressItem.setVisible(true);
+  }
 
-      @Override protected void onPreExecute() {
-        progressItem.setVisible(true);
-      }
+  @EventBusHook public void onEventMainThread(Uninstaller.FinishedEvent event) {
+    if (file == null || !file.equals(event.file)) {
+      return;
+    }
 
-      @Override protected Boolean doInBackground(Void... params) {
-        return Utils.uninstallBinary(file);
-      }
-
-      @Override protected void onPostExecute(Boolean result) {
-        if (!result) {
-          Toasts.show(getString(R.string.error_uninstalling_s, file.filename));
-          Crashlytics.log("Error uninstalling " + file.path);
-          return;
-        }
-        file = null;
-        progressItem.setVisible(false);
-        uninstallButton.setEnabled(false);
-        propertiesCard.setVisibility(View.GONE);
-      }
-
-    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    if (event.success) {
+      file = null;
+      progressItem.setVisible(false);
+      uninstallButton.setEnabled(false);
+      propertiesCard.setVisibility(View.GONE);
+    } else {
+      Toasts.show(getString(R.string.error_uninstalling_s, file.filename));
+      Crashlytics.log("Error uninstalling " + file.path);
+    }
   }
 
   private void updateDiskUsagePieChart() {

@@ -21,7 +21,6 @@ import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
-import com.jrummyapps.android.io.external.ExternalStorageHelper;
 import com.jrummyapps.android.os.ABI;
 import com.jrummyapps.android.roottools.RootTools;
 import com.jrummyapps.android.roottools.box.BusyBox;
@@ -29,9 +28,9 @@ import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.roottools.shell.stericson.Shell;
 import com.jrummyapps.android.roottools.utils.Assets;
 import com.jrummyapps.android.roottools.utils.Mount;
-import com.jrummyapps.android.roottools.utils.RootUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
+import com.jrummyapps.packagemanager.tasks.Uninstaller;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -109,56 +108,6 @@ public class Utils {
     return binaries;
   }
 
-  private static boolean deleteFile(AFile file) {
-    return file.isOnRemovableStorage() && ExternalStorageHelper.delete(file) || file.delete() || RootTools.rm(file);
-  }
-
-  public static List<AFile> getSymlinks(AFile binary) {
-    List<AFile> symlinks = new ArrayList<>();
-    AFile parent = binary.getParentFile();
-    if (parent != null) {
-      AFile[] files = parent.listFiles();
-      if (files != null) {
-        for (AFile file : files) {
-          if (file.isSymbolicLink() && file.readlink().equals(binary)) {
-            symlinks.add(file);
-          }
-        }
-      }
-    }
-    return symlinks;
-  }
-
-  public static boolean deleteSymlinks(AFile binary) {
-    List<AFile> symlinks = getSymlinks(binary);
-    if (symlinks.isEmpty()) {
-      return true;
-    }
-
-    String rm = RootUtils.getUtil("rm");
-    if (rm != null) {
-      StringBuilder command = new StringBuilder(rm);
-      for (AFile symlink : symlinks) {
-        command.append(" \"").append(symlink.path).append("\"");
-      }
-      if (Mount.remountThenRun(binary, command.toString()).success()) {
-        return true;
-      }
-    }
-
-    for (AFile symlink : symlinks) {
-      if (!deleteFile(symlink)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  public static boolean uninstallBinary(AFile binary) {
-    return deleteFile(binary) && deleteSymlinks(binary);
-  }
-
   public static void installBusyboxFromAsset(BinaryInfo binaryInfo, String path, boolean symlink, boolean overwrite) {
 
     // TODO: clean up!
@@ -180,7 +129,7 @@ public class Utils {
     AFile dtFile = new AFile(path, binaryInfo.filename);
 
     if (dtFile.exists()) {
-      uninstallBinary(dtFile);
+      Uninstaller.uninstall(dtFile);
     }
 
     if (!RootTools.cp(srFile, dtFile)) {
