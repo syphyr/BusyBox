@@ -310,7 +310,7 @@ public class InstallerFragment extends BaseFragment implements
       return;
     }
     uninstalling = true;
-    uninstallButton.setEnabled(!uninstalling && !installing);
+    uninstallButton.setEnabled(!installing);
     installButton.setEnabled(!uninstalling && !installing);
     progressItem.setVisible(uninstalling || installing);
   }
@@ -320,7 +320,7 @@ public class InstallerFragment extends BaseFragment implements
       return;
     }
     uninstalling = false;
-    installButton.setEnabled(!uninstalling && !installing);
+    installButton.setEnabled(!installing);
     if (event.success) {
       file = null;
       progressItem.setVisible(uninstalling || installing);
