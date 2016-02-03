@@ -16,8 +16,9 @@
   ~
   -->
 
-<manifest package="com.jrummyapps.packagemanager"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest
+    package="com.jrummyapps.packagemanager"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
   <application
       android:name="com.jrummyapps.android.base.BaseApp"
@@ -29,6 +30,7 @@
     <activity
         android:name=".activities.MainActivity"
         android:label="@string/activity_busybox_installer"
+        android:launchMode="singleInstance"
         android:theme="@style/Theme.Light.DarkActionBar.NoActionBar.Overlay">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>

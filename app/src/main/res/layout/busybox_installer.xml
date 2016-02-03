@@ -17,6 +17,7 @@
   -->
 
 <RelativeLayout
+    android:id="@+id/main"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -30,7 +31,7 @@
       android:layout_alignParentBottom="true"
       android:layout_alignParentEnd="true"
       android:layout_alignParentRight="true"
-      android:layout_marginBottom="8dp"
+      android:layout_marginBottom="4dp"
       android:layout_marginLeft="16dp"
       android:layout_marginRight="16dp"
       android:orientation="horizontal">
@@ -220,8 +221,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
                 android:layout_centerVertical="true"
+                android:layout_margin="16dp"
                 android:paddingLeft="4dp"
                 android:paddingStart="4dp"
                 android:text="@string/properties"

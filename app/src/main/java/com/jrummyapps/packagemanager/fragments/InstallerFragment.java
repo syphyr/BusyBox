@@ -22,10 +22,10 @@ import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.os.StatFs;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.CardView;
-import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,15 +39,12 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListener;
 import com.jrummyapps.android.animations.Technique;
-import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.base.BaseFragment;
 import com.jrummyapps.android.colors.Color;
-import com.jrummyapps.android.common.Toasts;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.downloader.Download;
 import com.jrummyapps.android.downloader.DownloadRequest;
@@ -61,30 +58,28 @@ import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.fileproperties.activities.FilePropertiesActivity;
 import com.jrummyapps.android.fileproperties.charts.PieChart;
 import com.jrummyapps.android.fileproperties.charts.PieModel;
+import com.jrummyapps.android.fileproperties.models.FileMeta;
 import com.jrummyapps.android.html.HtmlBuilder;
 import com.jrummyapps.android.io.FileHelper;
-import com.jrummyapps.android.io.FilePermissions;
 import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.os.ABI;
 import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.files.AFile;
-import com.jrummyapps.android.roottools.files.FileInfo;
-import com.jrummyapps.android.roottools.files.FileLister;
-import com.jrummyapps.android.roottools.utils.Mount;
 import com.jrummyapps.android.theme.ColorScheme;
-import com.jrummyapps.android.util.DateUtils;
+import com.jrummyapps.android.theme.Themes;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
-import com.jrummyapps.packagemanager.tasks.Installer;
-import com.jrummyapps.packagemanager.tasks.Uninstaller;
+import com.jrummyapps.packagemanager.tasks.BusyBoxDiskUsageTask;
+import com.jrummyapps.packagemanager.tasks.BusyBoxInstaller;
+import com.jrummyapps.packagemanager.tasks.BusyBoxLocater;
+import com.jrummyapps.packagemanager.tasks.BusyBoxMetaTask;
+import com.jrummyapps.packagemanager.tasks.BusyBoxUninstaller;
 import com.jrummyapps.packagemanager.utils.Utils;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 public class InstallerFragment extends BaseFragment implements
@@ -94,30 +89,55 @@ public class InstallerFragment extends BaseFragment implements
 
   private static final String DEFAULT_INSTALL_PATH = "/system/xbin";
 
+  private ArrayList<FileMeta> properties;
   private ArrayList<BinaryInfo> binaries;
   private ArrayList<String> paths;
-
-  private MaterialSpinner binarySpinner;
-  private MaterialSpinner directorySpinner;
+  private MaterialSpinner versionSpinner;
+  private MaterialSpinner pathSpinner;
   private PieChart pieChart;
   private CardView propertiesCard;
   private Button installButton;
   private Button uninstallButton;
+  private ImageButton infoButton;
   private View backgroundShadow;
-
   private MenuItem progressItem;
-
-  private int selectedDirectoryPosition;
-
   private PieModel usedSlice;
   private PieModel freeSlice;
   private PieModel itemSlice;
-
-  private AFile file;
-
+  private BusyBox busybox;
+  private int pathIndex;
   private boolean uninstalling;
   private boolean installing;
   private Download download;
+
+  private final OnItemSelectedListener<String> onPathSelectedListener = new OnItemSelectedListener<String>() {
+
+    @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+      Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
+      if (item.equals(getString(R.string.choose_a_directory))) {
+        DirectoryPickerDialog.show(getActivity(), new File("/"));
+      } else {
+        pathIndex = view.getSelectedIndex();
+        updateDiskUsagePieChart();
+      }
+    }
+  };
+
+  private final OnItemSelectedListener<BinaryInfo> onBinarySelectedListener = new OnItemSelectedListener<BinaryInfo>() {
+
+    @Override public void onItemSelected(MaterialSpinner view, int position, long id, BinaryInfo item) {
+      Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
+    }
+  };
+
+  private final OnNothingSelectedListener onNothingSelectedListener = new OnNothingSelectedListener() {
+
+    @Override public void onNothingSelected(MaterialSpinner spinner) {
+      Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
+    }
+  };
+
+  // --------------------------------------------------------------------------------------------
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -140,114 +160,57 @@ public class InstallerFragment extends BaseFragment implements
     uninstallButton = findById(R.id.button_uninstall);
     pieChart = findById(R.id.piechart);
     propertiesCard = findById(R.id.properties_layout);
-    binarySpinner = findById(R.id.binary_spinner);
-    directorySpinner = findById(R.id.directory_spinner);
-
+    versionSpinner = findById(R.id.binary_spinner);
+    pathSpinner = findById(R.id.directory_spinner);
+    infoButton = findById(R.id.properties_button);
     onRestoreInstanceState(savedInstanceState);
-
-    final OnNothingSelectedListener onNothingSelectedListener = new OnNothingSelectedListener() {
-
-      @Override public void onNothingSelected(MaterialSpinner spinner) {
-        Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
-      }
-    };
-
-    binarySpinner.setItems(binaries);
-    binarySpinner.setOnClickListener(this);
-    binarySpinner.setOnNothingSelectedListener(onNothingSelectedListener);
-
-    directorySpinner.setItems(paths);
-    directorySpinner.setOnClickListener(this);
-    directorySpinner.setOnNothingSelectedListener(onNothingSelectedListener);
-
-    directorySpinner.setOnItemSelectedListener(new OnItemSelectedListener<String>() {
-
-      @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
-        Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
-        if (item.equals(getString(R.string.choose_a_directory))) {
-          DirectoryPickerDialog.show(getActivity(), new File("/"));
-        } else {
-          selectedDirectoryPosition = view.getSelectedIndex();
-          updateDiskUsagePieChart();
-        }
-      }
-    });
-
-    binarySpinner.setOnItemSelectedListener(new OnItemSelectedListener<BinaryInfo>() {
-
-      @Override public void onItemSelected(MaterialSpinner view, int position, long id, BinaryInfo item) {
-        Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
-      }
-    });
-
+    versionSpinner.setItems(binaries);
+    versionSpinner.setOnClickListener(this);
+    versionSpinner.setOnNothingSelectedListener(onNothingSelectedListener);
+    versionSpinner.setOnItemSelectedListener(onBinarySelectedListener);
+    pathSpinner.setItems(paths);
+    pathSpinner.setOnClickListener(this);
+    pathSpinner.setOnNothingSelectedListener(onNothingSelectedListener);
+    pathSpinner.setSelectedIndex(pathIndex);
+    pathSpinner.setOnItemSelectedListener(onPathSelectedListener);
+    infoButton.setColorFilter(ColorScheme.getSubMenuIcon());
     uninstallButton.setOnClickListener(this);
     installButton.setOnClickListener(this);
-    uninstallButton.setEnabled(file != null && file.exists() && !uninstalling && !installing);
-    installButton.setEnabled(!uninstalling && !installing);
-
-    ImageButton propertiesButton = findById(R.id.properties_button);
-    propertiesButton.setColorFilter(ColorScheme.getSubMenuIcon());
-    propertiesButton.setOnClickListener(new View.OnClickListener() {
-
-      @Override public void onClick(View v) {
-        Intent intent = new Intent(getActivity(), FilePropertiesActivity.class);
-        intent.putExtra(FileHelper.INTENT_EXTRA_FILE, (Parcelable) file);
-        startActivity(intent);
-      }
-    });
-
+    infoButton.setOnClickListener(this);
+    uninstallButton.setEnabled(busybox != null && busybox.exists() && !installing && !uninstalling);
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
-    outState.putInt("selected_directory_position", selectedDirectoryPosition);
+    outState.putInt("path_index", pathIndex);
     outState.putStringArrayList("paths", paths);
     outState.putParcelableArrayList("binaries", binaries);
-    outState.putParcelable("file", file);
+    outState.putParcelable("busybox", busybox);
     outState.putBoolean("uninstalling", uninstalling);
     outState.putBoolean("installing", installing);
     outState.putParcelable("download", download);
+    outState.putParcelableArrayList("properties", properties);
   }
 
   @Override public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     if (savedInstanceState != null) {
-      selectedDirectoryPosition = savedInstanceState.getInt("selected_directory_position", -1);
+      pathIndex = savedInstanceState.getInt("path_index", -1);
       paths = savedInstanceState.getStringArrayList("paths");
       binaries = savedInstanceState.getParcelableArrayList("binaries");
-      file = savedInstanceState.getParcelable("file");
+      busybox = savedInstanceState.getParcelable("busybox");
       uninstalling = savedInstanceState.getBoolean("uninstalling");
       installing = savedInstanceState.getBoolean("installing");
       download = savedInstanceState.getParcelable("download");
+      properties = savedInstanceState.getParcelableArrayList("properties");
+      updateDiskUsagePieChart();
+      setProperties(properties);
     } else {
       paths = new ArrayList<>();
       paths.addAll(Arrays.asList(Storage.PATH));
       paths.add(getString(R.string.choose_a_directory));
       binaries = Utils.getBinariesFromAssets(ABI.getAbi());
-
-      // find busybox in a background thread because it runs a command as root to check if busybox is installed to /sbin
-      new AsyncTask<Void, Void, AFile>() {
-
-        @Override protected AFile doInBackground(Void... params) {
-          return getInstalledBusyBox();
-        }
-
-        @Override protected void onPostExecute(AFile result) {
-          file = result;
-          String defaultInstallPath = file == null ? DEFAULT_INSTALL_PATH : file.getParent();
-          for (int i = 0; i < Storage.PATH.length; i++) {
-            String path = Storage.PATH[i];
-            if (path.equals(defaultInstallPath)) {
-              selectedDirectoryPosition = i;
-              directorySpinner.setSelectedIndex(selectedDirectoryPosition);
-              break;
-            }
-          }
-          new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
-          updateDiskUsagePieChart();
-        }
-
-      }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+      new BusyBoxLocater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
   }
 
@@ -260,50 +223,17 @@ public class InstallerFragment extends BaseFragment implements
   }
 
   @Override public void onClick(View v) {
-    if (v == directorySpinner || v == binarySpinner) {
+    if (v == pathSpinner || v == versionSpinner) {
       backgroundShadow.setVisibility(View.VISIBLE);
       Technique.FADE_IN.getComposer().duration(500).playOn(backgroundShadow);
     } else if (v == uninstallButton) {
-      Uninstaller.showConfirmationDialog(getActivity(), file);
+      BusyBoxUninstaller.showConfirmationDialog(getActivity(), busybox);
     } else if (v == installButton) {
-      BinaryInfo binary = binaries.get(binarySpinner.getSelectedIndex());
-      String path = paths.get(directorySpinner.getSelectedIndex());
-
-      if (binary.path.startsWith("http")) {
-        File destination = new File(getActivity().getCacheDir(), binary.name + "/" + binary.filename);
-        if (destination.exists() && destination.length() == binary.size) {
-          Installer installer = new Installer.Builder()
-              .setFilename(binary.filename)
-              .setBinary(new AFile(destination))
-              .setPath(path)
-              .setSymlink(true)
-              .setOverwrite(false)
-              .create();
-          new Thread(installer).start();
-        } else {
-          download = new Download.Builder(binary.path)
-              .setDestination(destination)
-              .setFilename(binary.filename)
-              .setShouldRedownload(true)
-              .setMd5sum(binary.md5sum)
-              .build();
-          DownloadRequest request = download.request()
-              .setNotificationVisibility(DownloadRequest.VISIBILITY_HIDDEN)
-              .build();
-          DownloadProgressDialog.show(getActivity(), download);
-          request.start(getActivity());
-        }
-      } else {
-        Installer installer = new Installer.Builder()
-            .setAsset(binary.path)
-            .setFilename(binary.filename)
-            .setPath(path)
-            .setSymlink(true)
-            .setOverwrite(false)
-            .create();
-        new Thread(installer).start();
-      }
-
+      installBusyBox();
+    } else if (v == infoButton) {
+      Intent intent = new Intent(getActivity(), FilePropertiesActivity.class);
+      intent.putExtra(FileHelper.INTENT_EXTRA_FILE, (Parcelable) busybox);
+      startActivity(intent);
     }
   }
 
@@ -311,61 +241,72 @@ public class InstallerFragment extends BaseFragment implements
     if (paths.contains(directory.getAbsolutePath())) {
       for (int i = 0; i < paths.size(); i++) {
         if (paths.get(i).equals(directory.getAbsolutePath())) {
-          selectedDirectoryPosition = i;
-          directorySpinner.setSelectedIndex(selectedDirectoryPosition);
+          pathIndex = i;
+          pathSpinner.setSelectedIndex(pathIndex);
           updateDiskUsagePieChart();
           break;
         }
       }
     } else {
-      selectedDirectoryPosition = paths.size() - 1;
-      paths.add(selectedDirectoryPosition, directory.getAbsolutePath());
-      directorySpinner.setSelectedIndex(selectedDirectoryPosition);
+      pathIndex = paths.size() - 1;
+      paths.add(pathIndex, directory.getAbsolutePath());
+      pathSpinner.setSelectedIndex(pathIndex);
       updateDiskUsagePieChart();
     }
   }
 
   @Override public void onDirectoryPickerCancelledListener() {
-    directorySpinner.setSelectedIndex(selectedDirectoryPosition);
+    pathSpinner.setSelectedIndex(pathIndex);
   }
+
+  // --------------------------------------------------------------------------------------------
 
   @EventBusHook public void onEventMainThread(DownloadFinished event) {
     if (download != null && download.getId() == event.download.getId()) {
-      String path = paths.get(directorySpinner.getSelectedIndex());
-      Installer installer = new Installer.Builder()
+      String path = paths.get(pathSpinner.getSelectedIndex());
+      BusyBoxInstaller.newBusyboxInstaller()
           .setFilename(event.download.getFilename())
           .setBinary(new AFile(event.download.getDestinationFile()))
           .setPath(path)
           .setSymlink(true)
           .setOverwrite(false)
-          .create();
-      new Thread(installer).start();
+          .confirm(getActivity());
     }
   }
 
   @EventBusHook public void onEventMainThread(DownloadError event) {
     if (download != null && download.getId() == event.download.getId()) {
-      Toasts.show("Error downloading file");
-      Crashlytics.log("Error downloading file");
+      showMessage(R.string.download_unsuccessful);
     }
   }
 
-  @EventBusHook public void onEventMainThread(Installer installer) {
-    if (installer.isRunning()) {
-      installing = true;
-    } else {
-      installing = false;
-      file = new AFile(installer.path, installer.filename);
-      new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
-    }
-    progressItem.setVisible(installing || uninstalling);
-    uninstallButton.setEnabled(file != null && !installing && !uninstalling);
-    installButton.setEnabled(!installing && !uninstalling);
-
+  @EventBusHook public void onEventMainThread(BusyBoxInstaller.StartEvent event) {
+    installing = true;
+    progressItem.setVisible(true);
+    uninstallButton.setEnabled(false);
+    installButton.setEnabled(false);
   }
 
-  @EventBusHook public void onEventMainThread(Uninstaller.StartEvent event) {
-    if (file == null || !file.equals(event.file)) {
+  @EventBusHook public void onEventMainThread(BusyBoxInstaller.FinishedEvent event) {
+    installing = false;
+    progressItem.setVisible(false);
+    uninstallButton.setEnabled(true);
+    installButton.setEnabled(true);
+    busybox = BusyBox.from(new AFile(event.installer.path, event.installer.filename).path);
+    new BusyBoxMetaTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, busybox);
+    showMessage(R.string.successfully_installed_s, busybox.filename);
+  }
+
+  @EventBusHook public void onEventMainThread(BusyBoxInstaller.ErrorEvent event) {
+    installing = false;
+    showMessage(R.string.installation_failed);
+    progressItem.setVisible(false);
+    uninstallButton.setEnabled(busybox != null && busybox.exists());
+    installButton.setEnabled(true);
+  }
+
+  @EventBusHook public void onEventMainThread(BusyBoxUninstaller.StartEvent event) {
+    if (busybox == null || !busybox.equals(event.file)) {
       return;
     }
     uninstalling = true;
@@ -374,247 +315,236 @@ public class InstallerFragment extends BaseFragment implements
     progressItem.setVisible(true);
   }
 
-  @EventBusHook public void onEventMainThread(Uninstaller.FinishedEvent event) {
-    if (file == null || !file.equals(event.file)) {
+  @EventBusHook public void onEventMainThread(BusyBoxUninstaller.FinishedEvent event) {
+    if (busybox == null || !busybox.equals(event.file)) {
       return;
     }
     uninstalling = false;
     installButton.setEnabled(!installing);
     if (event.success) {
-      file = getInstalledBusyBox();
+      new BusyBoxLocater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       progressItem.setVisible(uninstalling || installing);
-      uninstallButton.setEnabled(file != null);
-      new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
+      showMessage(R.string.uninstalled_s, event.file.filename);
     } else {
-      Toasts.show(getString(R.string.error_uninstalling_s, file.filename));
-      Crashlytics.log("Error uninstalling " + file.path);
+      showMessage(R.string.error_uninstalling_s, busybox.filename);
+    }
+  }
+
+  @EventBusHook public void onEvent(BusyBoxLocater.BusyboxLocatedEvent event) {
+    busybox = event.busybox;
+    String defaultInstallPath = busybox == null ? DEFAULT_INSTALL_PATH : busybox.getParent();
+    for (int i = 0; i < Storage.PATH.length; i++) {
+      String path = Storage.PATH[i];
+      if (path.equals(defaultInstallPath)) {
+        pathIndex = i;
+        break;
+      }
+    }
+    pathSpinner.setSelectedIndex(pathIndex);
+    uninstallButton.setEnabled(busybox != null && busybox.exists() && !uninstalling && !installing);
+    installButton.setEnabled(!uninstalling && !installing);
+    new BusyBoxMetaTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, busybox);
+    updateDiskUsagePieChart();
+  }
+
+  @EventBusHook public void onEvent(BusyBoxMetaTask.BusyBoxPropertiesEvent event) {
+    setProperties(event.properties);
+  }
+
+  @EventBusHook public void onEvent(BusyBoxDiskUsageTask.BusyBoxDiskUsageEvent event) {
+    long totalSize = event.total;
+    long freeSize = event.free;
+    long usedSize = totalSize - freeSize;
+
+    int color1 = ColorScheme.getAccent();
+    int color2 = ColorScheme.getAccentDark();
+    int color3 = ColorScheme.getPrimary();
+    if (color1 == color3) color3 = Color.invert(color1);
+
+    if (itemSlice == null || freeSlice == null || usedSlice == null) {
+      usedSlice = new PieModel(usedSize - event.binaryInfo.size, color1);
+      freeSlice = new PieModel(freeSize, color2);
+      itemSlice = new PieModel(event.binaryInfo.size, color3);
+      pieChart.addPieSlice(usedSlice);
+      pieChart.addPieSlice(freeSlice);
+      pieChart.addPieSlice(itemSlice);
+    } else {
+      usedSlice.setValue(usedSize - event.binaryInfo.size);
+      freeSlice.setValue(freeSize);
+      itemSlice.setValue(event.binaryInfo.size);
+      pieChart.update();
+    }
+
+    String item = event.binaryInfo.filename.length() >= 8 ? "binary" : event.binaryInfo.filename;
+
+    setLegendText(R.id.text_used, getString(R.string.used).toUpperCase(), usedSize, totalSize, color1);
+    setLegendText(R.id.text_free, getString(R.string.free).toUpperCase(), freeSize, totalSize, color2);
+    setLegendText(R.id.text_item, item.toUpperCase(), event.binaryInfo.size, totalSize, color3);
+
+    findById(R.id.text_used).setVisibility(View.VISIBLE);
+    findById(R.id.text_free).setVisibility(View.VISIBLE);
+    findById(R.id.text_item).setVisibility(View.VISIBLE);
+    findById(R.id.progress).setVisibility(View.GONE);
+  }
+
+  // --------------------------------------------------------------------------------------------
+
+  private void installBusyBox() {
+    BinaryInfo binary = binaries.get(versionSpinner.getSelectedIndex());
+    String path = paths.get(pathSpinner.getSelectedIndex());
+    if (binary.path.startsWith("http")) {
+      File destination = new File(getActivity().getCacheDir(), binary.name + "/" + binary.filename);
+      if (destination.exists() && destination.length() == binary.size) {
+        BusyBoxInstaller.newBusyboxInstaller()
+            .setFilename(binary.filename)
+            .setBinary(new AFile(destination))
+            .setPath(path)
+            .setSymlink(true)
+            .setOverwrite(false)
+            .confirm(getActivity());
+      } else {
+        download = new Download.Builder(binary.path)
+            .setDestination(destination)
+            .setFilename(binary.filename)
+            .setShouldRedownload(true)
+            .setMd5sum(binary.md5sum)
+            .build();
+        DownloadRequest request = download.request()
+            .setNotificationVisibility(DownloadRequest.VISIBILITY_HIDDEN)
+            .build();
+        DownloadProgressDialog.show(getActivity(), download);
+        request.start(getActivity());
+      }
+    } else {
+      BusyBoxInstaller.newBusyboxInstaller()
+          .setAsset(binary.path)
+          .setFilename(binary.filename)
+          .setPath(path)
+          .setSymlink(true)
+          .setOverwrite(false)
+          .confirm(getActivity());
     }
   }
 
   private void updateDiskUsagePieChart() {
-    BinaryInfo binaryInfo = binaries.get(binarySpinner.getSelectedIndex());
-    String path = paths.get(directorySpinner.getSelectedIndex());
-    new DiskUsageUpdater(binaryInfo, path).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    BinaryInfo binaryInfo = binaries.get(versionSpinner.getSelectedIndex());
+    String path = paths.get(pathSpinner.getSelectedIndex());
+    new BusyBoxDiskUsageTask(binaryInfo, path) {
+
+      @Override protected void onPreExecute() {
+        findById(R.id.progress).setVisibility(View.VISIBLE);
+        findById(R.id.text_used).setVisibility(View.GONE);
+        findById(R.id.text_free).setVisibility(View.GONE);
+        findById(R.id.text_item).setVisibility(View.GONE);
+      }
+
+    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
 
-  private BusyBox getInstalledBusyBox() {
-    for (String path : Storage.PATH) {
-      BusyBox busybox = BusyBox.from(new File(path, "busybox").getAbsolutePath());
-      if (path.equals("/sbin")) {
-        // /sbin is not readable. Get file info with root
-        FileInfo fileInfo = FileLister.getFileInfo("/sbin/busybox");
-        if (fileInfo != null) {
-          busybox.setFileInfo(fileInfo);
-          return busybox;
-        }
-      }
-      if (busybox.exists()) {
-        return busybox;
-      }
+  private void setProperties(ArrayList<FileMeta> properties) {
+    this.properties = properties;
+
+    if (properties == null) {
+      propertiesCard.setVisibility(View.GONE);
+      return;
     }
-    return null;
-  }
-
-  private final class PropertiesUpdater extends AsyncTask<AFile, Void, List<String[]>> {
-
-    @Override protected List<String[]> doInBackground(AFile... params) {
-      AFile file = params[0];
-      if (file == null) return null;
-      if (!file.exists() && file.path.equals("/sbin/busybox")) file.getFileInfo();
-      if (!file.exists()) return null;
-
-      List<String[]> properties = new ArrayList<>();
-
-      properties.add(new String[]{getString(R.string.path), file.path});
-
-      if (file.filename.equals("busybox")) {
-        BusyBox busyBox = BusyBox.from(file.path);
-        String version = busyBox.getVersion();
-        if (!TextUtils.isEmpty(version)) {
-          properties.add(new String[]{getString(R.string.version), version});
-        }
-      }
-
-      FilePermissions permissions = file.getFilePermissions();
-      if (permissions != null) {
-        String value = Integer.toString(permissions.mode) + " (" + permissions.symbolicNotation + ")";
-        properties.add(new String[]{getString(R.string.permissions), value});
-      }
-
-      properties.add(new String[]{getString(R.string.size), Formatter.formatFileSize(App.getContext(), file.length())});
-
-      SimpleDateFormat sdf = DateUtils.getInstance().getDateTimeFormatter();
-      properties.add(new String[]{getString(R.string.last_modified), sdf.format(file.lastModified())});
-
-      return properties;
+    if (propertiesCard.getVisibility() != View.VISIBLE) {
+      propertiesCard.setVisibility(View.VISIBLE);
     }
 
-    @Override protected void onPostExecute(List<String[]> properties) {
-      if (properties == null) {
-        propertiesCard.setVisibility(View.GONE);
-        return;
+    TableLayout tableLayout = findById(R.id.table_properties);
+
+    if (tableLayout.getChildCount() > 0) {
+      tableLayout.removeAllViews();
+    }
+
+    int width = ResUtils.dpToPx(128);
+    int left = ResUtils.dpToPx(16);
+    int top = ResUtils.dpToPx(6);
+    int bottom = ResUtils.dpToPx(6);
+
+    int i = 0;
+    for (FileMeta meta : properties) {
+      TableRow tableRow = new TableRow(getActivity());
+      TextView nameText = new TextView(getActivity());
+      TextView valueText = new TextView(getActivity());
+
+      if (i % 2 == 0) {
+        tableRow.setBackgroundColor(0x0D000000);
+      } else {
+        tableRow.setBackgroundColor(Color.TRANSPARENT);
       }
-      if (propertiesCard.getVisibility() != View.VISIBLE) {
-        propertiesCard.setVisibility(View.VISIBLE);
-      }
 
-      TableLayout tableLayout = findById(R.id.table_properties);
+      nameText.setLayoutParams(new TableRow.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT));
+      nameText.setPadding(left, top, 0, bottom);
+      nameText.setAllCaps(true);
+      nameText.setTypeface(Typeface.DEFAULT_BOLD);
+      nameText.setText(meta.name);
 
-      if (tableLayout.getChildCount() > 0) {
-        tableLayout.removeAllViews();
-      }
+      valueText.setPadding(left, top, 0, bottom);
+      valueText.setText(meta.value);
 
-      int width = ResUtils.dpToPx(128);
-      int left = ResUtils.dpToPx(16);
-      int top = ResUtils.dpToPx(6);
-      int bottom = ResUtils.dpToPx(6);
+      tableRow.addView(nameText);
+      tableRow.addView(valueText);
+      tableLayout.addView(tableRow);
 
-      int i = 0;
-      for (String[] arr : properties) {
-        TableRow tableRow = new TableRow(getActivity());
-        TextView nameText = new TextView(getActivity());
-        TextView valueText = new TextView(getActivity());
-
-        if (i % 2 == 0) {
-          tableRow.setBackgroundColor(0x0D000000);
-        } else {
-          tableRow.setBackgroundColor(Color.TRANSPARENT);
-        }
-
-        nameText.setLayoutParams(new TableRow.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT));
-        nameText.setPadding(left, top, 0, bottom);
-        nameText.setAllCaps(true);
-        nameText.setTypeface(Typeface.DEFAULT_BOLD);
-        nameText.setText(arr[0]);
-
-        valueText.setPadding(left, top, 0, bottom);
-        valueText.setText(arr[1]);
-
-        tableRow.addView(nameText);
-        tableRow.addView(valueText);
-        tableLayout.addView(tableRow);
-
-        i++;
-      }
+      i++;
     }
   }
 
-  private final class DiskUsageUpdater extends AsyncTask<Void, Void, Long[]> {
+  private void setLegendText(int id, String title, long size, long total, int color) {
+    String percent = formatPercent(size, total);
+    TextDrawable legendDrawable = new TextDrawable(getActivity(), percent).setBackgroundColor(Color.TRANSPARENT);
+    CircleDrawable drawable = new CircleDrawable(legendDrawable, color);
+    drawable.setBounds(0, 0, ResUtils.dpToPx(32), ResUtils.dpToPx(32));
+    TextView textView = findById(id);
 
-    private final BinaryInfo binaryInfo;
-    private final String path;
+    String text = "";
+    for (int i = title.length(); i <= 10; i++) text += 'A';
 
-    public DiskUsageUpdater(BinaryInfo binaryInfo, String path) {
-      this.binaryInfo = binaryInfo;
-      this.path = path;
+    new HtmlBuilder()
+        .strong()
+        .append(title.toUpperCase())
+        .font()
+        .color(ColorScheme.getBackgroundLight(getActivity()))
+        .text(text)
+        .close()
+        .close()
+        .append(Formatter.formatFileSize(getActivity(), size))
+        .on(textView);
+
+    textView.setCompoundDrawables(drawable, null, null, null);
+    textView.setVisibility(View.VISIBLE);
+  }
+
+  private String formatPercent(long n1, long n2) {
+    float result;
+    if (n2 == 0) {
+      return "0%";
+    } else {
+      result = 1.0f * n1 / n2;
     }
-
-    @Override protected void onPreExecute() {
-      findById(R.id.progress).setVisibility(View.VISIBLE);
-      findById(R.id.text_used).setVisibility(View.GONE);
-      findById(R.id.text_free).setVisibility(View.GONE);
-      findById(R.id.text_item).setVisibility(View.GONE);
+    if (result < 0.01f) {
+      return "< 1%";
     }
+    return String.format(Locale.ENGLISH, "%d%%", (int) (100.0f * result));
+  }
 
-    @Override protected Long[] doInBackground(Void... params) {
-      Mount mount = Mount.getMount(path);
-      long total, free;
+  private void showMessage(@StringRes int resid, Object... args) {
+    showMessage(getString(resid, args));
+  }
 
-      String fileSystemPath;
-      if (mount == null || mount.mountPoint.equals("/")) {
-        fileSystemPath = Storage.ANDROID_ROOT.getAbsolutePath();
-      } else {
-        fileSystemPath = mount.mountPoint;
-      }
-
-      StatFs statFs = new StatFs(fileSystemPath);
-
-      total = Storage.getTotalSpace(statFs);
-      free = Storage.getFreeSpace(statFs);
-
-      if (total == 0) {
-        statFs.restat(Storage.ANDROID_ROOT.getAbsolutePath());
-        total = Storage.getTotalSpace(statFs);
-        free = Storage.getFreeSpace(statFs);
-      }
-
-      return new Long[]{total, free};
+  private void showMessage(String message) {
+    Snackbar snackbar = Snackbar.make(findById(R.id.main), message, Snackbar.LENGTH_LONG);
+    View view = snackbar.getView();
+    TextView messageText = (TextView) view.findViewById(android.support.design.R.id.snackbar_text);
+    if (Themes.isDark()) {
+      messageText.setTextColor(ColorScheme.getPrimaryText(getActivity()));
+      view.setBackgroundColor(ColorScheme.getBackgroundDark(getActivity()));
+    } else {
+      messageText.setTextColor(Color.WHITE);
     }
-
-    @Override protected void onPostExecute(Long[] sizes) {
-      long totalSize = sizes[0];
-      long freeSize = sizes[1];
-      long usedSize = totalSize - freeSize;
-
-      int color1 = ColorScheme.getAccent();
-      int color2 = ColorScheme.getAccentDark();
-      int color3 = ColorScheme.getPrimary();
-      if (color1 == color3) color3 = Color.invert(color1);
-
-      if (itemSlice == null || freeSlice == null || usedSlice == null) {
-        usedSlice = new PieModel(usedSize - binaryInfo.size, color1);
-        freeSlice = new PieModel(freeSize, color2);
-        itemSlice = new PieModel(binaryInfo.size, color3);
-        pieChart.addPieSlice(usedSlice);
-        pieChart.addPieSlice(freeSlice);
-        pieChart.addPieSlice(itemSlice);
-      } else {
-        usedSlice.setValue(usedSize - binaryInfo.size);
-        freeSlice.setValue(freeSize);
-        itemSlice.setValue(binaryInfo.size);
-        pieChart.update();
-      }
-
-      String item = binaryInfo.filename.length() >= 8 ? "binary" : binaryInfo.filename;
-
-      setLegendText(R.id.text_used, getString(R.string.used).toUpperCase(), usedSize, totalSize, color1);
-      setLegendText(R.id.text_free, getString(R.string.free).toUpperCase(), freeSize, totalSize, color2);
-      setLegendText(R.id.text_item, item.toUpperCase(), binaryInfo.size, totalSize, color3);
-
-      findById(R.id.text_used).setVisibility(View.VISIBLE);
-      findById(R.id.text_free).setVisibility(View.VISIBLE);
-      findById(R.id.text_item).setVisibility(View.VISIBLE);
-      findById(R.id.progress).setVisibility(View.GONE);
-    }
-
-    private void setLegendText(int id, String title, long size, long total, int color) {
-      String percent = formatPercent(size, total);
-      TextDrawable legendDrawable = new TextDrawable(getActivity(), percent).setBackgroundColor(Color.TRANSPARENT);
-      CircleDrawable drawable = new CircleDrawable(legendDrawable, color);
-      drawable.setBounds(0, 0, ResUtils.dpToPx(32), ResUtils.dpToPx(32));
-      TextView textView = findById(id);
-
-      String text = "";
-      for (int i = title.length(); i <= 10; i++) text += 'A';
-
-      new HtmlBuilder()
-          .strong()
-          .append(title.toUpperCase())
-          .font()
-          .color(ColorScheme.getBackgroundLight(getActivity()))
-          .text(text)
-          .close()
-          .close()
-          .append(Formatter.formatFileSize(getActivity(), size))
-          .on(textView);
-
-      textView.setCompoundDrawables(drawable, null, null, null);
-      textView.setVisibility(View.VISIBLE);
-    }
-
-    private String formatPercent(long n1, long n2) {
-      float result;
-      if (n2 == 0) {
-        return "0%";
-      } else {
-        result = 1.0f * n1 / n2;
-      }
-      if (result < 0.01f) {
-        return "< 1%";
-      }
-      return String.format(Locale.ENGLISH, "%d%%", (int) (100.0f * result));
-    }
-
+    snackbar.show();
   }
 
 }

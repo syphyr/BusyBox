@@ -17,6 +17,15 @@
 
 package com.jrummyapps.packagemanager.tasks;
 
+import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.v7.app.AlertDialog;
+
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.io.Storage;
@@ -28,6 +37,7 @@ import com.jrummyapps.android.roottools.files.FileLister;
 import com.jrummyapps.android.roottools.shell.stericson.Shell;
 import com.jrummyapps.android.roottools.utils.Assets;
 import com.jrummyapps.android.roottools.utils.Mount;
+import com.jrummyapps.packagemanager.R;
 
 import java.io.File;
 import java.util.List;
@@ -40,9 +50,13 @@ import static com.jrummyapps.android.io.PermissionsHelper.S_IXGRP;
 import static com.jrummyapps.android.io.PermissionsHelper.S_IXOTH;
 import static com.jrummyapps.android.io.PermissionsHelper.S_IXUSR;
 
-public class Installer implements Runnable {
+public class BusyBoxInstaller implements Runnable {
 
   private static final int MODE_EXECUTABLE = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+
+  public static Builder newBusyboxInstaller() {
+    return new Builder();
+  }
 
   public final AFile binary;
   public final String asset;
@@ -51,9 +65,7 @@ public class Installer implements Runnable {
   public final boolean symlink;
   public final boolean overwrite;
 
-  private boolean running;
-
-  private Installer(Builder builder) {
+  private BusyBoxInstaller(Builder builder) {
     binary = builder.binary;
     asset = builder.asset;
     path = builder.path;
@@ -63,9 +75,7 @@ public class Installer implements Runnable {
   }
 
   @Override public void run() {
-    running = true;
-
-    Events.post(this);
+    Events.post(new StartEvent(this));
 
     AFile srFile;
     if (asset != null) {
@@ -77,13 +87,15 @@ public class Installer implements Runnable {
 
     Mount mount = Mount.getMount(path);
     if (mount == null) {
-      throw new RuntimeException("Error getting mount point for " + path);
+      Events.post(new ErrorEvent(this, "Error getting mount point for " + path));
+      return;
     }
 
     boolean mountedReadWrite = mount.isMountedReadWrite();
 
     if (!mount.remountReadWrite()) {
-      throw new RuntimeException("Failed mounting " + mount.mountPoint + " read/write");
+      Events.post(new ErrorEvent(this, "Error mounting " + mount.mountPoint + " read/write"));
+      return;
     }
 
     AFile dtFile = new AFile(path, filename);
@@ -94,7 +106,7 @@ public class Installer implements Runnable {
         ExternalStorageHelper.mkdir(parent);
       } else if (parent.isOnExternalStorage()) {
         //noinspection ResultOfMethodCallIgnored
-        parent.mkdirs(); // TODO: add storage permission
+        parent.mkdirs();
       } else {
         RootTools.mkdir(parent);
         RootTools.chmod("0755", parent);
@@ -107,18 +119,16 @@ public class Installer implements Runnable {
     }
 
     if (dtFile.exists()) {
-      Uninstaller.uninstall(dtFile);
+      BusyBoxUninstaller.uninstall(dtFile);
     }
 
     if (!RootTools.cp(srFile, dtFile)) {
-      throw new RuntimeException("Failed copying " + srFile + " to " + dtFile);
+      Events.post(new ErrorEvent(this, "Failed copying " + srFile + " to " + dtFile));
+      return;
     }
-    if (!RootTools.chmod("0755", dtFile)) {
-      throw new RuntimeException("Failed to give permissions to " + dtFile);
-    }
-    if (!RootTools.chown("root", "root", dtFile)) {
-      throw new RuntimeException("Failed to set user/group to root/root for " + dtFile);
-    }
+
+    RootTools.chmod("0755", dtFile);
+    RootTools.chown("root", "root", dtFile);
 
     BusyBox busyBox = BusyBox.from(dtFile.getAbsolutePath());
 
@@ -149,16 +159,42 @@ public class Installer implements Runnable {
       mount.remountReadOnly();
     }
 
-    running = false;
-
-    Events.post(this);
+    Events.post(new FinishedEvent(this));
   }
 
-  public boolean isRunning() {
-    return running;
+  public static final class StartEvent {
+
+    public final BusyBoxInstaller installer;
+
+    public StartEvent(BusyBoxInstaller installer) {
+      this.installer = installer;
+    }
+
   }
 
-  public static final class Builder {
+  public static final class FinishedEvent {
+
+    public final BusyBoxInstaller installer;
+
+    public FinishedEvent(BusyBoxInstaller installer) {
+      this.installer = installer;
+    }
+
+  }
+
+  public static final class ErrorEvent {
+
+    public final BusyBoxInstaller installer;
+    public final String error;
+
+    public ErrorEvent(BusyBoxInstaller installer, String error) {
+      this.installer = installer;
+      this.error = error;
+    }
+
+  }
+
+  public static final class Builder implements Parcelable {
 
     private AFile binary;
     private String asset;
@@ -167,8 +203,19 @@ public class Installer implements Runnable {
     private boolean symlink;
     private boolean overwrite;
 
-    public Installer create() {
-      return new Installer(this);
+    private Builder() {
+    }
+
+    public BusyBoxInstaller create() {
+      return new BusyBoxInstaller(this);
+    }
+
+    public void confirm(Activity activity) {
+      ConfirmInstallDialog dialog = new ConfirmInstallDialog();
+      Bundle args = new Bundle();
+      args.putParcelable("builder", this);
+      dialog.setArguments(args);
+      dialog.show(activity.getFragmentManager(), "ConfirmInstallDialog");
     }
 
     public Builder setBinary(AFile binary) {
@@ -199,6 +246,59 @@ public class Installer implements Runnable {
     public Builder setOverwrite(boolean overwrite) {
       this.overwrite = overwrite;
       return this;
+    }
+
+    @Override public int describeContents() {
+      return 0;
+    }
+
+    @Override public void writeToParcel(Parcel dest, int flags) {
+      dest.writeParcelable(this.binary, 0);
+      dest.writeString(this.asset);
+      dest.writeString(this.path);
+      dest.writeString(this.filename);
+      dest.writeByte(symlink ? (byte) 1 : (byte) 0);
+      dest.writeByte(overwrite ? (byte) 1 : (byte) 0);
+    }
+
+    protected Builder(Parcel in) {
+      this.binary = in.readParcelable(AFile.class.getClassLoader());
+      this.asset = in.readString();
+      this.path = in.readString();
+      this.filename = in.readString();
+      this.symlink = in.readByte() != 0;
+      this.overwrite = in.readByte() != 0;
+    }
+
+    public static final Parcelable.Creator<Builder> CREATOR = new Parcelable.Creator<Builder>() {
+
+      public Builder createFromParcel(Parcel source) {
+        return new Builder(source);
+      }
+
+      public Builder[] newArray(int size) {
+        return new Builder[size];
+      }
+    };
+
+  }
+
+  public static class ConfirmInstallDialog extends DialogFragment {
+
+    @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+      final Builder builder = getArguments().getParcelable("builder");
+      return new AlertDialog.Builder(getActivity())
+          .setTitle(R.string.confirm_before_install)
+          .setMessage(getString(R.string.are_you_sure_you_want_to_install_s_to_s, builder.filename, builder.path))
+          .setNegativeButton(android.R.string.cancel, null)
+          .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+
+            @Override public void onClick(DialogInterface dialog, int which) {
+              new Thread(new BusyBoxInstaller(builder)).start();
+              dialog.dismiss();
+            }
+          })
+          .create();
     }
 
   }
