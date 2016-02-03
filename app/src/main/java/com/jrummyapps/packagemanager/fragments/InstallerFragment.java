@@ -52,6 +52,8 @@ import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.downloader.Download;
 import com.jrummyapps.android.downloader.DownloadRequest;
 import com.jrummyapps.android.downloader.dialogs.DownloadProgressDialog;
+import com.jrummyapps.android.downloader.events.DownloadError;
+import com.jrummyapps.android.downloader.events.DownloadFinished;
 import com.jrummyapps.android.drawable.CircleDrawable;
 import com.jrummyapps.android.drawable.TextDrawable;
 import com.jrummyapps.android.eventbus.EventBusHook;
@@ -90,11 +92,7 @@ public class InstallerFragment extends BaseFragment implements
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
     View.OnClickListener {
 
-  private static final String TAG = "BusyBoxInstaller";
-
   private static final String DEFAULT_INSTALL_PATH = "/system/xbin";
-
-  private static final String REPO = ""; // TODO: add URL to install utilities
 
   private ArrayList<BinaryInfo> binaries;
   private ArrayList<String> paths;
@@ -119,6 +117,7 @@ public class InstallerFragment extends BaseFragment implements
 
   private boolean uninstalling;
   private boolean installing;
+  private Download download;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -181,10 +180,9 @@ public class InstallerFragment extends BaseFragment implements
       }
     });
 
-    uninstallButton.setEnabled(file != null && file.exists());
     uninstallButton.setOnClickListener(this);
     installButton.setOnClickListener(this);
-    uninstallButton.setEnabled(!uninstalling && !installing);
+    uninstallButton.setEnabled(file != null && file.exists() && !uninstalling && !installing);
     installButton.setEnabled(!uninstalling && !installing);
 
     ImageButton propertiesButton = findById(R.id.properties_button);
@@ -208,6 +206,7 @@ public class InstallerFragment extends BaseFragment implements
     outState.putParcelable("file", file);
     outState.putBoolean("uninstalling", uninstalling);
     outState.putBoolean("installing", installing);
+    outState.putParcelable("download", download);
   }
 
   @Override public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
@@ -219,6 +218,7 @@ public class InstallerFragment extends BaseFragment implements
       file = savedInstanceState.getParcelable("file");
       uninstalling = savedInstanceState.getBoolean("uninstalling");
       installing = savedInstanceState.getBoolean("installing");
+      download = savedInstanceState.getParcelable("download");
     } else {
       paths = new ArrayList<>();
       paths.addAll(Arrays.asList(Storage.PATH));
@@ -271,33 +271,39 @@ public class InstallerFragment extends BaseFragment implements
 
       if (binary.path.startsWith("http")) {
         File destination = new File(getActivity().getCacheDir(), binary.name + "/" + binary.filename);
-
-        Download download = new Download.Builder(binary.path)
-            .setDestination(destination)
-            .setShouldRedownload(false)
-            .setMd5sum(binary.md5sum)
-            .build();
-
-        DownloadRequest request = download.request()
-            .setNotificationVisibility(DownloadRequest.VISIBILITY_HIDDEN)
-            .build();
-
-        DownloadProgressDialog.show(getActivity(), download);
-
-        request.start(getActivity());
-        return;
+        if (destination.exists() && destination.length() == binary.size) {
+          Installer installer = new Installer.Builder()
+              .setFilename(binary.filename)
+              .setBinary(new AFile(destination))
+              .setPath(path)
+              .setSymlink(true)
+              .setOverwrite(false)
+              .create();
+          new Thread(installer).start();
+        } else {
+          download = new Download.Builder(binary.path)
+              .setDestination(destination)
+              .setFilename(binary.filename)
+              .setShouldRedownload(true)
+              .setMd5sum(binary.md5sum)
+              .build();
+          DownloadRequest request = download.request()
+              .setNotificationVisibility(DownloadRequest.VISIBILITY_HIDDEN)
+              .build();
+          DownloadProgressDialog.show(getActivity(), download);
+          request.start(getActivity());
+        }
+      } else {
+        Installer installer = new Installer.Builder()
+            .setAsset(binary.path)
+            .setFilename(binary.filename)
+            .setPath(path)
+            .setSymlink(true)
+            .setOverwrite(false)
+            .create();
+        new Thread(installer).start();
       }
 
-
-      file = new AFile(path, binary.filename);
-      Installer installer = new Installer.Builder()
-          .setAsset(binary.path)
-          .setFilename(binary.filename)
-          .setPath(path)
-          .setSymlink(true)
-          .setOverwrite(false)
-          .create();
-      new Thread(installer).start();
     }
   }
 
@@ -323,15 +329,37 @@ public class InstallerFragment extends BaseFragment implements
     directorySpinner.setSelectedIndex(selectedDirectoryPosition);
   }
 
+  @EventBusHook public void onEventMainThread(DownloadFinished event) {
+    if (download != null && download.getId() == event.download.getId()) {
+      String path = paths.get(directorySpinner.getSelectedIndex());
+      Installer installer = new Installer.Builder()
+          .setFilename(event.download.getFilename())
+          .setBinary(new AFile(event.download.getDestinationFile()))
+          .setPath(path)
+          .setSymlink(true)
+          .setOverwrite(false)
+          .create();
+      new Thread(installer).start();
+    }
+  }
+
+  @EventBusHook public void onEventMainThread(DownloadError event) {
+    if (download != null && download.getId() == event.download.getId()) {
+      Toasts.show("Error downloading file");
+      Crashlytics.log("Error downloading file");
+    }
+  }
+
   @EventBusHook public void onEventMainThread(Installer installer) {
     if (installer.isRunning()) {
       installing = true;
     } else {
       installing = false;
+      file = new AFile(installer.path, installer.filename);
       new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
     }
     progressItem.setVisible(installing || uninstalling);
-    uninstallButton.setEnabled(!installing && !uninstalling);
+    uninstallButton.setEnabled(file != null && !installing && !uninstalling);
     installButton.setEnabled(!installing && !uninstalling);
 
   }
@@ -341,9 +369,9 @@ public class InstallerFragment extends BaseFragment implements
       return;
     }
     uninstalling = true;
-    uninstallButton.setEnabled(!installing);
-    installButton.setEnabled(!uninstalling && !installing);
-    progressItem.setVisible(uninstalling || installing);
+    uninstallButton.setEnabled(false);
+    installButton.setEnabled(false);
+    progressItem.setVisible(true);
   }
 
   @EventBusHook public void onEventMainThread(Uninstaller.FinishedEvent event) {
@@ -355,7 +383,7 @@ public class InstallerFragment extends BaseFragment implements
     if (event.success) {
       file = getInstalledBusyBox();
       progressItem.setVisible(uninstalling || installing);
-      uninstallButton.setEnabled(!uninstalling && !installing);
+      uninstallButton.setEnabled(file != null);
       new PropertiesUpdater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
     } else {
       Toasts.show(getString(R.string.error_uninstalling_s, file.filename));

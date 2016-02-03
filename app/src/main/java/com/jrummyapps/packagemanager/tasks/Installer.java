@@ -67,8 +67,12 @@ public class Installer implements Runnable {
 
     Events.post(this);
 
+    AFile srFile;
     if (asset != null) {
       Assets.transferAsset(App.getContext(), asset, filename, MODE_EXECUTABLE);
+      srFile = new AFile(App.getContext().getFilesDir(), filename);
+    } else {
+      srFile = binary;
     }
 
     Mount mount = Mount.getMount(path);
@@ -82,7 +86,6 @@ public class Installer implements Runnable {
       throw new RuntimeException("Failed mounting " + mount.mountPoint + " read/write");
     }
 
-    AFile srFile = new AFile(App.getContext().getFilesDir(), filename);
     AFile dtFile = new AFile(path, filename);
     AFile parent = dtFile.getParentFile();
 
@@ -90,6 +93,7 @@ public class Installer implements Runnable {
       if (parent.isOnRemovableStorage()) {
         ExternalStorageHelper.mkdir(parent);
       } else if (parent.isOnExternalStorage()) {
+        //noinspection ResultOfMethodCallIgnored
         parent.mkdirs(); // TODO: add storage permission
       } else {
         RootTools.mkdir(parent);
