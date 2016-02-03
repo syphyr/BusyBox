@@ -19,7 +19,6 @@ package com.jrummyapps.packagemanager.activities;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -30,7 +29,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -39,7 +37,6 @@ import android.widget.TextView;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jrummyapps.android.base.BaseDrawerActivity;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
-import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.ReflectUtils;
 import com.jrummyapps.packagemanager.R;
@@ -102,16 +99,6 @@ public class MainActivity extends BaseDrawerActivity implements
       }
     }
     return super.onViewCreated(view, attrs);
-  }
-
-  @Override public boolean onOptionsItemSelected(MenuItem item) {
-    int itemId = item.getItemId();
-    if (itemId == R.id.action_settings) {
-      startActivity(new Intent(this, MainPreferenceActivity.class));
-    } else {
-      return super.onOptionsItemSelected(item);
-    }
-    return true;
   }
 
   @Override public int getLayoutResId() {

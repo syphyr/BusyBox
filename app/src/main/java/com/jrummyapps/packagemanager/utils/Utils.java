@@ -21,8 +21,9 @@ import android.os.Build;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
-import com.jrummyapps.android.app.App;
+import com.jrummyapps.android.io.IOUtils;
 import com.jrummyapps.android.os.ABI;
+import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
 
@@ -30,11 +31,52 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
+import static com.jrummyapps.android.app.App.getContext;
 
 public class Utils {
+
+  public static List<String> getBusyBoxApplets() {
+    BusyBox busyBox = BusyBox.getInstance();
+    List<String> applets = busyBox.getApplets();
+    if (applets.isEmpty()) {
+      String json = readRaw(R.raw.busybox_applets);
+      try {
+        JSONObject jsonObject=new JSONObject(json);
+        for(Iterator<String> iterator = jsonObject.keys(); iterator.hasNext(); ) {
+          applets.add(iterator.next());
+        }
+      } catch (Exception ignored) {
+      }
+    }
+    return applets;
+  }
+
+  /**
+   * Read a file from /res/raw
+   *
+   * @param id
+   *     The id from R.raw
+   * @return The contents of the file or {@code null} if reading failed.
+   */
+  public static String readRaw(int id) {
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    InputStream inputStream = getContext().getResources().openRawResource(id);
+    try {
+      IOUtils.copy(inputStream, outputStream);
+    } catch (IOException e) {
+      return null;
+    } finally {
+      IOUtils.closeQuietly(outputStream);
+      IOUtils.closeQuietly(inputStream);
+    }
+    return outputStream.toString();
+  }
 
   /**
    * Get a list of binaries in the assets directory
@@ -45,7 +87,7 @@ public class Utils {
     ArrayList<BinaryInfo> binaries = new ArrayList<>();
     try {
       ByteArrayOutputStream output = new ByteArrayOutputStream();
-      InputStream input = App.getContext().getResources().openRawResource(R.raw.binaries);
+      InputStream input = getContext().getResources().openRawResource(R.raw.binaries);
       byte[] buffer = new byte[4096];
       int n;
       while ((n = input.read(buffer)) != -1) {
