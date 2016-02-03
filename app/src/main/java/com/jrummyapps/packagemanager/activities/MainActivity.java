@@ -43,7 +43,7 @@ import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.ReflectUtils;
 import com.jrummyapps.packagemanager.R;
-import com.jrummyapps.packagemanager.fragments.InstallerFragment;
+import com.jrummyapps.packagemanager.fragments.BusyBoxInstallerFragment;
 
 import java.io.File;
 
@@ -56,7 +56,7 @@ public class MainActivity extends BaseDrawerActivity implements
     if (savedInstanceState == null) {
       getFragmentManager()
           .beginTransaction()
-          .add(R.id.content_frame, new InstallerFragment())
+          .add(R.id.content_frame, new BusyBoxInstallerFragment())
           .commit();
     }
   }

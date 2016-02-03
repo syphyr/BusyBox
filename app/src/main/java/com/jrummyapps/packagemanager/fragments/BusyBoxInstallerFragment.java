@@ -82,7 +82,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 
-public class InstallerFragment extends BaseFragment implements
+public class BusyBoxInstallerFragment extends BaseFragment implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
     View.OnClickListener {
