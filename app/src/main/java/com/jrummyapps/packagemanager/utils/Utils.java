@@ -57,11 +57,12 @@ public class Utils {
         JSONObject jsonObject = jsonArray.getJSONObject(i);
         String name = jsonObject.getString("name");
         String filename = jsonObject.getString("filename");
-        String path = jsonObject.getString("path");
         String abi = jsonObject.getString("abi");
+        String path = jsonObject.getString("path");
+        String md5sum = jsonObject.getString("md5sum");
         long size = jsonObject.getLong("size");
         int minSdk = jsonObject.optInt("maxsdk", Build.VERSION.SDK_INT);
-        binaries.add(new BinaryInfo(name, filename, abi, path, size, minSdk));
+        binaries.add(new BinaryInfo(name, filename, abi, path, md5sum, size, minSdk));
       }
     } catch (Exception e) {
       Crashlytics.logException(e);
@@ -83,9 +84,6 @@ public class Utils {
       if (!TextUtils.equals(binaryInfo.abi, abi.base) || binaryInfo.maxSdk < Build.VERSION.SDK_INT) {
         iterator.remove();
       }
-    }
-    for (BinaryInfo binary : binaries) {
-      System.out.println(binary.path);
     }
     return binaries;
   }

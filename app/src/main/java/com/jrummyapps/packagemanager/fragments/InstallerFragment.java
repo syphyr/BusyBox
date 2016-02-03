@@ -49,6 +49,9 @@ import com.jrummyapps.android.base.BaseFragment;
 import com.jrummyapps.android.colors.Color;
 import com.jrummyapps.android.common.Toasts;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
+import com.jrummyapps.android.downloader.Download;
+import com.jrummyapps.android.downloader.DownloadRequest;
+import com.jrummyapps.android.downloader.dialogs.DownloadProgressDialog;
 import com.jrummyapps.android.drawable.CircleDrawable;
 import com.jrummyapps.android.drawable.TextDrawable;
 import com.jrummyapps.android.eventbus.EventBusHook;
@@ -265,6 +268,27 @@ public class InstallerFragment extends BaseFragment implements
     } else if (v == installButton) {
       BinaryInfo binary = binaries.get(binarySpinner.getSelectedIndex());
       String path = paths.get(directorySpinner.getSelectedIndex());
+
+      if (binary.path.startsWith("http")) {
+        File destination = new File(getActivity().getCacheDir(), binary.name + "/" + binary.filename);
+
+        Download download = new Download.Builder(binary.path)
+            .setDestination(destination)
+            .setShouldRedownload(false)
+            .setMd5sum(binary.md5sum)
+            .build();
+
+        DownloadRequest request = download.request()
+            .setNotificationVisibility(DownloadRequest.VISIBILITY_HIDDEN)
+            .build();
+
+        DownloadProgressDialog.show(getActivity(), download);
+
+        request.start(getActivity());
+        return;
+      }
+
+
       file = new AFile(path, binary.filename);
       Installer installer = new Installer.Builder()
           .setAsset(binary.path)

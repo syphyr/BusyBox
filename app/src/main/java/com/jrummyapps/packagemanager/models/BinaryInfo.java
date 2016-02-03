@@ -26,14 +26,16 @@ public class BinaryInfo implements Parcelable {
   public final String filename;
   public final String abi;
   public final String path;
+  public final String md5sum;
   public final long size;
   public final int maxSdk;
 
-  public BinaryInfo(String name, String filename, String abi, String path, long size, int maxSdk) {
+  public BinaryInfo(String name, String filename, String abi, String path, String md5sum, long size, int maxSdk) {
     this.name = name;
     this.filename = filename;
     this.abi = abi;
     this.path = path;
+    this.md5sum = md5sum;
     this.size = size;
     this.maxSdk = maxSdk;
   }
@@ -51,6 +53,7 @@ public class BinaryInfo implements Parcelable {
     dest.writeString(filename);
     dest.writeString(abi);
     dest.writeString(path);
+    dest.writeString(md5sum);
     dest.writeLong(size);
     dest.writeInt(maxSdk);
   }
@@ -60,6 +63,7 @@ public class BinaryInfo implements Parcelable {
     filename = in.readString();
     abi = in.readString();
     path = in.readString();
+    md5sum = in.readString();
     size = in.readLong();
     maxSdk = in.readInt();
   }
