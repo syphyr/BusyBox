@@ -23,6 +23,8 @@ include ':lib-baseapp'
 include ':lib-codeeditor'
 include ':lib-common'
 include ':lib-cpb'
+include ':lib-database'
+include ':lib-downloader'
 include ':lib-directorypicker'
 include ':lib-discreteseekbar'
 include ':lib-eventbus'
@@ -33,6 +35,7 @@ include ':lib-io'
 include ':lib-io-external'
 include ':lib-jazzylistview'
 include ':lib-materialviewpager'
+include ':lib-numberprogressbar'
 include ':lib-observablescrollview'
 include ':lib-picasso'
 include ':lib-recyclerview'
@@ -51,6 +54,8 @@ project(':lib-baseapp').projectDir = new File(core, "lib-baseapp")
 project(':lib-codeeditor').projectDir = new File(core, "lib-codeeditor")
 project(':lib-common').projectDir = new File(core, "lib-common")
 project(':lib-cpb').projectDir = new File(core, "lib-cpb")
+project(':lib-database').projectDir = new File(core, "lib-database")
+project(':lib-downloader').projectDir = new File(core, "lib-downloader")
 project(':lib-directorypicker').projectDir = new File(core, "lib-directorypicker")
 project(':lib-discreteseekbar').projectDir = new File(core, "lib-discreteseekbar")
 project(':lib-eventbus').projectDir = new File(core, "lib-eventbus")
@@ -61,6 +66,7 @@ project(':lib-io').projectDir = new File(core, "lib-io")
 project(':lib-io-external').projectDir = new File(core, "lib-io-external")
 project(':lib-jazzylistview').projectDir = new File(core, "lib-jazzylistview")
 project(':lib-materialviewpager').projectDir = new File(core, "lib-materialviewpager")
+project(':lib-numberprogressbar').projectDir = new File(core, "lib-numberprogressbar")
 project(':lib-observablescrollview').projectDir = new File(core, "lib-observablescrollview")
 project(':lib-picasso').projectDir = new File(core, "lib-picasso")
 project(':lib-recyclerview').projectDir = new File(core, "lib-recyclerview")
