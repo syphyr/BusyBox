@@ -10,14 +10,14 @@
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "mips",
-    "path": "busybox/mips/pie/busybox",
+    "path": "http://jrummyapps.com/files/android/binaries/busybox/jrummyapps/1.24.1/mips/pie/bin/busybox",
     "size": 1455672
   },
   {
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "x86",
-    "path": "busybox/x86/pie/busybox",
+    "path": "http://jrummyapps.com/files/android/binaries/busybox/jrummyapps/1.24.1/x86/pie/bin/busybox",
     "size": 863192
   },
   {
@@ -32,7 +32,7 @@
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "mips",
-    "path": "busybox/mips/nopie/busybox",
+    "path": "http://jrummyapps.com/files/android/binaries/busybox/jrummyapps/1.24.1/mips/nopie/bin/busybox",
     "size": 1455668,
     "maxsdk": 20
   },
@@ -40,7 +40,7 @@
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "x86",
-    "path": "busybox/x86/nopie/busybox",
+    "path": "http://jrummyapps.com/files/android/binaries/busybox/jrummyapps/1.24.1/x86/nopie/bin/busybox",
     "size": 850904,
     "maxsdk": 20
   }
