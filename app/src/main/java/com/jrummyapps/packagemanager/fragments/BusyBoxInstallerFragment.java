@@ -22,10 +22,13 @@ import android.app.DialogFragment;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
@@ -33,7 +36,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.text.TextUtils;
 import android.text.format.Formatter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,7 +48,6 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListener;
@@ -79,6 +80,7 @@ import com.jrummyapps.android.roottools.shell.stericson.Shell;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
 import com.jrummyapps.android.util.IntentUtils;
+import com.jrummyapps.android.util.OrientationUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.activities.SettingsActivity;
@@ -100,12 +102,14 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
     View.OnClickListener {
 
-  private static final String TAG = "InstallerFragment";
-
   private static final String DEFAULT_INSTALL_PATH = "/system/xbin";
+
+  private static final int REQUEST_TERM = 56;
 
   private static final int CMD_INSTALL = 0;
   private static final int CMD_TERMINAL = 1;
+
+  private final Object termLock = new Object();
 
   private ArrayList<FileMeta> properties;
   private ArrayList<BinaryInfo> binaries;
@@ -254,6 +258,18 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
       default:
         return super.onOptionsItemSelected(item);
     }
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    if (requestCode == REQUEST_TERM) {
+      OrientationUtils.unlockOrientation(getActivity());
+      synchronized (termLock) {
+        termLock.notify();
+      }
+      return;
+    }
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
   }
 
   @Override public void onClick(View v) {
@@ -457,16 +473,36 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
       file = new File(getActivity().getFilesDir(), binary.filename);
     }
 
-    new AsyncTask<File, Void, Intent>() {
+    new AsyncTask<File, String, Intent>() {
+
+      private boolean openGooglePlay = true;
 
       @Override protected Intent doInBackground(File... params) {
         Intent intent;
+        String permission;
         if (IntentUtils.isIntentAvailable(getActivity(), new Intent("jackpal.androidterm.RUN_SCRIPT"))) {
           intent = new Intent("jackpal.androidterm.RUN_SCRIPT");
+          permission = "jackpal.androidterm.permission.RUN_SCRIPT";
         } else if (IntentUtils.isIntentAvailable(getActivity(), new Intent("jrummy.androidterm.RUN_SCRIPT"))) {
           intent = new Intent("jrummy.androidterm.RUN_SCRIPT");
+          permission = "jrummy.androidterm.permission.RUN_SCRIPT";
         } else {
           return null;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+          if (getActivity().checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+            OrientationUtils.lockOrientation(getActivity());
+            requestPermissions(new String[]{permission}, REQUEST_TERM);
+            synchronized (termLock) {
+              try {
+                termLock.wait();
+              } catch (InterruptedException e) {
+                openGooglePlay = false;
+                return null;
+              }
+            }
+          }
         }
 
         File bin = new File(getActivity().getFilesDir(), "bin");
@@ -481,21 +517,18 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
         Shell.SH.run(file + " ln -s " + file + " " + bin + "/busybox");
 
         intent.addCategory(Intent.CATEGORY_DEFAULT);
-        intent.putExtra("jackpal.androidterm.iInitialCommand", String.format("export PATH=%s:$PATH", bin.getPath()));
+        intent.putExtra("jackpal.androidterm.iInitialCommand",
+            String.format("export PATH=%s:$PATH; busybox", bin.getPath()));
         return intent;
       }
 
       @Override protected void onPostExecute(Intent intent) {
+        if (intent == null && openGooglePlay) {
+          intent = IntentUtils.newMarketForAppIntent(getActivity(), "jackpal.androidterm");
+        }
         try {
           startActivity(intent);
-        } catch (Exception e) {
-          Log.e(TAG, "Error opening terminal emulator", e);
-          Intent marketIntent = IntentUtils.newMarketForAppIntent(getActivity(), "jackpal.androidterm");
-          try {
-            startActivity(marketIntent);
-          } catch (ActivityNotFoundException error) {
-            Crashlytics.logException(error);
-          }
+        } catch (Exception ignored) {
         }
       }
     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
