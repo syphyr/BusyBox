@@ -719,7 +719,11 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
 
             @Override public void onClick(DialogInterface dialog, int which) {
               try {
-                startActivity(IntentUtils.newGooglePlayIntent(getActivity(), "com.jrummyapps.rootchecker"));
+                Intent intent = getActivity().getPackageManager().getLaunchIntentForPackage("com.jrummyapps.rootchecker");
+                if (intent == null) {
+                  intent = IntentUtils.newGooglePlayIntent(getActivity(), "com.jrummyapps.rootchecker");
+                }
+                startActivity(intent);
               } catch (ActivityNotFoundException ignored) {
               }
             }
