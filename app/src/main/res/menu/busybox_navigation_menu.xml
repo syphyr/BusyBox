@@ -24,7 +24,7 @@
         android:title="@string/installer"/>
     <item
         android:id="@+id/action_applets"
-        android:icon="@drawable/ic_applets_white_24dp"
+        android:icon="@drawable/ic_applet_white_24dp"
         android:title="@string/applets"/>
     <item
         android:id="@+id/action_scripts"
