@@ -49,6 +49,7 @@ public class BusyBoxNavigationFragment extends BaseFragment implements Navigatio
     NavigationView navigationView = findById(R.id.navigation_view);
 
     navigationView.getMenu().findItem(R.id.action_installer).setChecked(true);
+    getActivity().setTitle(navigationView.getMenu().findItem(R.id.action_installer).getTitle());
 
     ImageView headerView = new KenBurnsView(getActivity());
     headerView.setLayoutParams(new FrameLayout.LayoutParams(
