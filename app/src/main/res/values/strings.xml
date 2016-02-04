@@ -44,6 +44,7 @@
   <string name="successfully_installed_s">Successfully installed %s</string>
   <string name="installation_failed">Installation failed</string>
   <string name="uninstalled_s">Uninstalled %s</string>
+  <string name="please_connect_to_a_network_and_try_again">Please connect to a network and try again</string>
 
   <!-- NAVIGATION ITEMS -->
   <string name="installer">Installer</string>
@@ -56,4 +57,5 @@
   <string name="replace_applets">Replace applets</string>
   <string name="create_symlinks_to_applets">Create symlinks to applets</string>
   <string name="install_applets">Install applets</string>
+
 </resources>

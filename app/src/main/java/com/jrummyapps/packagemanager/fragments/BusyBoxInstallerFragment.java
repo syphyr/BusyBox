@@ -20,10 +20,13 @@ package com.jrummyapps.packagemanager.fragments;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -455,6 +458,12 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
       file = binary.getDownloadDestination();
       if (!file.exists() || file.length() != binary.size) {
         // We need to download busybox before opening terminal
+        NetworkInfo networkInfo =
+            ((ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        if (networkInfo == null || !networkInfo.isConnected()) {
+          showMessage(R.string.please_connect_to_a_network_and_try_again);
+          return;
+        }
         downloadCompleteCommand = CMD_TERMINAL;
         download = new Download.Builder(binary.path)
             .setDestination(file)
@@ -552,6 +561,12 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
             .setOverwrite(prefs.get("replace_with_busybox_applets", false))
             .confirm(getActivity());
       } else {
+        NetworkInfo networkInfo =
+            ((ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        if (networkInfo == null || !networkInfo.isConnected()) {
+          showMessage(R.string.please_connect_to_a_network_and_try_again);
+          return;
+        }
         downloadCompleteCommand = CMD_INSTALL;
         download = new Download.Builder(binary.path)
             .setDestination(destination)
@@ -719,7 +734,8 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
 
             @Override public void onClick(DialogInterface dialog, int which) {
               try {
-                Intent intent = getActivity().getPackageManager().getLaunchIntentForPackage("com.jrummyapps.rootchecker");
+                Intent intent = getActivity().getPackageManager().getLaunchIntentForPackage(
+                    "com.jrummyapps.rootchecker");
                 if (intent == null) {
                   intent = IntentUtils.newGooglePlayIntent(getActivity(), "com.jrummyapps.rootchecker");
                 }
