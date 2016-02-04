@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 
 import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.roottools.box.BusyBox;
@@ -83,13 +84,15 @@ public class BusyBoxAppletDialog extends DialogFragment {
       if (help != null) {
         return help;
       }
-      try {
-        help = BusyBox.getInstance().getHelp(applet);
-      } catch (Exception ignored) {
-      }
-      if (help != null) {
-        CACHE.put(applet, help);
-        return help;
+      if (BusyBox.getInstance().exists()) {
+        try {
+          help = BusyBox.getInstance().getHelp(applet);
+        } catch (Exception ignored) {
+        }
+        if (!TextUtils.isEmpty(help)) {
+          CACHE.put(applet, help);
+          return help;
+        }
       }
       try {
         if (json == null) {
