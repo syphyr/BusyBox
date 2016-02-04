@@ -16,22 +16,41 @@
   -->
 
 <resources>
+  <!-- LABELS -->
   <string name="activity_busybox_installer">BusyBox</string>
+
+  <!-- SPINNER ITEMS -->
   <string name="choose_a_directory">Choose a directory…</string>
+
+  <!-- BUTTONS -->
   <string name="install">Install</string>
-  <string name="confirm_before_deleting">Confirm before deleting</string>
-  <string name="confirm_before_install">Confirm before install</string>
   <string name="uninstall">Uninstall</string>
   <string name="yes">Yes</string>
   <string name="delete">Delete</string>
+
+  <!-- DIALOG TITLES -->
+  <string name="confirm_before_deleting">Confirm before deleting</string>
+  <string name="confirm_before_install">Confirm before install</string>
+
+  <!-- DIALOG MESSAGES -->
   <string name="are_you_sure_you_want_to_uninstall_s">Are you sure you want to uninstall %s?</string>
   <string name="are_you_sure_you_want_to_install_s_to_s">Are you sure you want to install %1$s to %2$s?</string>
+
+  <!-- SNACKBAR MESSAGES -->
   <string name="error_uninstalling_s">Error uninstalling %s</string>
   <string name="successfully_installed_s">Successfully installed %s</string>
   <string name="installation_failed">Installation failed</string>
   <string name="uninstalled_s">Uninstalled %s</string>
+
+  <!-- NAVIGATION ITEMS -->
   <string name="installer">Installer</string>
   <string name="applets">Applets</string>
   <string name="scripts">Scripts</string>
   <string name="terminal">Terminal</string>
+
+  <!-- PREFERENCES -->
+  <string name="replace_existing_applets">Replace existing applets</string>
+  <string name="replace_applets">Replace applets</string>
+  <string name="create_symlinks_to_applets">Create symlinks to applets</string>
+  <string name="install_applets">Install applets</string>
 </resources>

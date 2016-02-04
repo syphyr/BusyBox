@@ -25,15 +25,15 @@
     <com.jrummyapps.android.preferences.widget.SwitchPreferenceCompat
         android:defaultValue="true"
         android:key="symlink_busybox_applets"
-        android:summary="Create symlinks to applets"
-        android:title="Install applets"
+        android:summary="@string/create_symlinks_to_applets"
+        android:title="@string/install_applets"
         android:widgetLayout="@layout/preference_switch_layout"/>
 
     <com.jrummyapps.android.preferences.widget.SwitchPreferenceCompat
         android:defaultValue="false"
         android:key="replace_with_busybox_applets"
-        android:summary="Replace existing applets"
-        android:title="Replace applets"
+        android:summary="@string/replace_existing_applets"
+        android:title="@string/replace_applets"
         android:widgetLayout="@layout/preference_switch_layout"/>
 
   </PreferenceCategory>
