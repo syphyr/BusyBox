@@ -510,8 +510,11 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
         bin.mkdirs();
 
         File file = params[0];
+        //noinspection OctalInteger
         Os.chmod(file.getAbsolutePath(), 0755);
+        //noinspection OctalInteger
         Os.chmod(bin.getAbsolutePath(), 0777);
+        //noinspection OctalInteger
         Os.chmod(file.getParent(), 0777);
         Shell.SH.run(file + " --install -s " + bin);
         Shell.SH.run(file + " ln -s " + file + " " + bin + "/busybox");
