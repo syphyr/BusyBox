@@ -94,22 +94,24 @@ public class BusyBoxNavigationFragment extends BaseFragment implements Navigatio
 
     switch (itemId){
       case R.id.action_installer:
+        getActivity().setTitle(item.getTitle());
         getActivity().getFragmentManager()
             .beginTransaction()
             .replace(R.id.content_frame, new BusyBoxInstallerFragment())
             .commit();
         return true;
       case R.id.action_applets:
+        getActivity().setTitle(item.getTitle());
         getActivity().getFragmentManager()
             .beginTransaction()
             .replace(R.id.content_frame, new BusyBoxAppletsFragment())
             .commit();
         return true;
       case R.id.action_scripts:
-
+        getActivity().setTitle(item.getTitle());
         return true;
       case R.id.action_terminal:
-
+        getActivity().setTitle(item.getTitle());
         return true;
     }
 

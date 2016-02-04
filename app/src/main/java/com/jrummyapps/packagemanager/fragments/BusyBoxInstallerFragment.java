@@ -63,13 +63,14 @@ import com.jrummyapps.android.html.HtmlBuilder;
 import com.jrummyapps.android.io.FileHelper;
 import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.os.ABI;
-import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
+import com.jrummyapps.android.prefs.Prefs;
 import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
+import com.jrummyapps.packagemanager.activities.SettingsActivity;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
 import com.jrummyapps.packagemanager.tasks.BusyBoxDiskUsageTask;
 import com.jrummyapps.packagemanager.tasks.BusyBoxInstaller;
@@ -225,7 +226,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == R.id.action_settings) {
-      startActivity(new Intent(getActivity(), MainPreferenceActivity.class));
+      startActivity(new Intent(getActivity(), SettingsActivity.class));
     } else {
       return super.onOptionsItemSelected(item);
     }
@@ -274,12 +275,13 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
   @EventBusHook public void onEventMainThread(DownloadFinished event) {
     if (download != null && download.getId() == event.download.getId()) {
       String path = paths.get(pathSpinner.getSelectedIndex());
+      Prefs prefs = Prefs.getInstance();
       BusyBoxInstaller.newBusyboxInstaller()
           .setFilename(event.download.getFilename())
           .setBinary(new AFile(event.download.getDestinationFile()))
           .setPath(path)
-          .setSymlink(true)
-          .setOverwrite(false)
+          .setSymlink(prefs.get("symlink_busybox_applets", true))
+          .setOverwrite(prefs.get("replace_with_busybox_applets", false))
           .confirm(getActivity());
     }
   }
@@ -405,12 +407,13 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     if (binary.path.startsWith("http")) {
       File destination = new File(getActivity().getCacheDir(), binary.name + "/" + binary.filename);
       if (destination.exists() && destination.length() == binary.size) {
+        Prefs prefs = Prefs.getInstance();
         BusyBoxInstaller.newBusyboxInstaller()
             .setFilename(binary.filename)
             .setBinary(new AFile(destination))
             .setPath(path)
-            .setSymlink(true)
-            .setOverwrite(false)
+            .setSymlink(prefs.get("symlink_busybox_applets", true))
+            .setOverwrite(prefs.get("replace_with_busybox_applets", false))
             .confirm(getActivity());
       } else {
         download = new Download.Builder(binary.path)
@@ -426,12 +429,13 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
         request.start(getActivity());
       }
     } else {
+      Prefs prefs = Prefs.getInstance();
       BusyBoxInstaller.newBusyboxInstaller()
           .setAsset(binary.path)
           .setFilename(binary.filename)
           .setPath(path)
-          .setSymlink(true)
-          .setOverwrite(false)
+          .setSymlink(prefs.get("symlink_busybox_applets", true))
+          .setOverwrite(prefs.get("replace_with_busybox_applets", false))
           .confirm(getActivity());
     }
   }
