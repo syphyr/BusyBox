@@ -63,6 +63,7 @@ import com.jrummyapps.android.html.HtmlBuilder;
 import com.jrummyapps.android.io.FileHelper;
 import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.os.ABI;
+import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
 import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.theme.ColorScheme;
@@ -220,6 +221,15 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     progressItem.setVisible(uninstalling || installing);
     ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
     super.onCreateOptionsMenu(menu, inflater);
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    if (item.getItemId() == R.id.action_settings) {
+      startActivity(new Intent(getActivity(), MainPreferenceActivity.class));
+    } else {
+      return super.onOptionsItemSelected(item);
+    }
+    return true;
   }
 
   @Override public void onClick(View v) {

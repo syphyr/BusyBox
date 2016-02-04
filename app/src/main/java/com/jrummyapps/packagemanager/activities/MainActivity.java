@@ -41,6 +41,7 @@ import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.ReflectUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.fragments.BusyBoxInstallerFragment;
+import com.jrummyapps.packagemanager.fragments.BusyBoxNavigationFragment;
 
 import java.io.File;
 
@@ -54,6 +55,11 @@ public class MainActivity extends BaseDrawerActivity implements
       getFragmentManager()
           .beginTransaction()
           .add(R.id.content_frame, new BusyBoxInstallerFragment())
+          .commit();
+
+      getFragmentManager()
+          .beginTransaction().
+          add(R.id.navigation_drawer, new BusyBoxNavigationFragment())
           .commit();
     }
   }
