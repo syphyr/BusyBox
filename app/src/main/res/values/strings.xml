@@ -30,4 +30,8 @@
   <string name="successfully_installed_s">Successfully installed %s</string>
   <string name="installation_failed">Installation failed</string>
   <string name="uninstalled_s">Uninstalled %s</string>
+  <string name="installer">Installer</string>
+  <string name="applets">Applets</string>
+  <string name="scripts">Scripts</string>
+  <string name="terminal">Terminal</string>
 </resources>
