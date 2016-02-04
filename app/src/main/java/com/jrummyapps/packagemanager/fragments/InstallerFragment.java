@@ -88,10 +88,10 @@ import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.activities.SettingsActivity;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
-import com.jrummyapps.packagemanager.tasks.DiskUsageTask;
-import com.jrummyapps.packagemanager.tasks.Installer;
 import com.jrummyapps.packagemanager.tasks.BusyBoxFinder;
 import com.jrummyapps.packagemanager.tasks.BusyBoxMetaTask;
+import com.jrummyapps.packagemanager.tasks.DiskUsageTask;
+import com.jrummyapps.packagemanager.tasks.Installer;
 import com.jrummyapps.packagemanager.tasks.Uninstaller;
 import com.jrummyapps.packagemanager.utils.Utils;
 
@@ -665,8 +665,10 @@ public class InstallerFragment extends BaseFragment implements
     drawable.setBounds(0, 0, ResUtils.dpToPx(32), ResUtils.dpToPx(32));
     TextView textView = findById(id);
 
+    final int WORD_LENGTH = getResources().getBoolean(R.bool.isTablet) ? 12 : 8;
+
     String text = "";
-    for (int i = title.length(); i <= 10; i++) text += 'A';
+    for (int i = title.length(); i <= WORD_LENGTH; i++) text += 'A';
 
     new HtmlBuilder()
         .strong()
