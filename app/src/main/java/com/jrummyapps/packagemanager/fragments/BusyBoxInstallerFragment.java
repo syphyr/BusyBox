@@ -17,7 +17,10 @@
 
 package com.jrummyapps.packagemanager.fragments;
 
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -26,8 +29,11 @@ import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
+import android.text.TextUtils;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -93,6 +99,8 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
     View.OnClickListener {
+
+  private static final String TAG = "InstallerFragment";
 
   private static final String DEFAULT_INSTALL_PATH = "/system/xbin";
 
@@ -326,6 +334,13 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     progressItem.setVisible(false);
     uninstallButton.setEnabled(busybox != null && busybox.exists());
     installButton.setEnabled(true);
+    if (TextUtils.equals(event.error, BusyBoxInstaller.ERROR_NOT_ROOTED)) {
+      RootRequiredDialog dialog = new RootRequiredDialog();
+      Bundle args = new Bundle();
+      args.putString("filename", event.installer.filename);
+      dialog.setArguments(args);
+      dialog.show(getFragmentManager(), "RootRequiredDialog");
+    }
   }
 
   @EventBusHook public void onEventMainThread(BusyBoxUninstaller.StartEvent event) {
@@ -410,6 +425,10 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     findById(R.id.progress).setVisibility(View.GONE);
   }
 
+  @EventBusHook public void onEvent(OpenTerminalEvent event) {
+    openTerminal();
+  }
+
   // --------------------------------------------------------------------------------------------
 
   private void openTerminal() {
@@ -470,6 +489,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
         try {
           startActivity(intent);
         } catch (Exception e) {
+          Log.e(TAG, "Error opening terminal emulator", e);
           Intent marketIntent = IntentUtils.newMarketForAppIntent(getActivity(), "jackpal.androidterm");
           try {
             startActivity(marketIntent);
@@ -640,6 +660,37 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
       messageText.setTextColor(Color.WHITE);
     }
     snackbar.show();
+  }
+
+  public static final class OpenTerminalEvent {
+
+  }
+
+  public static class RootRequiredDialog extends DialogFragment {
+
+    @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+      return new AlertDialog.Builder(getActivity())
+          .setTitle(R.string.root_required)
+          .setMessage(getString(R.string.root_access_is_required_to_install_s, getArguments().getString("filename")))
+          .setNegativeButton(R.string.close, null)
+          .setNeutralButton(R.string.terminal, new DialogInterface.OnClickListener() {
+
+            @Override public void onClick(DialogInterface dialog, int which) {
+              Events.post(new OpenTerminalEvent());
+            }
+          })
+          .setPositiveButton(R.string.root_info, new DialogInterface.OnClickListener() {
+
+            @Override public void onClick(DialogInterface dialog, int which) {
+              try {
+                startActivity(IntentUtils.newGooglePlayIntent(getActivity(), "com.jrummyapps.rootchecker"));
+              } catch (ActivityNotFoundException ignored) {
+              }
+            }
+          })
+          .create();
+    }
+
   }
 
 }

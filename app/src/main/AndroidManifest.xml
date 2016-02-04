@@ -24,7 +24,7 @@
   <uses-permission android:name="jrummy.androidterm.permission.RUN_SCRIPT" />
 
   <application
-      android:name="com.jrummyapps.android.base.BaseApp"
+      android:name=".App"
       android:allowBackup="true"
       android:icon="@mipmap/ic_launcher"
       android:label="@string/activity_busybox_installer"

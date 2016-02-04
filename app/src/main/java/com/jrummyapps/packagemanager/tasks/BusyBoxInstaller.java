@@ -32,6 +32,7 @@ import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.io.external.ExternalStorageHelper;
 import com.jrummyapps.android.roottools.RootTools;
 import com.jrummyapps.android.roottools.box.BusyBox;
+import com.jrummyapps.android.roottools.check.RootCheck;
 import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.roottools.files.FileLister;
 import com.jrummyapps.android.roottools.shell.stericson.Shell;
@@ -53,6 +54,8 @@ import static com.jrummyapps.android.io.PermissionsHelper.S_IXUSR;
 public class BusyBoxInstaller implements Runnable {
 
   private static final int MODE_EXECUTABLE = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+
+  public static final String ERROR_NOT_ROOTED = "Root is required to install busybox";
 
   public static Builder newBusyboxInstaller() {
     return new Builder();
@@ -76,6 +79,11 @@ public class BusyBoxInstaller implements Runnable {
 
   @Override public void run() {
     Events.post(new StartEvent(this));
+
+    if (!RootCheck.getInstance().accessGranted) {
+      Events.post(new ErrorEvent(this, ERROR_NOT_ROOTED));
+      return;
+    }
 
     AFile srFile;
     if (asset != null) {
