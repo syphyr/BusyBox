@@ -18,17 +18,23 @@
 package com.jrummyapps.packagemanager.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.jrummyapps.android.base.BaseFragment;
+import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.packagemanager.R;
+import com.jrummyapps.packagemanager.activities.SettingsActivity;
 import com.jrummyapps.packagemanager.dialogs.BusyBoxAppletDialog;
 import com.jrummyapps.packagemanager.utils.Utils;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -38,6 +44,11 @@ import java.util.Locale;
 
 public class BusyBoxAppletsFragment extends BaseFragment {
 
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setHasOptionsMenu(true);
+  }
+
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     return inflater.inflate(R.layout.busybox_applets, container, false);
   }
@@ -46,6 +57,24 @@ public class BusyBoxAppletsFragment extends BaseFragment {
     FastScrollRecyclerView recyclerView = findById(R.id.recycler);
     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     recyclerView.setAdapter(new RecyclerAdapter());
+  }
+
+  @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    menu.add(0, R.id.action_settings, 0, R.string.settings)
+        .setIcon(R.drawable.ic_settings_white_24dp)
+        .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+    ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
+    super.onCreateOptionsMenu(menu, inflater);
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.action_settings:
+        startActivity(new Intent(getActivity(), SettingsActivity.class));
+        return true;
+      default:
+        return super.onOptionsItemSelected(item);
+    }
   }
 
   private static class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder>
