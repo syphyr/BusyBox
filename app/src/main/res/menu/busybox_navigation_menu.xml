@@ -30,10 +30,6 @@
         android:id="@+id/action_scripts"
         android:icon="@drawable/ic_code_array_white_24dp"
         android:title="@string/scripts"/>
-    <item
-        android:id="@+id/action_terminal"
-        android:icon="@drawable/ic_terminal_white_24dp"
-        android:title="@string/terminal"/>
   </group>
 
 </menu>

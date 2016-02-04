@@ -20,6 +20,10 @@ package com.jrummyapps.packagemanager.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.jrummyapps.android.app.App;
+
+import java.io.File;
+
 public class BinaryInfo implements Parcelable {
 
   public final String name;
@@ -38,6 +42,11 @@ public class BinaryInfo implements Parcelable {
     this.md5sum = md5sum;
     this.size = size;
     this.maxSdk = maxSdk;
+  }
+
+  public File getDownloadDestination() {
+    String folder = name.replaceAll(" ", "_");
+    return new File(App.getContext().getCacheDir(), folder + "/" + filename);
   }
 
   @Override public String toString() {

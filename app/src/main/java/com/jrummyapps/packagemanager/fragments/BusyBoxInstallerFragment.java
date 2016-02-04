@@ -17,6 +17,7 @@
 
 package com.jrummyapps.packagemanager.fragments;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -39,6 +40,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListener;
@@ -63,11 +65,14 @@ import com.jrummyapps.android.html.HtmlBuilder;
 import com.jrummyapps.android.io.FileHelper;
 import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.os.ABI;
+import com.jrummyapps.android.os.Os;
 import com.jrummyapps.android.prefs.Prefs;
 import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.files.AFile;
+import com.jrummyapps.android.roottools.shell.stericson.Shell;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
+import com.jrummyapps.android.util.IntentUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.activities.SettingsActivity;
@@ -91,6 +96,9 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
 
   private static final String DEFAULT_INSTALL_PATH = "/system/xbin";
 
+  private static final int CMD_INSTALL = 0;
+  private static final int CMD_TERMINAL = 1;
+
   private ArrayList<FileMeta> properties;
   private ArrayList<BinaryInfo> binaries;
   private ArrayList<String> paths;
@@ -108,6 +116,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
   private PieModel itemSlice;
   private BusyBox busybox;
   private int pathIndex;
+  private int downloadCompleteCommand;
   private boolean uninstalling;
   private boolean installing;
   private Download download;
@@ -192,6 +201,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     outState.putBoolean("installing", installing);
     outState.putParcelable("download", download);
     outState.putParcelableArrayList("properties", properties);
+    outState.putInt("download_complete_command", downloadCompleteCommand);
   }
 
   @Override public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
@@ -205,6 +215,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
       installing = savedInstanceState.getBoolean("installing");
       download = savedInstanceState.getParcelable("download");
       properties = savedInstanceState.getParcelableArrayList("properties");
+      downloadCompleteCommand = savedInstanceState.getInt("download_complete_command", downloadCompleteCommand);
       updateDiskUsagePieChart();
       setProperties(properties);
     } else {
@@ -225,12 +236,16 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == R.id.action_settings) {
-      startActivity(new Intent(getActivity(), SettingsActivity.class));
-    } else {
-      return super.onOptionsItemSelected(item);
+    switch (item.getItemId()) {
+      case R.id.action_settings:
+        startActivity(new Intent(getActivity(), SettingsActivity.class));
+        return true;
+      case R.id.action_terminal:
+        openTerminal();
+        return true;
+      default:
+        return super.onOptionsItemSelected(item);
     }
-    return true;
   }
 
   @Override public void onClick(View v) {
@@ -274,15 +289,11 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
 
   @EventBusHook public void onEventMainThread(DownloadFinished event) {
     if (download != null && download.getId() == event.download.getId()) {
-      String path = paths.get(pathSpinner.getSelectedIndex());
-      Prefs prefs = Prefs.getInstance();
-      BusyBoxInstaller.newBusyboxInstaller()
-          .setFilename(event.download.getFilename())
-          .setBinary(new AFile(event.download.getDestinationFile()))
-          .setPath(path)
-          .setSymlink(prefs.get("symlink_busybox_applets", true))
-          .setOverwrite(prefs.get("replace_with_busybox_applets", false))
-          .confirm(getActivity());
+      if (downloadCompleteCommand == CMD_TERMINAL) {
+        openTerminal();
+      } else if (downloadCompleteCommand == CMD_INSTALL) {
+        installBusyBox();
+      }
     }
   }
 
@@ -401,11 +412,80 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
 
   // --------------------------------------------------------------------------------------------
 
+  private void openTerminal() {
+    BinaryInfo binary = binaries.get(versionSpinner.getSelectedIndex());
+
+    File file;
+    if (binary.path.startsWith("http")) {
+      file = binary.getDownloadDestination();
+      if (!file.exists() || file.length() != binary.size) {
+        // We need to download busybox before opening terminal
+        downloadCompleteCommand = CMD_TERMINAL;
+        download = new Download.Builder(binary.path)
+            .setDestination(file)
+            .setFilename(binary.filename)
+            .setShouldRedownload(true)
+            .setMd5sum(binary.md5sum)
+            .build();
+        DownloadRequest request = download.request()
+            .setNotificationVisibility(DownloadRequest.VISIBILITY_HIDDEN)
+            .build();
+        DownloadProgressDialog.show(getActivity(), download);
+        request.start(getActivity());
+        return;
+      }
+    } else {
+      file = new File(getActivity().getFilesDir(), binary.filename);
+    }
+
+    new AsyncTask<File, Void, Intent>() {
+
+      @Override protected Intent doInBackground(File... params) {
+        Intent intent;
+        if (IntentUtils.isIntentAvailable(getActivity(), new Intent("jackpal.androidterm.RUN_SCRIPT"))) {
+          intent = new Intent("jackpal.androidterm.RUN_SCRIPT");
+        } else if (IntentUtils.isIntentAvailable(getActivity(), new Intent("jrummy.androidterm.RUN_SCRIPT"))) {
+          intent = new Intent("jrummy.androidterm.RUN_SCRIPT");
+        } else {
+          return null;
+        }
+
+        File bin = new File(getActivity().getFilesDir(), "bin");
+        //noinspection ResultOfMethodCallIgnored
+        bin.mkdirs();
+
+        File file = params[0];
+        Os.chmod(file.getAbsolutePath(), 0755);
+        Os.chmod(bin.getAbsolutePath(), 0777);
+        Os.chmod(file.getParent(), 0777);
+        Shell.SH.run(file + " --install -s " + bin);
+        Shell.SH.run(file + " ln -s " + file + " " + bin + "/busybox");
+
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.putExtra("jackpal.androidterm.iInitialCommand", String.format("export PATH=%s:$PATH", bin.getPath()));
+        return intent;
+      }
+
+      @Override protected void onPostExecute(Intent intent) {
+        try {
+          startActivity(intent);
+        } catch (Exception e) {
+          Intent marketIntent = IntentUtils.newMarketForAppIntent(getActivity(), "jackpal.androidterm");
+          try {
+            startActivity(marketIntent);
+          } catch (ActivityNotFoundException error) {
+            Crashlytics.logException(error);
+          }
+        }
+      }
+    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);
+  }
+
   private void installBusyBox() {
     BinaryInfo binary = binaries.get(versionSpinner.getSelectedIndex());
     String path = paths.get(pathSpinner.getSelectedIndex());
     if (binary.path.startsWith("http")) {
-      File destination = new File(getActivity().getCacheDir(), binary.name + "/" + binary.filename);
+      File destination = binary.getDownloadDestination();
       if (destination.exists() && destination.length() == binary.size) {
         Prefs prefs = Prefs.getInstance();
         BusyBoxInstaller.newBusyboxInstaller()
@@ -416,6 +496,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
             .setOverwrite(prefs.get("replace_with_busybox_applets", false))
             .confirm(getActivity());
       } else {
+        downloadCompleteCommand = CMD_INSTALL;
         download = new Download.Builder(binary.path)
             .setDestination(destination)
             .setFilename(binary.filename)

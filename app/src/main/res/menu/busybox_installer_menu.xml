@@ -32,4 +32,10 @@
       android:title="@string/settings"
       app:showAsAction="always"/>
 
+  <item
+      android:id="@+id/action_terminal"
+      android:icon="@drawable/ic_terminal_white_24dp"
+      android:title="@string/terminal"
+      app:showAsAction="never"/>
+
 </menu>
