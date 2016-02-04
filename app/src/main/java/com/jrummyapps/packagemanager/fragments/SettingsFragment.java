@@ -20,7 +20,7 @@ package com.jrummyapps.packagemanager.fragments;
 import com.jrummyapps.android.preferences.fragments.AppearancePreferenceFragment;
 import com.jrummyapps.packagemanager.R;
 
-public class MainPreferenceFragment extends AppearancePreferenceFragment {
+public class SettingsFragment extends AppearancePreferenceFragment {
 
   @Override public int getPreferenceXmlResId() {
     return R.xml.prefs_main;

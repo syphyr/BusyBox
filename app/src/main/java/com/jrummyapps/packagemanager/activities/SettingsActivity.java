@@ -21,14 +21,14 @@ import android.app.Fragment;
 
 import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
 import com.jrummyapps.packagemanager.R;
-import com.jrummyapps.packagemanager.fragments.MainPreferenceFragment;
+import com.jrummyapps.packagemanager.fragments.SettingsFragment;
 
 public class SettingsActivity extends MainPreferenceActivity {
 
   @Override protected Fragment getFragment(int position) {
     int stringId = getStringId(position);
     if (stringId == R.string.settings) {
-      return new MainPreferenceFragment();
+      return new SettingsFragment();
     }
     return super.getFragment(position);
   }

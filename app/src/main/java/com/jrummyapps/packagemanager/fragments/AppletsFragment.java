@@ -42,7 +42,7 @@ import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import java.util.List;
 import java.util.Locale;
 
-public class BusyBoxAppletsFragment extends BaseFragment {
+public class AppletsFragment extends BaseFragment {
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);

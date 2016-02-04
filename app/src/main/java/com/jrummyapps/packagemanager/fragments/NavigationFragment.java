@@ -34,7 +34,7 @@ import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
 
-public class BusyBoxNavigationFragment extends BaseFragment implements NavigationView.OnNavigationItemSelectedListener {
+public class NavigationFragment extends BaseFragment implements NavigationView.OnNavigationItemSelectedListener {
 
   private static final int[] CHECKED_STATE_SET = {android.R.attr.state_checked};
   private static final int[] DISABLED_STATE_SET = {-android.R.attr.state_enabled};
@@ -98,14 +98,14 @@ public class BusyBoxNavigationFragment extends BaseFragment implements Navigatio
         getActivity().setTitle(item.getTitle());
         getActivity().getFragmentManager()
             .beginTransaction()
-            .replace(R.id.content_frame, new BusyBoxInstallerFragment())
+            .replace(R.id.content_frame, new InstallerFragment())
             .commit();
         return true;
       case R.id.action_applets:
         getActivity().setTitle(item.getTitle());
         getActivity().getFragmentManager()
             .beginTransaction()
-            .replace(R.id.content_frame, new BusyBoxAppletsFragment())
+            .replace(R.id.content_frame, new AppletsFragment())
             .commit();
         return true;
       case R.id.action_scripts:

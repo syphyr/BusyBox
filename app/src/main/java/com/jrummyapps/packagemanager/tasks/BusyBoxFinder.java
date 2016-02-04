@@ -28,7 +28,7 @@ import com.jrummyapps.android.roottools.files.FileLister;
 
 import java.io.File;
 
-public class BusyBoxLocater extends AsyncTask<Void, Void, BusyBox> {
+public class BusyBoxFinder extends AsyncTask<Void, Void, BusyBox> {
 
   @Override protected BusyBox doInBackground(Void... params) {
     for (String path : Storage.PATH) {
@@ -49,14 +49,14 @@ public class BusyBoxLocater extends AsyncTask<Void, Void, BusyBox> {
   }
 
   @Override protected void onPostExecute(BusyBox busybox) {
-    Events.post(new BusyboxLocatedEvent(busybox));
+    Events.post(new BusyboxFoundEvent(busybox));
   }
 
-  public static final class BusyboxLocatedEvent {
+  public static final class BusyboxFoundEvent {
 
     @Nullable public final BusyBox busybox;
 
-    public BusyboxLocatedEvent(BusyBox busybox) {
+    public BusyboxFoundEvent(BusyBox busybox) {
       this.busybox = busybox;
     }
 

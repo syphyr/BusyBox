@@ -51,7 +51,7 @@ import static com.jrummyapps.android.io.PermissionsHelper.S_IXGRP;
 import static com.jrummyapps.android.io.PermissionsHelper.S_IXOTH;
 import static com.jrummyapps.android.io.PermissionsHelper.S_IXUSR;
 
-public class BusyBoxInstaller implements Runnable {
+public class Installer implements Runnable {
 
   private static final int MODE_EXECUTABLE = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 
@@ -68,7 +68,7 @@ public class BusyBoxInstaller implements Runnable {
   public final boolean symlink;
   public final boolean overwrite;
 
-  private BusyBoxInstaller(Builder builder) {
+  private Installer(Builder builder) {
     binary = builder.binary;
     asset = builder.asset;
     path = builder.path;
@@ -127,7 +127,7 @@ public class BusyBoxInstaller implements Runnable {
     }
 
     if (dtFile.exists()) {
-      BusyBoxUninstaller.uninstall(dtFile);
+      Uninstaller.uninstall(dtFile);
     }
 
     if (!RootTools.cp(srFile, dtFile)) {
@@ -172,9 +172,9 @@ public class BusyBoxInstaller implements Runnable {
 
   public static final class StartEvent {
 
-    public final BusyBoxInstaller installer;
+    public final Installer installer;
 
-    public StartEvent(BusyBoxInstaller installer) {
+    public StartEvent(Installer installer) {
       this.installer = installer;
     }
 
@@ -182,9 +182,9 @@ public class BusyBoxInstaller implements Runnable {
 
   public static final class FinishedEvent {
 
-    public final BusyBoxInstaller installer;
+    public final Installer installer;
 
-    public FinishedEvent(BusyBoxInstaller installer) {
+    public FinishedEvent(Installer installer) {
       this.installer = installer;
     }
 
@@ -192,10 +192,10 @@ public class BusyBoxInstaller implements Runnable {
 
   public static final class ErrorEvent {
 
-    public final BusyBoxInstaller installer;
+    public final Installer installer;
     public final String error;
 
-    public ErrorEvent(BusyBoxInstaller installer, String error) {
+    public ErrorEvent(Installer installer, String error) {
       this.installer = installer;
       this.error = error;
     }
@@ -214,8 +214,8 @@ public class BusyBoxInstaller implements Runnable {
     private Builder() {
     }
 
-    public BusyBoxInstaller create() {
-      return new BusyBoxInstaller(this);
+    public Installer create() {
+      return new Installer(this);
     }
 
     public void confirm(Activity activity) {
@@ -302,7 +302,7 @@ public class BusyBoxInstaller implements Runnable {
           .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
             @Override public void onClick(DialogInterface dialog, int which) {
-              new Thread(new BusyBoxInstaller(builder)).start();
+              new Thread(new Installer(builder)).start();
               dialog.dismiss();
             }
           })

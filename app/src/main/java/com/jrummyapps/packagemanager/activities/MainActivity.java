@@ -40,8 +40,8 @@ import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.ReflectUtils;
 import com.jrummyapps.packagemanager.R;
-import com.jrummyapps.packagemanager.fragments.BusyBoxInstallerFragment;
-import com.jrummyapps.packagemanager.fragments.BusyBoxNavigationFragment;
+import com.jrummyapps.packagemanager.fragments.InstallerFragment;
+import com.jrummyapps.packagemanager.fragments.NavigationFragment;
 
 import java.io.File;
 
@@ -54,12 +54,12 @@ public class MainActivity extends BaseDrawerActivity implements
     if (savedInstanceState == null) {
       getFragmentManager()
           .beginTransaction()
-          .add(R.id.content_frame, new BusyBoxInstallerFragment())
+          .add(R.id.content_frame, new InstallerFragment())
           .commit();
 
       getFragmentManager()
           .beginTransaction().
-          add(R.id.navigation_drawer, new BusyBoxNavigationFragment())
+          add(R.id.navigation_drawer, new NavigationFragment())
           .commit();
     }
   }

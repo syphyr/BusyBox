@@ -35,7 +35,7 @@ import com.jrummyapps.packagemanager.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BusyBoxUninstaller implements Runnable {
+public class Uninstaller implements Runnable {
 
   public static void showConfirmationDialog(Activity activity, AFile file) {
     ConfirmUninstallDialog dialog = new ConfirmUninstallDialog();
@@ -97,7 +97,7 @@ public class BusyBoxUninstaller implements Runnable {
 
   private final AFile file;
 
-  public BusyBoxUninstaller(AFile file) {
+  public Uninstaller(AFile file) {
     this.file = file;
   }
 
@@ -139,7 +139,7 @@ public class BusyBoxUninstaller implements Runnable {
           .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
             @Override public void onClick(DialogInterface dialog, int which) {
-              new Thread(new BusyBoxUninstaller(file)).start();
+              new Thread(new Uninstaller(file)).start();
               dialog.dismiss();
             }
           })

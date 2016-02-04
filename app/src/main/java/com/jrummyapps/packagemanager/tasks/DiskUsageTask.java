@@ -25,12 +25,12 @@ import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.roottools.utils.Mount;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
 
-public class BusyBoxDiskUsageTask extends AsyncTask<Void, Void, Long[]> {
+public class DiskUsageTask extends AsyncTask<Void, Void, Long[]> {
 
   private final BinaryInfo binaryInfo;
   private final String path;
 
-  public BusyBoxDiskUsageTask(BinaryInfo binaryInfo, String path) {
+  public DiskUsageTask(BinaryInfo binaryInfo, String path) {
     this.binaryInfo = binaryInfo;
     this.path = path;
   }

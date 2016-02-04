@@ -88,11 +88,11 @@ import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.activities.SettingsActivity;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
-import com.jrummyapps.packagemanager.tasks.BusyBoxDiskUsageTask;
-import com.jrummyapps.packagemanager.tasks.BusyBoxInstaller;
-import com.jrummyapps.packagemanager.tasks.BusyBoxLocater;
+import com.jrummyapps.packagemanager.tasks.DiskUsageTask;
+import com.jrummyapps.packagemanager.tasks.Installer;
+import com.jrummyapps.packagemanager.tasks.BusyBoxFinder;
 import com.jrummyapps.packagemanager.tasks.BusyBoxMetaTask;
-import com.jrummyapps.packagemanager.tasks.BusyBoxUninstaller;
+import com.jrummyapps.packagemanager.tasks.Uninstaller;
 import com.jrummyapps.packagemanager.utils.Utils;
 
 import java.io.File;
@@ -100,7 +100,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 
-public class BusyBoxInstallerFragment extends BaseFragment implements
+public class InstallerFragment extends BaseFragment implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
     View.OnClickListener {
@@ -238,7 +238,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
       paths.addAll(Arrays.asList(Storage.PATH));
       paths.add(getString(R.string.choose_a_directory));
       binaries = Utils.getBinariesFromAssets(ABI.getAbi());
-      new BusyBoxLocater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+      new BusyBoxFinder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
   }
 
@@ -280,7 +280,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
       backgroundShadow.setVisibility(View.VISIBLE);
       Technique.FADE_IN.getComposer().duration(500).playOn(backgroundShadow);
     } else if (v == uninstallButton) {
-      BusyBoxUninstaller.showConfirmationDialog(getActivity(), busybox);
+      Uninstaller.showConfirmationDialog(getActivity(), busybox);
     } else if (v == installButton) {
       installBusyBox();
     } else if (v == infoButton) {
@@ -330,14 +330,14 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     }
   }
 
-  @EventBusHook public void onEventMainThread(BusyBoxInstaller.StartEvent event) {
+  @EventBusHook public void onEventMainThread(Installer.StartEvent event) {
     installing = true;
     progressItem.setVisible(true);
     uninstallButton.setEnabled(false);
     installButton.setEnabled(false);
   }
 
-  @EventBusHook public void onEventMainThread(BusyBoxInstaller.FinishedEvent event) {
+  @EventBusHook public void onEventMainThread(Installer.FinishedEvent event) {
     installing = false;
     progressItem.setVisible(false);
     uninstallButton.setEnabled(true);
@@ -347,13 +347,13 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     showMessage(R.string.successfully_installed_s, busybox.filename);
   }
 
-  @EventBusHook public void onEventMainThread(BusyBoxInstaller.ErrorEvent event) {
+  @EventBusHook public void onEventMainThread(Installer.ErrorEvent event) {
     installing = false;
     showMessage(R.string.installation_failed);
     progressItem.setVisible(false);
     uninstallButton.setEnabled(busybox != null && busybox.exists());
     installButton.setEnabled(true);
-    if (TextUtils.equals(event.error, BusyBoxInstaller.ERROR_NOT_ROOTED)) {
+    if (TextUtils.equals(event.error, Installer.ERROR_NOT_ROOTED)) {
       RootRequiredDialog dialog = new RootRequiredDialog();
       Bundle args = new Bundle();
       args.putString("filename", event.installer.filename);
@@ -362,7 +362,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     }
   }
 
-  @EventBusHook public void onEventMainThread(BusyBoxUninstaller.StartEvent event) {
+  @EventBusHook public void onEventMainThread(Uninstaller.StartEvent event) {
     if (busybox == null || !busybox.equals(event.file)) {
       return;
     }
@@ -372,14 +372,14 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     progressItem.setVisible(true);
   }
 
-  @EventBusHook public void onEventMainThread(BusyBoxUninstaller.FinishedEvent event) {
+  @EventBusHook public void onEventMainThread(Uninstaller.FinishedEvent event) {
     if (busybox == null || !busybox.equals(event.file)) {
       return;
     }
     uninstalling = false;
     installButton.setEnabled(!installing);
     if (event.success) {
-      new BusyBoxLocater().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+      new BusyBoxFinder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       progressItem.setVisible(uninstalling || installing);
       showMessage(R.string.uninstalled_s, event.file.filename);
     } else {
@@ -387,7 +387,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     }
   }
 
-  @EventBusHook public void onEvent(BusyBoxLocater.BusyboxLocatedEvent event) {
+  @EventBusHook public void onEvent(BusyBoxFinder.BusyboxFoundEvent event) {
     busybox = event.busybox;
     String defaultInstallPath = busybox == null ? DEFAULT_INSTALL_PATH : busybox.getParent();
     for (int i = 0; i < Storage.PATH.length; i++) {
@@ -408,7 +408,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
     setProperties(event.properties);
   }
 
-  @EventBusHook public void onEvent(BusyBoxDiskUsageTask.BusyBoxDiskUsageEvent event) {
+  @EventBusHook public void onEvent(DiskUsageTask.BusyBoxDiskUsageEvent event) {
     long totalSize = event.total;
     long freeSize = event.free;
     long usedSize = totalSize - freeSize;
@@ -553,7 +553,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
       File destination = binary.getDownloadDestination();
       if (destination.exists() && destination.length() == binary.size) {
         Prefs prefs = Prefs.getInstance();
-        BusyBoxInstaller.newBusyboxInstaller()
+        Installer.newBusyboxInstaller()
             .setFilename(binary.filename)
             .setBinary(new AFile(destination))
             .setPath(path)
@@ -582,7 +582,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
       }
     } else {
       Prefs prefs = Prefs.getInstance();
-      BusyBoxInstaller.newBusyboxInstaller()
+      Installer.newBusyboxInstaller()
           .setAsset(binary.path)
           .setFilename(binary.filename)
           .setPath(path)
@@ -595,7 +595,7 @@ public class BusyBoxInstallerFragment extends BaseFragment implements
   private void updateDiskUsagePieChart() {
     BinaryInfo binaryInfo = binaries.get(versionSpinner.getSelectedIndex());
     String path = paths.get(pathSpinner.getSelectedIndex());
-    new BusyBoxDiskUsageTask(binaryInfo, path) {
+    new DiskUsageTask(binaryInfo, path) {
 
       @Override protected void onPreExecute() {
         findById(R.id.progress).setVisibility(View.VISIBLE);
