@@ -38,4 +38,10 @@
       android:title="@string/terminal"
       app:showAsAction="never"/>
 
+  <item
+      android:id="@+id/action_zip_archive"
+      android:icon="@drawable/ic_zip_white_24dp"
+      android:title="Zip archive"
+      app:showAsAction="never"/>
+
 </menu>

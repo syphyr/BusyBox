@@ -87,7 +87,9 @@ import com.jrummyapps.android.util.OrientationUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
 import com.jrummyapps.packagemanager.activities.SettingsActivity;
+import com.jrummyapps.packagemanager.dialogs.CreateZipDialog;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
+import com.jrummyapps.packagemanager.utils.BusyBoxZipHelper;
 import com.jrummyapps.packagemanager.tasks.BusyBoxFinder;
 import com.jrummyapps.packagemanager.tasks.BusyBoxMetaTask;
 import com.jrummyapps.packagemanager.tasks.DiskUsageTask;
@@ -111,6 +113,7 @@ public class InstallerFragment extends BaseFragment implements
 
   private static final int CMD_INSTALL = 0;
   private static final int CMD_TERMINAL = 1;
+  private static final int CMD_CREATE_ZIP = 2;
 
   private final Object termLock = new Object();
 
@@ -134,6 +137,7 @@ public class InstallerFragment extends BaseFragment implements
   private int downloadCompleteCommand;
   private boolean uninstalling;
   private boolean installing;
+  private boolean createArchive;
   private Download download;
 
   private final OnItemSelectedListener<String> onPathSelectedListener = new OnItemSelectedListener<String>() {
@@ -217,6 +221,7 @@ public class InstallerFragment extends BaseFragment implements
     outState.putParcelable("download", download);
     outState.putParcelableArrayList("properties", properties);
     outState.putInt("download_complete_command", downloadCompleteCommand);
+    outState.putBoolean("create_archive", createArchive);
   }
 
   @Override public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
@@ -231,6 +236,7 @@ public class InstallerFragment extends BaseFragment implements
       download = savedInstanceState.getParcelable("download");
       properties = savedInstanceState.getParcelableArrayList("properties");
       downloadCompleteCommand = savedInstanceState.getInt("download_complete_command", downloadCompleteCommand);
+      createArchive = savedInstanceState.getBoolean("create_archive");
       updateDiskUsagePieChart();
       setProperties(properties);
     } else {
@@ -257,6 +263,12 @@ public class InstallerFragment extends BaseFragment implements
         return true;
       case R.id.action_terminal:
         openTerminal();
+        return true;
+      case R.id.action_zip_archive:
+        if (getSelectedBinary(CMD_CREATE_ZIP) != null) {
+          createArchive = true;
+          DirectoryPickerDialog.show(getActivity());
+        }
         return true;
       default:
         return super.onOptionsItemSelected(item);
@@ -290,21 +302,59 @@ public class InstallerFragment extends BaseFragment implements
     }
   }
 
-  @Override public void onDirectorySelected(File directory) {
-    if (paths.contains(directory.getAbsolutePath())) {
-      for (int i = 0; i < paths.size(); i++) {
-        if (paths.get(i).equals(directory.getAbsolutePath())) {
-          pathIndex = i;
-          pathSpinner.setSelectedIndex(pathIndex);
-          updateDiskUsagePieChart();
-          break;
+  @SuppressWarnings("ConstantConditions")
+  @EventBusHook public void onEvent(CreateZipDialog.CreateZipEvent event) {
+    new AsyncTask<String, Void, Integer>() {
+
+      @Override protected void onPreExecute() {
+        progressItem.setVisible(true);
+      }
+
+      @Override protected Integer doInBackground(String... params) {
+        try {
+          BusyBox busybox = BusyBox.from(params[0]);
+          String installPath = params[1];
+          BusyBoxZipHelper.createBusyboxRecoveryZip(busybox, installPath, new File(params[2]));
+          return R.string.created_installable_zip;
+        } catch (Exception e) {
+          return R.string.could_not_create_the_zip_archive;
         }
       }
+
+      @Override protected void onPostExecute(Integer resid) {
+        progressItem.setVisible(false);
+        showMessage(resid);
+      }
+
+    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+        getSelectedBinary(CMD_CREATE_ZIP).getAbsolutePath(),
+        paths.get(pathSpinner.getSelectedIndex()) + "/busybox",
+        event.file.getAbsolutePath()
+    );
+  }
+
+  @Override public void onDirectorySelected(File directory) {
+    if (createArchive) {
+      BinaryInfo binaryInfo = binaries.get(versionSpinner.getSelectedIndex());
+      String filename = binaryInfo.filename + "-" + binaryInfo.abi + ".zip";
+      CreateZipDialog.show(getActivity(), directory, filename);
+      createArchive = false;
     } else {
-      pathIndex = paths.size() - 1;
-      paths.add(pathIndex, directory.getAbsolutePath());
-      pathSpinner.setSelectedIndex(pathIndex);
-      updateDiskUsagePieChart();
+      if (paths.contains(directory.getAbsolutePath())) {
+        for (int i = 0; i < paths.size(); i++) {
+          if (paths.get(i).equals(directory.getAbsolutePath())) {
+            pathIndex = i;
+            pathSpinner.setSelectedIndex(pathIndex);
+            updateDiskUsagePieChart();
+            break;
+          }
+        }
+      } else {
+        pathIndex = paths.size() - 1;
+        paths.add(pathIndex, directory.getAbsolutePath());
+        pathSpinner.setSelectedIndex(pathIndex);
+        updateDiskUsagePieChart();
+      }
     }
   }
 
@@ -320,6 +370,9 @@ public class InstallerFragment extends BaseFragment implements
         openTerminal();
       } else if (downloadCompleteCommand == CMD_INSTALL) {
         installBusyBox();
+      } else if (downloadCompleteCommand == CMD_CREATE_ZIP) {
+        createArchive = true;
+        DirectoryPickerDialog.show(getActivity());
       }
     }
   }
@@ -450,7 +503,7 @@ public class InstallerFragment extends BaseFragment implements
 
   // --------------------------------------------------------------------------------------------
 
-  private void openTerminal() {
+  private File getSelectedBinary(int command) {
     BinaryInfo binary = binaries.get(versionSpinner.getSelectedIndex());
 
     File file;
@@ -462,9 +515,9 @@ public class InstallerFragment extends BaseFragment implements
             ((ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         if (networkInfo == null || !networkInfo.isConnected()) {
           showMessage(R.string.please_connect_to_a_network_and_try_again);
-          return;
+          return null;
         }
-        downloadCompleteCommand = CMD_TERMINAL;
+        downloadCompleteCommand = command;
         download = new Download.Builder(binary.path)
             .setDestination(file)
             .setFilename(binary.filename)
@@ -476,10 +529,19 @@ public class InstallerFragment extends BaseFragment implements
             .build();
         DownloadProgressDialog.show(getActivity(), download);
         request.start(getActivity());
-        return;
+        return null;
       }
     } else {
       file = new File(getActivity().getFilesDir(), binary.filename);
+    }
+
+    return file;
+  }
+
+  private void openTerminal() {
+    File file = getSelectedBinary(CMD_INSTALL);
+    if (file == null) {
+      return; // downloading or no network connection
     }
 
     new AsyncTask<File, String, Intent>() {

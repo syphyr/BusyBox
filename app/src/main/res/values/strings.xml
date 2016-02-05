@@ -29,6 +29,7 @@
   <string name="delete">Delete</string>
   <string name="root_info">Root info</string>
   <string name="root_required">Root required</string>
+  <string name="create">Create</string>
 
   <!-- DIALOG TITLES -->
   <string name="confirm_before_deleting">Confirm before deleting</string>
@@ -57,5 +58,7 @@
   <string name="replace_applets">Replace applets</string>
   <string name="create_symlinks_to_applets">Create symlinks to applets</string>
   <string name="install_applets">Install applets</string>
+  <string name="could_not_create_the_zip_archive">Could not create the ZIP archive</string>
+  <string name="created_installable_zip">Created installable ZIP</string>
 
 </resources>

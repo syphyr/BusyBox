@@ -89,6 +89,7 @@ android {
 dependencies {
     compile 'com.jaredrummler:material-spinner:1.0.4'
     compile 'com.simplecityapps:recyclerview-fastscroll:1.0.5'
+    compile 'org.apache.commons:commons-compress:1.5'
     compile project(':lib-texteditor')
     compile project(':lib-downloader')
 }
