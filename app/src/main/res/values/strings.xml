@@ -60,5 +60,7 @@
   <string name="install_applets">Install applets</string>
   <string name="could_not_create_the_zip_archive">Could not create the ZIP archive</string>
   <string name="created_installable_zip">Created installable ZIP</string>
+  <string name="install_busybox_in_recovery">Install busybox in recovery</string>
+  <string name="recovery_mode">Recovery mode</string>
 
 </resources>

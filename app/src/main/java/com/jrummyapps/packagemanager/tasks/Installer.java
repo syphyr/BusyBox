@@ -26,10 +26,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.app.AlertDialog;
 
+import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.eventbus.Events;
+import com.jrummyapps.android.io.FileUtils;
 import com.jrummyapps.android.io.Storage;
 import com.jrummyapps.android.io.external.ExternalStorageHelper;
+import com.jrummyapps.android.prefs.Prefs;
 import com.jrummyapps.android.roottools.RootTools;
 import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.check.RootCheck;
@@ -38,9 +41,12 @@ import com.jrummyapps.android.roottools.files.FileLister;
 import com.jrummyapps.android.roottools.shell.stericson.Shell;
 import com.jrummyapps.android.roottools.utils.Assets;
 import com.jrummyapps.android.roottools.utils.Mount;
+import com.jrummyapps.android.roottools.utils.Reboot;
 import com.jrummyapps.packagemanager.R;
+import com.jrummyapps.packagemanager.utils.BusyBoxZipHelper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static com.jrummyapps.android.io.PermissionsHelper.S_IRGRP;
@@ -67,6 +73,7 @@ public class Installer implements Runnable {
   public final String filename;
   public final boolean symlink;
   public final boolean overwrite;
+  public final boolean recovery;
 
   private Installer(Builder builder) {
     binary = builder.binary;
@@ -75,6 +82,7 @@ public class Installer implements Runnable {
     filename = builder.filename;
     symlink = builder.symlink;
     overwrite = builder.overwrite;
+    recovery = builder.recovery;
   }
 
   @Override public void run() {
@@ -85,7 +93,10 @@ public class Installer implements Runnable {
       return;
     }
 
+    AFile dtFile = new AFile(path, filename);
+    AFile parent = dtFile.getParentFile();
     AFile srFile;
+
     if (asset != null) {
       Assets.transferAsset(App.getContext(), asset, filename, MODE_EXECUTABLE);
       srFile = new AFile(App.getContext().getFilesDir(), filename);
@@ -93,81 +104,108 @@ public class Installer implements Runnable {
       srFile = binary;
     }
 
-    Mount mount = Mount.getMount(path);
-    if (mount == null) {
-      Events.post(new ErrorEvent(this, "Error getting mount point for " + path));
-      return;
-    }
+    if (recovery) {
+      File updateZip = new File(App.getContext().getFilesDir(), "update.zip");
+      BusyBox busybox = BusyBox.from(srFile.path);
+      try {
+        BusyBoxZipHelper.createBusyboxRecoveryZip(busybox, dtFile.getAbsolutePath(), updateZip);
 
-    boolean mountedReadWrite = mount.isMountedReadWrite();
+        File commandTemp = new File(App.getContext().getFilesDir(), "command");
+        FileUtils.writeNewFile(commandTemp, "--update_package=CACHE:busybox.zip'");
+        RootTools.cp(commandTemp, new File("/cache/recovery/command"));
+        RootTools.chmod("755", "/cache/recovery/command");
+        RootTools.cp(updateZip, new File("/cache/busybox.zip"));
+        RootTools.chmod("755", "/cache/busybox.zip");
 
-    if (!mount.remountReadWrite()) {
-      Events.post(new ErrorEvent(this, "Error mounting " + mount.mountPoint + " read/write"));
-      return;
-    }
+        // TWRP reportedly does not find the update package
+        FileUtils.writeNewFile(commandTemp, "install /cache/busybox.zip");
+        RootTools.cp(commandTemp, new File("/cache/recovery/openrecoveryscript"));
+        RootTools.chmod("755", "/cache/recovery/openrecoveryscript");
 
-    AFile dtFile = new AFile(path, filename);
-    AFile parent = dtFile.getParentFile();
+        commandTemp.delete();
+        updateZip.delete();
 
-    if (parent != null && !parent.isDirectory()) {
-      if (parent.isOnRemovableStorage()) {
-        ExternalStorageHelper.mkdir(parent);
-      } else if (parent.isOnExternalStorage()) {
-        //noinspection ResultOfMethodCallIgnored
-        parent.mkdirs();
-      } else {
-        RootTools.mkdir(parent);
-        RootTools.chmod("0755", parent);
-        RootTools.chown("root", "shell", parent);
+        Reboot.RECOVERY.execute();
+
+        Events.post(new FinishedEvent(this));
+      } catch (IOException e) {
+        Events.post(new ErrorEvent(this, "Error creating installable zip"));
+        Crashlytics.logException(e);
       }
-    }
+    } else {
+      Mount mount = Mount.getMount(path);
+      if (mount == null) {
+        Events.post(new ErrorEvent(this, "Error getting mount point for " + path));
+        return;
+      }
 
-    if (dtFile.path.equals("/sbin/busybox")) {
-      dtFile.setFileInfo(FileLister.getFileInfo(dtFile.path));
-    }
+      boolean mountedReadWrite = mount.isMountedReadWrite();
 
-    if (dtFile.exists()) {
-      Uninstaller.uninstall(dtFile);
-    }
+      if (!mount.remountReadWrite()) {
+        Events.post(new ErrorEvent(this, "Error mounting " + mount.mountPoint + " read/write"));
+        return;
+      }
 
-    if (!RootTools.cp(srFile, dtFile)) {
-      Events.post(new ErrorEvent(this, "Failed copying " + srFile + " to " + dtFile));
-      return;
-    }
-
-    RootTools.chmod("0755", dtFile);
-    RootTools.chown("root", "root", dtFile);
-
-    BusyBox busyBox = BusyBox.from(dtFile.getAbsolutePath());
-
-    if (overwrite && symlink && Storage.isSystemFile(dtFile)) {
-      mount.remountReadWrite();
-      List<String> applets = busyBox.getApplets();
-      for (String applet : applets) {
-        File file = new File(path, applet);
-        if (file.exists()) {
-          RootTools.rm(file);
+      if (parent != null && !parent.isDirectory()) {
+        if (parent.isOnRemovableStorage()) {
+          ExternalStorageHelper.mkdir(parent);
+        } else if (parent.isOnExternalStorage()) {
+          //noinspection ResultOfMethodCallIgnored
+          parent.mkdirs();
+        } else {
+          RootTools.mkdir(parent);
+          RootTools.chmod("0755", parent);
+          RootTools.chown("root", "shell", parent);
         }
       }
-    }
 
-    if (symlink && Storage.isSystemFile(dtFile)) {
-      mount.remountReadWrite();
-      if (!Shell.SU.run("\"" + busyBox.path + "\" --install -s \"" + path + "\"").success()) {
-        // "--install" is not a command, symlink applets one by one.
+      if (dtFile.path.equals("/sbin/busybox")) {
+        dtFile.setFileInfo(FileLister.getFileInfo(dtFile.path));
+      }
+
+      if (dtFile.exists()) {
+        Uninstaller.uninstall(dtFile);
+      }
+
+      if (!RootTools.cp(srFile, dtFile)) {
+        Events.post(new ErrorEvent(this, "Failed copying " + srFile + " to " + dtFile));
+        return;
+      }
+
+      RootTools.chmod("0755", dtFile);
+      RootTools.chown("root", "root", dtFile);
+
+      BusyBox busyBox = BusyBox.from(dtFile.getAbsolutePath());
+
+      if (overwrite && symlink && Storage.isSystemFile(dtFile)) {
+        mount.remountReadWrite();
         List<String> applets = busyBox.getApplets();
         for (String applet : applets) {
-          AFile file = new AFile(path, applet);
-          RootTools.ln(busyBox, file);
+          File file = new File(path, applet);
+          if (file.exists()) {
+            RootTools.rm(file);
+          }
         }
       }
-    }
 
-    if (!mountedReadWrite) {
-      mount.remountReadOnly();
-    }
+      if (symlink && Storage.isSystemFile(dtFile)) {
+        mount.remountReadWrite();
+        if (!Shell.SU.run("\"" + busyBox.path + "\" --install -s \"" + path + "\"").success()) {
+          // "--install" is not a command, symlink applets one by one.
+          List<String> applets = busyBox.getApplets();
+          for (String applet : applets) {
+            AFile file = new AFile(path, applet);
+            RootTools.ln(busyBox, file);
+          }
+        }
+      }
 
-    Events.post(new FinishedEvent(this));
+      if (!mountedReadWrite) {
+        mount.remountReadOnly();
+      }
+
+      Events.post(new FinishedEvent(this));
+    }
   }
 
   public static final class StartEvent {
@@ -210,8 +248,12 @@ public class Installer implements Runnable {
     private String filename;
     private boolean symlink;
     private boolean overwrite;
+    private boolean recovery;
 
     private Builder() {
+      symlink = Prefs.getInstance().get("symlink_busybox_applets", true);
+      overwrite = Prefs.getInstance().get("replace_with_busybox_applets", false);
+      recovery = Prefs.getInstance().get("install_busybox_in_recovery", false);
     }
 
     public Installer create() {
@@ -253,6 +295,11 @@ public class Installer implements Runnable {
 
     public Builder setOverwrite(boolean overwrite) {
       this.overwrite = overwrite;
+      return this;
+    }
+
+    public Builder setRecovery(boolean recovery) {
+      this.recovery = recovery;
       return this;
     }
 

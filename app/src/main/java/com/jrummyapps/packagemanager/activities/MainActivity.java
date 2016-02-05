@@ -56,7 +56,6 @@ public class MainActivity extends BaseDrawerActivity implements
           .beginTransaction()
           .add(R.id.content_frame, new InstallerFragment())
           .commit();
-
       getFragmentManager()
           .beginTransaction().
           add(R.id.navigation_drawer, new NavigationFragment())

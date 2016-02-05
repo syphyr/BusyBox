@@ -36,6 +36,13 @@
         android:title="@string/replace_applets"
         android:widgetLayout="@layout/preference_switch_layout"/>
 
+    <com.jrummyapps.android.preferences.widget.SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="install_busybox_in_recovery"
+        android:summary="@string/install_busybox_in_recovery"
+        android:title="@string/recovery_mode"
+        android:widgetLayout="@layout/preference_switch_layout"/>
+
   </PreferenceCategory>
 
   <PreferenceCategory
