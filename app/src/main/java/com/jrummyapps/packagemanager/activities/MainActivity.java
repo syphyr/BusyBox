@@ -37,6 +37,7 @@ import android.widget.TextView;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jrummyapps.android.base.BaseDrawerActivity;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
+import com.jrummyapps.android.io.WriteExternalStoragePermissions;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.ReflectUtils;
 import com.jrummyapps.packagemanager.R;
@@ -104,6 +105,14 @@ public class MainActivity extends BaseDrawerActivity implements
       }
     }
     return super.onViewCreated(view, attrs);
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    if (WriteExternalStoragePermissions.INSTANCE.onRequestPermissionsResult(requestCode, permissions, grantResults)) {
+      return;
+    }
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
   }
 
   @Override public int getLayoutResId() {
