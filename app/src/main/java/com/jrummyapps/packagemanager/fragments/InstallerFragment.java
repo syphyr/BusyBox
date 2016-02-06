@@ -257,7 +257,6 @@ public class InstallerFragment extends BaseFragment implements
     inflater.inflate(R.menu.busybox_installer_menu, menu);
     progressItem = menu.findItem(R.id.menu_item_progress);
     progressItem.setVisible(uninstalling || installing);
-    Toasts.show(isTerminalSupported() ? "supported" : "not supported");
     menu.findItem(R.id.action_terminal).setVisible(isTerminalSupported());
     ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
     super.onCreateOptionsMenu(menu, inflater);
