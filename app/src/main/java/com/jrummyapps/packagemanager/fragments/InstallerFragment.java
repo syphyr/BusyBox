@@ -58,7 +58,6 @@ import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListene
 import com.jrummyapps.android.animations.Technique;
 import com.jrummyapps.android.base.BaseFragment;
 import com.jrummyapps.android.colors.Color;
-import com.jrummyapps.android.common.Toasts;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.downloader.Download;
 import com.jrummyapps.android.downloader.DownloadRequest;
