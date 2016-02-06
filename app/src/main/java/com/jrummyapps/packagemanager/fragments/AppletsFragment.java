@@ -34,6 +34,7 @@ import android.widget.TextView;
 import com.jrummyapps.android.base.BaseFragment;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.packagemanager.R;
+import com.jrummyapps.packagemanager.activities.AboutActivity;
 import com.jrummyapps.packagemanager.activities.SettingsActivity;
 import com.jrummyapps.packagemanager.dialogs.BusyBoxAppletDialog;
 import com.jrummyapps.packagemanager.utils.Utils;
@@ -63,6 +64,9 @@ public class AppletsFragment extends BaseFragment {
     menu.add(0, R.id.action_settings, 0, R.string.settings)
         .setIcon(R.drawable.ic_settings_white_24dp)
         .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+    menu.add(0, R.id.action_info, 0, R.string.about)
+        .setIcon(R.drawable.ic_information_white_24dp)
+        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
     ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
     super.onCreateOptionsMenu(menu, inflater);
   }
@@ -71,6 +75,9 @@ public class AppletsFragment extends BaseFragment {
     switch (item.getItemId()) {
       case R.id.action_settings:
         startActivity(new Intent(getActivity(), SettingsActivity.class));
+        return true;
+      case R.id.action_info:
+        startActivity(new Intent(getActivity(), AboutActivity.class));
         return true;
       default:
         return super.onOptionsItemSelected(item);

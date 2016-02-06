@@ -20,15 +20,15 @@
     package="com.jrummyapps.packagemanager"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-  <uses-permission android:name="jackpal.androidterm.permission.RUN_SCRIPT" />
-  <uses-permission android:name="jrummy.androidterm.permission.RUN_SCRIPT" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="jackpal.androidterm.permission.RUN_SCRIPT"/>
+  <uses-permission android:name="jrummy.androidterm.permission.RUN_SCRIPT"/>
 
   <application
       android:name=".App"
       android:allowBackup="true"
       android:icon="@mipmap/ic_launcher"
-      android:label="@string/activity_busybox_installer"
+      android:label="@string/app_name"
       android:supportsRtl="true"
       android:theme="@style/Theme.Light.DarkActionBar">
     <activity
@@ -43,6 +43,9 @@
       </intent-filter>
     </activity>
     <activity android:name=".activities.SettingsActivity"/>
+    <activity
+        android:name=".activities.AboutActivity"
+        android:theme="@style/Theme.Light.NoActionBar.Translucent"/>
   </application>
 
 </manifest>

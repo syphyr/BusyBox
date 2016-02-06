@@ -86,15 +86,16 @@ import com.jrummyapps.android.util.IntentUtils;
 import com.jrummyapps.android.util.OrientationUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.packagemanager.R;
+import com.jrummyapps.packagemanager.activities.AboutActivity;
 import com.jrummyapps.packagemanager.activities.SettingsActivity;
 import com.jrummyapps.packagemanager.dialogs.CreateZipDialog;
 import com.jrummyapps.packagemanager.models.BinaryInfo;
-import com.jrummyapps.packagemanager.utils.BusyBoxZipHelper;
 import com.jrummyapps.packagemanager.tasks.BusyBoxFinder;
 import com.jrummyapps.packagemanager.tasks.BusyBoxMetaTask;
 import com.jrummyapps.packagemanager.tasks.DiskUsageTask;
 import com.jrummyapps.packagemanager.tasks.Installer;
 import com.jrummyapps.packagemanager.tasks.Uninstaller;
+import com.jrummyapps.packagemanager.utils.BusyBoxZipHelper;
 import com.jrummyapps.packagemanager.utils.Utils;
 
 import java.io.File;
@@ -269,6 +270,9 @@ public class InstallerFragment extends BaseFragment implements
           createArchive = true;
           DirectoryPickerDialog.show(getActivity());
         }
+        return true;
+      case R.id.action_info:
+        startActivity(new Intent(getActivity(), AboutActivity.class));
         return true;
       default:
         return super.onOptionsItemSelected(item);

@@ -54,7 +54,7 @@ android {
 
     defaultConfig {
         applicationId "com.jrummyapps.packagemanager"
-        minSdkVersion 14
+        minSdkVersion 15
         targetSdkVersion 23
         //noinspection GroovyAssignabilityCheck
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
@@ -90,6 +90,7 @@ dependencies {
     compile 'com.jaredrummler:material-spinner:1.0.4'
     compile 'com.simplecityapps:recyclerview-fastscroll:1.0.5'
     compile 'org.apache.commons:commons-compress:1.5'
+    compile 'com.commit451:elasticdragdismisslayout:1.0.1'
     compile project(':lib-texteditor')
     compile project(':lib-downloader')
 }

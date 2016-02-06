@@ -44,4 +44,10 @@
       android:title="Zip archive"
       app:showAsAction="never"/>
 
+  <item
+      android:id="@+id/action_info"
+      android:icon="@drawable/ic_information_white_24dp"
+      android:title="@string/about"
+      app:showAsAction="never"/>
+
 </menu>
