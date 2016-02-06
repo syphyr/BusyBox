@@ -27,6 +27,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -57,6 +58,7 @@ import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListene
 import com.jrummyapps.android.animations.Technique;
 import com.jrummyapps.android.base.BaseFragment;
 import com.jrummyapps.android.colors.Color;
+import com.jrummyapps.android.common.Toasts;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.downloader.Download;
 import com.jrummyapps.android.downloader.DownloadRequest;
@@ -102,6 +104,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
+
+import static com.jrummyapps.android.util.IntentUtils.isIntentAvailable;
 
 public class InstallerFragment extends BaseFragment implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
@@ -253,6 +257,8 @@ public class InstallerFragment extends BaseFragment implements
     inflater.inflate(R.menu.busybox_installer_menu, menu);
     progressItem = menu.findItem(R.id.menu_item_progress);
     progressItem.setVisible(uninstalling || installing);
+    Toasts.show(isTerminalSupported() ? "supported" : "not supported");
+    menu.findItem(R.id.action_terminal).setVisible(isTerminalSupported());
     ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
     super.onCreateOptionsMenu(menu, inflater);
   }
@@ -542,6 +548,13 @@ public class InstallerFragment extends BaseFragment implements
     return file;
   }
 
+  private boolean isTerminalSupported() {
+    return isIntentAvailable(getActivity(), new Intent("jackpal.androidterm.RUN_SCRIPT")) ||
+        isIntentAvailable(getActivity(), new Intent("jrummy.androidterm.RUN_SCRIPT")) ||
+        isIntentAvailable(getActivity(), new Intent(Intent.ACTION_VIEW,
+            Uri.parse("market://details?id=jackpal.androidterm")));
+  }
+
   private void openTerminal() {
     File file = getSelectedBinary(CMD_INSTALL);
     if (file == null) {
@@ -555,10 +568,10 @@ public class InstallerFragment extends BaseFragment implements
       @Override protected Intent doInBackground(File... params) {
         Intent intent;
         String permission;
-        if (IntentUtils.isIntentAvailable(getActivity(), new Intent("jackpal.androidterm.RUN_SCRIPT"))) {
+        if (isIntentAvailable(getActivity(), new Intent("jackpal.androidterm.RUN_SCRIPT"))) {
           intent = new Intent("jackpal.androidterm.RUN_SCRIPT");
           permission = "jackpal.androidterm.permission.RUN_SCRIPT";
-        } else if (IntentUtils.isIntentAvailable(getActivity(), new Intent("jrummy.androidterm.RUN_SCRIPT"))) {
+        } else if (isIntentAvailable(getActivity(), new Intent("jrummy.androidterm.RUN_SCRIPT"))) {
           intent = new Intent("jrummy.androidterm.RUN_SCRIPT");
           permission = "jrummy.androidterm.permission.RUN_SCRIPT";
         } else {
