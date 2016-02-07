@@ -20,9 +20,15 @@
     package="com.jrummyapps.packagemanager"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+  <!-- Permissions to list files on the SD card and open shell scripts -->
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+  <!-- Permissions to open terminal emulator -->
   <uses-permission android:name="jackpal.androidterm.permission.RUN_SCRIPT"/>
   <uses-permission android:name="jrummy.androidterm.permission.RUN_SCRIPT"/>
+
+  <!-- Permission to create a shortcut on the home launcher (used to create shortcuts to run scripts) -->
+  <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
 
   <application
       android:name=".App"
@@ -33,6 +39,7 @@
       android:theme="@style/Theme.Light.DarkActionBar">
     <activity
         android:name=".activities.MainActivity"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/activity_busybox_installer"
         android:launchMode="singleInstance"
         android:theme="@style/Theme.Light.DarkActionBar.NoActionBar.Overlay">
@@ -46,6 +53,21 @@
     <activity
         android:name=".activities.AboutActivity"
         android:theme="@style/Theme.Light.NoActionBar.Translucent"/>
+    <activity
+        android:name="com.jrummyapps.texteditor.activities.TextEditorActivity"
+        android:icon="@mipmap/ic_launcher_code_editor"
+        android:label="@string/activity_text_editor"
+        android:theme="@style/Theme.Light.DarkActionBar.NoActionBar.Overlay"
+        android:windowSoftInputMode="stateHidden|adjustResize"/>
+    <activity
+        android:name="com.jrummyapps.texteditor.shell.activities.ScriptExecutorActivity"
+        android:exported="true"
+        android:icon="@mipmap/ic_launcher_script_executor"
+        android:label="@string/activity_script_executor"/>
+    <activity
+        android:name=".activities.CreateScriptActivity"
+        android:theme="@style/Theme.Light.NoActionBar.MaterialDialog"
+        android:windowSoftInputMode="stateHidden|adjustResize"/>
   </application>
 
 </manifest>

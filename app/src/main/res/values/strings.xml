@@ -16,6 +16,7 @@
   -->
 
 <resources>
+
   <!-- LABELS -->
   <string name="app_name">BusyBox</string>
   <string name="activity_busybox_installer">BusyBox</string>
@@ -63,5 +64,15 @@
   <string name="created_installable_zip">Created installable ZIP</string>
   <string name="install_busybox_in_recovery">Install busybox in recovery</string>
   <string name="recovery_mode">Recovery mode</string>
+  <string name="info">Info</string>
+  <string name="edit">Edit</string>
+  <string name="run">Run</string>
+
+  <!-- EDITTEXT HINTS -->
+  <string name="script_name">Script name</string>
+  <string name="file_name">File name</string>
+  <string name="create_script">Create script</string>
+  <string name="a_script_with_that_name_already_exists">A script with that name already exists</string>
+  <string name="an_error_occurred_while_creating_the_file">An error occurred while creating the file</string>
 
 </resources>

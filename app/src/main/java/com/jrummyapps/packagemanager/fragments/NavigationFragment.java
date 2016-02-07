@@ -40,16 +40,27 @@ public class NavigationFragment extends BaseFragment implements NavigationView.O
   private static final int[] DISABLED_STATE_SET = {-android.R.attr.state_enabled};
   static final int[] EMPTY_STATE_SET = new int[0];
 
+  private int checkedItemId = R.id.action_installer;
+
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.busybox_navigation_view, container, false);
+    return inflater.inflate(R.layout.fragment_navigation_view, container, false);
   }
 
   @Override public void onViewCreated(View view, Bundle savedInstanceState) {
-    super.onViewCreated(view, savedInstanceState);
+    if (savedInstanceState != null) {
+      checkedItemId = savedInstanceState.getInt("checked_item_id", R.id.action_installer);
+    }
+
     NavigationView navigationView = findById(R.id.navigation_view);
 
-    navigationView.getMenu().findItem(R.id.action_installer).setChecked(true);
-    getActivity().setTitle(navigationView.getMenu().findItem(R.id.action_installer).getTitle());
+    navigationView.getMenu().findItem(checkedItemId).setChecked(true);
+
+    for (int i = 0; i < navigationView.getMenu().size(); i++) {
+      if (navigationView.getMenu().getItem(i).isChecked()) {
+        System.out.println(navigationView.getMenu().getItem(i).getTitle());
+        getActivity().setTitle(navigationView.getMenu().getItem(i).getTitle());
+      }
+    }
 
     ImageView headerView = new KenBurnsView(getActivity());
     headerView.setLayoutParams(new FrameLayout.LayoutParams(
@@ -79,6 +90,11 @@ public class NavigationFragment extends BaseFragment implements NavigationView.O
     navigationView.setNavigationItemSelectedListener(this);
   }
 
+  @Override public void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    outState.putInt("checked_item_id", checkedItemId);
+  }
+
   @Override public boolean onNavigationItemSelected(MenuItem item) {
     if (getActivity() instanceof BaseDrawerActivity) {
       BaseDrawerActivity activity = (BaseDrawerActivity) getActivity();
@@ -89,30 +105,28 @@ public class NavigationFragment extends BaseFragment implements NavigationView.O
       return true;
     }
 
+    int itemId = checkedItemId = item.getItemId();
+    getActivity().setTitle(item.getTitle());
     item.setChecked(true);
 
-    int itemId = item.getItemId();
-
-    switch (itemId){
+    switch (itemId) {
       case R.id.action_installer:
-        getActivity().setTitle(item.getTitle());
         getActivity().getFragmentManager()
             .beginTransaction()
             .replace(R.id.content_frame, new InstallerFragment())
             .commit();
         return true;
       case R.id.action_applets:
-        getActivity().setTitle(item.getTitle());
         getActivity().getFragmentManager()
             .beginTransaction()
             .replace(R.id.content_frame, new AppletsFragment())
             .commit();
         return true;
       case R.id.action_scripts:
-        getActivity().setTitle(item.getTitle());
-        return true;
-      case R.id.action_terminal:
-        getActivity().setTitle(item.getTitle());
+        getActivity().getFragmentManager()
+            .beginTransaction()
+            .replace(R.id.content_frame, new ScriptsFragment())
+            .commit();
         return true;
     }
 

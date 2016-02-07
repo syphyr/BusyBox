@@ -77,7 +77,7 @@ public class AboutActivity extends BaseCompatActivity implements ElasticDragDism
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.about_busybox);
+    setContentView(R.layout.activity_about_busybox);
 
     final ElasticDragDismissFrameLayout draggableLayout = findById(R.id.draggable_frame);
     final View backgroundView = findById(R.id.about_background);

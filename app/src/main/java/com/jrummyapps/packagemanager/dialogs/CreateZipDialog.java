@@ -17,6 +17,7 @@
 
 package com.jrummyapps.packagemanager.dialogs;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -59,7 +60,8 @@ public class CreateZipDialog extends DialogFragment {
   private EditText editText;
 
   @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-    final View view = getActivity().getLayoutInflater().inflate(R.layout.editor__dialog_save_as, null, false);
+    @SuppressLint("InflateParams")
+    final View view = getActivity().getLayoutInflater().inflate(R.layout.editor__dialog_save_as, null);
     editText = (EditText) view.findViewById(R.id.edittext);
 
     final String path = getArguments().getString("path");

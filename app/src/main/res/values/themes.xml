@@ -17,6 +17,7 @@
   -->
 
 <resources xmlns:tools="http://schemas.android.com/tools">
+
   <style name="Theme.Light.NoActionBar.Translucent">
     <!-- using a semi-transparent window background for the drag-back gesture -->
     <item name="android:windowBackground">@color/scrim</item>
@@ -27,6 +28,7 @@
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowDrawsSystemBarBackgrounds" tools:ignore="NewApi">true</item>
   </style>
+
   <style name="Theme.Dark.NoActionBar.Translucent">
     <!-- using a semi-transparent window background for the drag-back gesture -->
     <item name="android:windowBackground">@color/scrim</item>
@@ -37,4 +39,33 @@
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowDrawsSystemBarBackgrounds" tools:ignore="NewApi">true</item>
   </style>
+
+  <style name="Theme.Light.NoActionBar.MaterialDialog">
+    <item name="android:windowAnimationStyle">@null</item>
+    <item name="android:windowBackground">@color/scrim</item>
+    <item name="android:colorBackgroundCacheHint">@null</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:windowIsFloating">false</item>
+    <item name="android:windowIsTranslucent">true</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowDrawsSystemBarBackgrounds" tools:ignore="NewApi">true</item>
+    <item name="android:windowAllowEnterTransitionOverlap" tools:ignore="NewApi">true</item>
+    <item name="android:windowAllowReturnTransitionOverlap" tools:ignore="NewApi">true</item>
+    <item name="android:windowSharedElementsUseOverlay" tools:ignore="NewApi">false</item>
+  </style>
+
+  <style name="Theme.Dark.NoActionBar.MaterialDialog">
+    <item name="android:windowAnimationStyle">@null</item>
+    <item name="android:windowBackground">@color/scrim</item>
+    <item name="android:colorBackgroundCacheHint">@null</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:windowIsFloating">false</item>
+    <item name="android:windowIsTranslucent">true</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowDrawsSystemBarBackgrounds" tools:ignore="NewApi">true</item>
+    <item name="android:windowAllowEnterTransitionOverlap" tools:ignore="NewApi">true</item>
+    <item name="android:windowAllowReturnTransitionOverlap" tools:ignore="NewApi">true</item>
+    <item name="android:windowSharedElementsUseOverlay" tools:ignore="NewApi">false</item>
+  </style>
+
 </resources>
