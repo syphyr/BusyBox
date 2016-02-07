@@ -15,7 +15,7 @@
  *
  */
 
-package com.jrummyapps.packagemanager.scripts;
+package com.jrummyapps.packagemanager.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

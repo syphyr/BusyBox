@@ -23,7 +23,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.jrummyapps.android.database.Table;
 import com.jrummyapps.android.database.WhereStatement;
-import com.jrummyapps.packagemanager.scripts.ShellScript;
+import com.jrummyapps.packagemanager.models.ShellScript;
 
 public class ShellScriptTable extends Table<ShellScript> {
 

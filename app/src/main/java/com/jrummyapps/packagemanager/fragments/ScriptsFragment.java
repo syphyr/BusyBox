@@ -57,7 +57,7 @@ import com.jrummyapps.packagemanager.activities.CreateScriptActivity;
 import com.jrummyapps.packagemanager.database.Database;
 import com.jrummyapps.packagemanager.database.ShellScriptTable;
 import com.jrummyapps.packagemanager.dialogs.CreateScriptDialog;
-import com.jrummyapps.packagemanager.scripts.ShellScript;
+import com.jrummyapps.packagemanager.models.ShellScript;
 import com.jrummyapps.packagemanager.transitions.FabDialogMorphSetup;
 import com.jrummyapps.packagemanager.utils.Utils;
 import com.jrummyapps.texteditor.activities.TextEditorActivity;
