@@ -38,10 +38,13 @@ public class BusyBoxFinder extends AsyncTask<Void, Void, BusyBox> {
         FileInfo fileInfo = FileLister.getFileInfo("/sbin/busybox");
         if (fileInfo != null) {
           busybox.setFileInfo(fileInfo);
-          return busybox;
+          if (!fileInfo.isSymlink) {
+            return busybox;
+          }
         }
+        continue;
       }
-      if (busybox.exists()) {
+      if (busybox.exists() && !busybox.isSymbolicLink()) {
         return busybox;
       }
     }
