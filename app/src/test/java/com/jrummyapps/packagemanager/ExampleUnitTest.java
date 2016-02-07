@@ -15,7 +15,7 @@
  *
  */
 
-package com.jrummyapps.packagemanager;
+package com.jrummyapps.busybox;
 
 import org.junit.Test;
 

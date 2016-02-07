@@ -17,7 +17,7 @@
   -->
 
 <manifest
-    package="com.jrummyapps.packagemanager"
+    package="com.jrummyapps.busybox"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
   <!-- Permissions to list files on the SD card and open shell scripts -->
@@ -31,14 +31,14 @@
   <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
 
   <application
-      android:name=".App"
+      android:name="com.jrummyapps.busybox.App"
       android:allowBackup="true"
       android:icon="@mipmap/ic_launcher"
       android:label="@string/app_name"
       android:supportsRtl="true"
       android:theme="@style/Theme.Light.DarkActionBar">
     <activity
-        android:name=".activities.MainActivity"
+        android:name="com.jrummyapps.busybox.activities.MainActivity"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/activity_busybox_installer"
         android:launchMode="singleInstance"
@@ -49,9 +49,9 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-    <activity android:name=".activities.SettingsActivity"/>
+    <activity android:name="com.jrummyapps.busybox.activities.SettingsActivity"/>
     <activity
-        android:name=".activities.AboutActivity"
+        android:name="com.jrummyapps.busybox.activities.AboutActivity"
         android:theme="@style/Theme.Light.NoActionBar.Translucent"/>
     <activity
         android:name="com.jrummyapps.texteditor.activities.TextEditorActivity"
@@ -65,7 +65,7 @@
         android:icon="@mipmap/ic_launcher_script_executor"
         android:label="@string/activity_script_executor"/>
     <activity
-        android:name=".activities.CreateScriptActivity"
+        android:name="com.jrummyapps.busybox.activities.CreateScriptActivity"
         android:theme="@style/Theme.Light.NoActionBar.MaterialDialog"
         android:windowSoftInputMode="stateHidden|adjustResize"/>
   </application>

@@ -53,7 +53,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.jrummyapps.packagemanager"
+        applicationId "com.jrummyapps.busybox"
         minSdkVersion 14
         targetSdkVersion 23
         //noinspection GroovyAssignabilityCheck
