@@ -1,0 +1,122 @@
+﻿[
+  {
+    "project": "Android Compatibility Library v4",
+    "authors": "Google",
+    "url": "https://android.googlesource.com/platform/frameworks/support/+/master/v4/",
+    "year": 2015,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "Android Compatibility Library v7",
+    "authors": "Google",
+    "url": "https://android.googlesource.com/platform/frameworks/support/+/master/v7/appcompat/",
+    "year": 2015,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "Android Cardview",
+    "authors": "Google",
+    "url": "https://android.googlesource.com/platform/frameworks/support/+/master/v7/cardview/",
+    "year": 2015,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "Apache Commons Compress™",
+    "authors": "Apache Commons™",
+    "url": "https://commons.apache.org/proper/commons-compress/",
+    "year": 2015,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "ColorPickerView",
+    "authors": "Daniel Nilsson",
+    "url": "https://github.com/danielnilsson9/color-picker-view",
+    "year": 2015,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "DiscreteSeekBar",
+    "authors": "Gustavo Claramunt",
+    "url": "https://github.com/AnderWeb/discreteSeekBar",
+    "year": 2014,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "ElasticDragDismissLayout",
+    "authors": "Commit 451",
+    "url": "https://github.com/Commit451/ElasticDragDismissLayout",
+    "year": 2016,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "EventBus",
+    "authors": "greenrobot",
+    "url": "https://github.com/greenrobot/EventBus",
+    "year": 2015,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "JazzyListView",
+    "authors": "Two Toasters",
+    "url": "https://github.com/twotoasters/JazzyListView",
+    "year": 2015,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "Picasso",
+    "authors": "Square",
+    "url": "https://github.com/square/picasso",
+    "year": 2013,
+    "license": "Apache Software License 2.0",
+    "license_url": "https://raw.githubusercontent.com/square/picasso/master/LICENSE.txt"
+  },
+  {
+    "project": "SmoothProgressBar",
+    "authors": "Antoine Merle",
+    "url": "https://github.com/castorflex/SmoothProgressBar",
+    "year": 2014,
+    "license": "Apache Software License 2.0",
+    "license_url": "https://raw.githubusercontent.com/castorflex/SmoothProgressBar/master/LICENSE.md"
+  },
+  {
+    "project": "svg-android",
+    "authors": "Larva Labs LLC",
+    "url": "https://github.com/pents90/svg-android",
+    "year": 2012,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "Material Design Icons",
+    "authors": "Austin Andrews, Google Inc.",
+    "url": "https://materialdesignicons.com/",
+    "year": 2015,
+    "license": "Creative Commons 4.0",
+    "license_url": "https://raw.githubusercontent.com/google/material-design-icons/master/LICENSE"
+  },
+  {
+    "project": "Material Spinner",
+    "authors": "Jared Rummler",
+    "url": "https://github.com/jaredrummler/Material-Spinner",
+    "year": 2016,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  },
+  {
+    "project": "RecyclerView-FastScroll",
+    "authors": "Tim Malseed",
+    "url": "https://github.com/timusus/RecyclerView-FastScroll",
+    "year": 2016,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+  }
+]
