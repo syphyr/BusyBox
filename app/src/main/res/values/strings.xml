@@ -17,8 +17,8 @@
 
 <resources>
   <!-- LABELS -->
-  <string name="activity_busybox_installer">BusyBox</string>
   <string name="app_name">BusyBox</string>
+  <string name="activity_busybox_installer">BusyBox</string>
 
   <!-- SPINNER ITEMS -->
   <string name="choose_a_directory">Choose a directory…</string>
