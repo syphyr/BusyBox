@@ -5,7 +5,8 @@
     "url": "https://android.googlesource.com/platform/frameworks/support/+/master/v4/",
     "year": 2015,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/30177?v=3&s=200"
   },
   {
     "project": "Android Compatibility Library v7",
@@ -13,7 +14,8 @@
     "url": "https://android.googlesource.com/platform/frameworks/support/+/master/v7/appcompat/",
     "year": 2015,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/30177?v=3&s=200"
   },
   {
     "project": "Android Cardview",
@@ -21,7 +23,8 @@
     "url": "https://android.googlesource.com/platform/frameworks/support/+/master/v7/cardview/",
     "year": 2015,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/30177?v=3&s=200"
   },
   {
     "project": "Apache Commons Compress™",
@@ -29,7 +32,8 @@
     "url": "https://commons.apache.org/proper/commons-compress/",
     "year": 2015,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/47359?v=3&s=200"
   },
   {
     "project": "ColorPickerView",
@@ -37,7 +41,8 @@
     "url": "https://github.com/danielnilsson9/color-picker-view",
     "year": 2015,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/5458667?v=3&s=200"
   },
   {
     "project": "DiscreteSeekBar",
@@ -46,7 +51,7 @@
     "year": 2014,
     "license": "Apache Software License 2.0",
     "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
-    "avatar": "https://avatars1.githubusercontent.com/u/223713?v=3&s=200"
+    "avatar": "https://avatars.githubusercontent.com/u/223713?v=3&s=200"
   },
   {
     "project": "ElasticDragDismissLayout",
@@ -54,7 +59,8 @@
     "url": "https://github.com/Commit451/ElasticDragDismissLayout",
     "year": 2016,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/12497423?v=3&s=200"
   },
   {
     "project": "EventBus",
@@ -62,7 +68,8 @@
     "url": "https://github.com/greenrobot/EventBus",
     "year": 2015,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/242242?v=3&s=200"
   },
   {
     "project": "JazzyListView",
@@ -70,7 +77,8 @@
     "url": "https://github.com/twotoasters/JazzyListView",
     "year": 2015,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/112994?v=3&s=200"
   },
   {
     "project": "Picasso",
@@ -78,7 +86,8 @@
     "url": "https://github.com/square/picasso",
     "year": 2013,
     "license": "Apache Software License 2.0",
-    "license_url": "https://raw.githubusercontent.com/square/picasso/master/LICENSE.txt"
+    "license_url": "https://raw.githubusercontent.com/square/picasso/master/LICENSE.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/82592?v=3&s=200"
   },
   {
     "project": "SmoothProgressBar",
@@ -86,7 +95,8 @@
     "url": "https://github.com/castorflex/SmoothProgressBar",
     "year": 2014,
     "license": "Apache Software License 2.0",
-    "license_url": "https://raw.githubusercontent.com/castorflex/SmoothProgressBar/master/LICENSE.md"
+    "license_url": "https://raw.githubusercontent.com/castorflex/SmoothProgressBar/master/LICENSE.md",
+    "avatar": "https://avatars.githubusercontent.com/u/1364129?v=3&s=200"
   },
   {
     "project": "svg-android",
@@ -94,7 +104,8 @@
     "url": "https://github.com/pents90/svg-android",
     "year": 2012,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/649612?v=3&s=200"
   },
   {
     "project": "Material Design Icons",
@@ -102,7 +113,8 @@
     "url": "https://materialdesignicons.com/",
     "year": 2015,
     "license": "Creative Commons 4.0",
-    "license_url": "https://raw.githubusercontent.com/google/material-design-icons/master/LICENSE"
+    "license_url": "https://raw.githubusercontent.com/google/material-design-icons/master/LICENSE",
+    "avatar": "https://avatars.githubusercontent.com/u/338885?v=3&s=200"
   },
   {
     "project": "Material Spinner",
@@ -110,7 +122,8 @@
     "url": "https://github.com/jaredrummler/Material-Spinner",
     "year": 2016,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/6203389?v=3&s=200"
   },
   {
     "project": "RecyclerView-FastScroll",
@@ -118,6 +131,7 @@
     "url": "https://github.com/timusus/RecyclerView-FastScroll",
     "year": 2016,
     "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/4422616?v=3&s=200"
   }
 ]
