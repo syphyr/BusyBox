@@ -34,6 +34,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,6 +55,7 @@ public class Utils {
       } catch (Exception ignored) {
       }
     }
+    Collections.sort(applets);
     return applets;
   }
 

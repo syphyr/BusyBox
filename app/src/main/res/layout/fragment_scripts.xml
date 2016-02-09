@@ -27,15 +27,8 @@
       android:id="@android:id/list"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:cacheColorHint="@android:color/transparent"
       android:divider="@null"
-      android:horizontalSpacing="4dp"
-      android:listSelector="@android:color/transparent"
-      android:paddingBottom="8dp"
-      android:paddingTop="8dp"
-      app:jazzy_effect="slide_in">
-
-  </com.jrummyapps.android.widget.jazzylistview.JazzyListView>
+      app:jazzy_effect="slide_in" />
 
   <android.support.design.widget.FloatingActionButton
       android:id="@+id/fab"

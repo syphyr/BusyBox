@@ -38,7 +38,20 @@
       android:supportsRtl="true"
       android:theme="@style/Theme.Light.DarkActionBar">
     <activity
-        android:name="com.jrummyapps.busybox.activities.MainActivity"
+        android:name=".activities.MainActivity"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/activity_busybox_installer"
+        android:launchMode="singleInstance"
+        android:theme="@style/Theme.Light.DarkActionBar.NoActionBar">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+    <activity
+        android:name=".activities.DrawerActivity"
+        android:enabled="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/activity_busybox_installer"
         android:launchMode="singleInstance"

@@ -31,19 +31,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.jrummyapps.android.base.BaseFragment;
+import com.jaredrummler.fastscrollrecyclerview.FastScrollRecyclerView;
+import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.activities.AboutActivity;
 import com.jrummyapps.busybox.activities.SettingsActivity;
 import com.jrummyapps.busybox.dialogs.BusyBoxAppletDialog;
 import com.jrummyapps.busybox.utils.Utils;
-import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.List;
 import java.util.Locale;
 
-public class AppletsFragment extends BaseFragment {
+public class AppletsFragment extends BaseSupportFragment {
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -66,7 +66,7 @@ public class AppletsFragment extends BaseFragment {
         .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
     menu.add(0, R.id.action_info, 0, R.string.about)
         .setIcon(R.drawable.ic_information_white_24dp)
-        .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
     ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
     super.onCreateOptionsMenu(menu, inflater);
   }
@@ -103,7 +103,7 @@ public class AppletsFragment extends BaseFragment {
     }
 
     @NonNull @Override public String getSectionName(int position) {
-      return String.format("%c", applets.get(position).charAt(0)).toUpperCase(Locale.ENGLISH);
+      return applets.get(position).substring(0,1).toUpperCase(Locale.ENGLISH);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

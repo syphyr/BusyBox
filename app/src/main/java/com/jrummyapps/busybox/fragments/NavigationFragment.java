@@ -28,6 +28,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.flaviofaria.kenburnsview.KenBurnsView;
+import com.jrummyapps.android.base.BaseCompatActivity;
 import com.jrummyapps.android.base.BaseDrawerActivity;
 import com.jrummyapps.android.base.BaseFragment;
 import com.jrummyapps.android.theme.ColorScheme;
@@ -108,21 +109,23 @@ public class NavigationFragment extends BaseFragment implements NavigationView.O
     getActivity().setTitle(item.getTitle());
     item.setChecked(true);
 
+    BaseCompatActivity activity = (BaseCompatActivity) getActivity();
+
     switch (itemId) {
       case R.id.action_installer:
-        getActivity().getFragmentManager()
+        activity.getSupportFragmentManager()
             .beginTransaction()
             .replace(R.id.content_frame, new InstallerFragment())
             .commit();
         return true;
       case R.id.action_applets:
-        getActivity().getFragmentManager()
+        activity.getSupportFragmentManager()
             .beginTransaction()
             .replace(R.id.content_frame, new AppletsFragment())
             .commit();
         return true;
       case R.id.action_scripts:
-        getActivity().getFragmentManager()
+        activity.getSupportFragmentManager()
             .beginTransaction()
             .replace(R.id.content_frame, new ScriptsFragment())
             .commit();

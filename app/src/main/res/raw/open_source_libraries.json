@@ -127,11 +127,11 @@
   },
   {
     "project": "RecyclerView-FastScroll",
-    "authors": "Tim Malseed",
-    "url": "https://github.com/timusus/RecyclerView-FastScroll",
+    "authors": "Jared Rummler",
+    "url": "https://github.com/jaredrummler/FastScroll-RecyclerView",
     "year": 2016,
     "license": "Apache Software License 2.0",
     "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
-    "avatar": "https://avatars.githubusercontent.com/u/4422616?v=3&s=200"
+    "avatar": "https://avatars.githubusercontent.com/u/6203389?v=3&s=200"
   }
 ]

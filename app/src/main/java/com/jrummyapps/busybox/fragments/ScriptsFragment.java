@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
@@ -32,6 +33,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -39,13 +41,12 @@ import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
-import com.jrummyapps.android.base.BaseFragment;
+import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.colors.Color;
 import com.jrummyapps.android.eventbus.EventBusHook;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.io.FileHelper;
 import com.jrummyapps.android.io.FileUtils;
-import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
 import com.jrummyapps.android.prefs.Prefs;
 import com.jrummyapps.android.roottools.utils.Assets;
 import com.jrummyapps.android.theme.ColorScheme;
@@ -54,6 +55,7 @@ import com.jrummyapps.android.view.ViewHolder;
 import com.jrummyapps.android.widget.jazzylistview.JazzyListView;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.activities.CreateScriptActivity;
+import com.jrummyapps.busybox.activities.SettingsActivity;
 import com.jrummyapps.busybox.database.Database;
 import com.jrummyapps.busybox.database.ShellScriptTable;
 import com.jrummyapps.busybox.dialogs.CreateScriptDialog;
@@ -72,7 +74,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScriptsFragment extends BaseFragment {
+public class ScriptsFragment extends BaseSupportFragment
+    implements AdapterView.OnItemClickListener, View.OnClickListener {
 
   private static final String LOAD_SCRIPTS_FROM_ASSETS = "load_scripts_from_assets";
 
@@ -109,6 +112,8 @@ public class ScriptsFragment extends BaseFragment {
     return scripts;
   }
 
+  private FloatingActionButton fab;
+  private JazzyListView listView;
   private Adapter adapter;
 
   @Override public void onCreate(Bundle savedInstanceState) {
@@ -127,6 +132,12 @@ public class ScriptsFragment extends BaseFragment {
   }
 
   @Override public void onViewCreated(View view, Bundle savedInstanceState) {
+    listView = findById(android.R.id.list);
+    fab = findById(R.id.fab);
+
+    listView.setOnItemClickListener(this);
+    fab.setOnClickListener(this);
+
     new AsyncTask<Void, Void, List<ShellScript>>() {
 
       @Override protected List<ShellScript> doInBackground(Void... params) {
@@ -134,29 +145,11 @@ public class ScriptsFragment extends BaseFragment {
       }
 
       @Override protected void onPostExecute(List<ShellScript> scripts) {
-        JazzyListView listView = findById(android.R.id.list);
         adapter = new Adapter(scripts);
         listView.setAdapter(adapter);
       }
 
     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-    findById(R.id.fab).setOnClickListener(new View.OnClickListener() {
-
-      @Override public void onClick(View v) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          Intent intent = new Intent(getActivity(), CreateScriptActivity.class);
-          intent.putExtra(FabDialogMorphSetup.EXTRA_SHARED_ELEMENT_START_COLOR, ColorScheme.getAccent());
-          ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
-              getActivity(), v, getString(R.string.dialog_transition));
-          startActivityForResult(intent, REQUEST_CREATE_SCRIPT, options.toBundle());
-        } else {
-          // normal dialog with no fancy animations :-(
-          new CreateScriptDialog().show(getFragmentManager(), "CreateScriptDialog");
-        }
-      }
-    });
-
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -170,7 +163,7 @@ public class ScriptsFragment extends BaseFragment {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.action_settings:
-        startActivity(new Intent(getActivity(), MainPreferenceActivity.class));
+        startActivity(new Intent(getActivity(), SettingsActivity.class));
         return true;
       default:
         return super.onOptionsItemSelected(item);
@@ -185,6 +178,79 @@ public class ScriptsFragment extends BaseFragment {
       return;
     }
     super.onActivityResult(requestCode, resultCode, data);
+  }
+
+  @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    final ShellScript script = adapter.getItem(position);
+
+    PopupMenu popupMenu = new PopupMenu(getActivity(), view);
+
+    popupMenu.getMenu().add(0, 1, 0, R.string.run).setIcon(R.drawable.ic_play_white_24dp);
+    popupMenu.getMenu().add(0, 2, 0, R.string.edit).setIcon(R.drawable.ic_edit_white_24dp);
+    popupMenu.getMenu().add(0, 3, 0, R.string.info).setIcon(R.drawable.ic_information_white_24dp);
+    popupMenu.getMenu().add(0, 4, 0, R.string.delete).setIcon(R.drawable.ic_delete_white_24dp);
+
+    if (TextUtils.isEmpty(script.info)) {
+      popupMenu.getMenu().findItem(3).setVisible(false);
+    }
+
+    ColorScheme.newMenuTint(popupMenu.getMenu()).forceIcons().apply(getActivity());
+
+    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
+      @Override public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+          case 1: { // run
+            Intent intent = new Intent(getActivity(), ScriptExecutorActivity.class);
+            intent.putExtra(FileHelper.INTENT_EXTRA_PATH, script.path);
+            startActivity(intent);
+            return true;
+          }
+          case 2: { // edit
+            Intent intent = new Intent(getActivity(), TextEditorActivity.class);
+            intent.putExtra(FileHelper.INTENT_EXTRA_PATH, script.path);
+            startActivity(intent);
+            return true;
+          }
+          case 3: { // info
+            new AlertDialog.Builder(getActivity())
+                .setTitle(script.name)
+                .setMessage(script.info)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+            return true;
+          }
+          case 4: { // delete
+            ShellScriptTable table = Database.getInstance().getTable(ShellScriptTable.NAME);
+            boolean deleted = table.delete(script) != 0;
+            if (deleted) {
+              adapter.scripts.remove(script);
+              adapter.notifyDataSetChanged();
+              new File(script.path).delete();
+            }
+            return true;
+          }
+          default:
+            return false;
+        }
+      }
+    });
+
+    popupMenu.show();
+  }
+
+  @Override public void onClick(View view) {
+    if (view == fab) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        Intent intent = new Intent(getActivity(), CreateScriptActivity.class);
+        intent.putExtra(FabDialogMorphSetup.EXTRA_SHARED_ELEMENT_START_COLOR, ColorScheme.getAccent());
+        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
+            getActivity(), view, getString(R.string.dialog_transition));
+        getActivity().startActivityForResult(intent, REQUEST_CREATE_SCRIPT, options.toBundle());
+      } else {
+        new CreateScriptDialog().show(getActivity().getFragmentManager(), "CreateScriptDialog");
+      }
+    }
   }
 
   @EventBusHook public void onEvent(CreateScriptDialog.CreateScriptEvent event) {
@@ -255,8 +321,8 @@ public class ScriptsFragment extends BaseFragment {
     }
 
     @Override public View getView(int position, View convertView, ViewGroup parent) {
+      final ShellScript script = getItem(position);
       final ViewHolder holder;
-
       if (convertView == null) {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         convertView = inflater.inflate(R.layout.item_script, parent, false);
@@ -268,71 +334,7 @@ public class ScriptsFragment extends BaseFragment {
       } else {
         holder = (ViewHolder) convertView.getTag();
       }
-
-      final ShellScript script = getItem(position);
       holder.setText(R.id.text, script.name);
-
-      holder.find(R.id.list_item).setOnClickListener(new View.OnClickListener() {
-
-        @Override public void onClick(View v) {
-          PopupMenu popupMenu = new PopupMenu(getActivity(), v);
-
-          popupMenu.getMenu().add(0, 1, 0, R.string.run).setIcon(R.drawable.ic_play_white_24dp);
-          popupMenu.getMenu().add(0, 2, 0, R.string.edit).setIcon(R.drawable.ic_edit_white_24dp);
-          popupMenu.getMenu().add(0, 3, 0, R.string.info).setIcon(R.drawable.ic_information_white_24dp);
-          popupMenu.getMenu().add(0, 4, 0, R.string.delete).setIcon(R.drawable.ic_delete_white_24dp);
-
-          if (TextUtils.isEmpty(script.info)) {
-            popupMenu.getMenu().findItem(3).setVisible(false);
-          }
-
-          ColorScheme.newMenuTint(popupMenu.getMenu()).forceIcons().apply(getActivity());
-
-          popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-
-            @Override public boolean onMenuItemClick(MenuItem item) {
-              switch (item.getItemId()) {
-                case 1: { // run
-                  Intent intent = new Intent(getActivity(), ScriptExecutorActivity.class);
-                  intent.putExtra(FileHelper.INTENT_EXTRA_PATH, script.path);
-                  startActivity(intent);
-                  return true;
-                }
-                case 2: { // edit
-                  Intent intent = new Intent(getActivity(), TextEditorActivity.class);
-                  intent.putExtra(FileHelper.INTENT_EXTRA_PATH, script.path);
-                  startActivity(intent);
-                  return true;
-                }
-                case 3: { // info
-                  new AlertDialog.Builder(getActivity())
-                      .setTitle(script.name)
-                      .setMessage(script.info)
-                      .setPositiveButton(android.R.string.ok, null)
-                      .show();
-                  return true;
-                }
-                case 4: { // delete
-                  ShellScriptTable table = Database.getInstance().getTable(ShellScriptTable.NAME);
-                  boolean deleted = table.delete(script) != 0;
-                  if (deleted) {
-                    scripts.remove(script);
-                    notifyDataSetChanged();
-                    new File(script.path).delete();
-                  }
-                  return true;
-                }
-                default:
-                  return false;
-              }
-            }
-          });
-
-          popupMenu.show();
-
-        }
-      });
-
       return convertView;
     }
 

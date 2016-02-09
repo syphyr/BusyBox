@@ -56,7 +56,7 @@ import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListener;
 import com.jrummyapps.android.animations.Technique;
-import com.jrummyapps.android.base.BaseFragment;
+import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.colors.Color;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.downloader.Download;
@@ -106,7 +106,7 @@ import java.util.Locale;
 
 import static com.jrummyapps.android.util.IntentUtils.isIntentAvailable;
 
-public class InstallerFragment extends BaseFragment implements
+public class InstallerFragment extends BaseSupportFragment implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
     View.OnClickListener {
@@ -419,7 +419,7 @@ public class InstallerFragment extends BaseFragment implements
       Bundle args = new Bundle();
       args.putString("filename", event.installer.filename);
       dialog.setArguments(args);
-      dialog.show(getFragmentManager(), "RootRequiredDialog");
+      dialog.show(getActivity().getFragmentManager(), "RootRequiredDialog");
     }
   }
 
