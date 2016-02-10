@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -40,15 +41,12 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
-import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.colors.Color;
 import com.jrummyapps.android.eventbus.EventBusHook;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.io.FileHelper;
 import com.jrummyapps.android.io.FileUtils;
-import com.jrummyapps.android.prefs.Prefs;
-import com.jrummyapps.android.roottools.utils.Assets;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
 import com.jrummyapps.android.view.ViewHolder;
@@ -61,57 +59,19 @@ import com.jrummyapps.busybox.database.Database;
 import com.jrummyapps.busybox.database.ShellScriptTable;
 import com.jrummyapps.busybox.dialogs.CreateScriptDialog;
 import com.jrummyapps.busybox.models.ShellScript;
+import com.jrummyapps.busybox.tasks.ScriptLoader;
 import com.jrummyapps.busybox.transitions.FabDialogMorphSetup;
-import com.jrummyapps.busybox.utils.Utils;
 import com.jrummyapps.texteditor.activities.TextEditorActivity;
 import com.jrummyapps.texteditor.shell.activities.ScriptExecutorActivity;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class ScriptsFragment extends BaseSupportFragment
     implements AdapterView.OnItemClickListener, View.OnClickListener {
 
-  private static final String LOAD_SCRIPTS_FROM_ASSETS = "load_scripts_from_assets";
-
   public static final int REQUEST_CREATE_SCRIPT = 27;
-
-  public static List<ShellScript> getShellScripts() {
-    ShellScriptTable table = Database.getInstance().getTable(ShellScriptTable.NAME);
-    List<ShellScript> scripts = new ArrayList<>();
-
-    if (Prefs.getInstance().get(LOAD_SCRIPTS_FROM_ASSETS, true)) {
-      String json = Utils.readRaw(R.raw.scripts);
-      try {
-        JSONArray jsonArray = new JSONArray(json);
-        for (int i = 0; i < jsonArray.length(); i++) {
-          JSONObject jsonObject = jsonArray.getJSONObject(i);
-          String name = jsonObject.getString("name");
-          String filename = jsonObject.getString("filename");
-          String info = jsonObject.getString("info");
-          String asset = "scripts/" + filename;
-          //noinspection OctalInteger
-          Assets.transferAsset(App.getContext(), asset, asset, 0755);
-          File file = new File(App.getContext().getFilesDir(), asset);
-          ShellScript script = new ShellScript(name, file.getAbsolutePath()).setInfo(info);
-          table.insert(script);
-        }
-        Prefs.getInstance().save(LOAD_SCRIPTS_FROM_ASSETS, false);
-      } catch (JSONException e) {
-        Crashlytics.logException(e);
-      }
-    }
-
-    scripts.addAll(table.select());
-
-    return scripts;
-  }
 
   private FloatingActionButton fab;
   private JazzyListView listView;
@@ -135,22 +95,27 @@ public class ScriptsFragment extends BaseSupportFragment
   @Override public void onViewCreated(View view, Bundle savedInstanceState) {
     listView = findById(android.R.id.list);
     fab = findById(R.id.fab);
-
+    onRestoreInstanceState(savedInstanceState);
     listView.setOnItemClickListener(this);
     fab.setOnClickListener(this);
+  }
 
-    new AsyncTask<Void, Void, List<ShellScript>>() {
+  @Override public void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    if (adapter != null) {
+      outState.putParcelableArrayList("scripts", adapter.scripts);
+    }
+  }
 
-      @Override protected List<ShellScript> doInBackground(Void... params) {
-        return getShellScripts();
-      }
-
-      @Override protected void onPostExecute(List<ShellScript> scripts) {
-        adapter = new Adapter(scripts);
-        listView.setAdapter(adapter);
-      }
-
-    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+  @Override public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    if (savedInstanceState == null || !savedInstanceState.containsKey("scripts")) {
+      new ScriptLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    } else {
+      ArrayList<ShellScript> scripts = savedInstanceState.getParcelableArrayList("scripts");
+      adapter = new Adapter(scripts);
+      listView.setAdapter(adapter);
+    }
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -260,6 +225,11 @@ public class ScriptsFragment extends BaseSupportFragment
     }
   }
 
+  @EventBusHook public void onEvent(ScriptLoader.ScriptsLoadedEvent event) {
+    adapter = new Adapter(event.scripts);
+    listView.setAdapter(adapter);
+  }
+
   @EventBusHook public void onEvent(CreateScriptDialog.CreateScriptEvent event) {
     createScript(event.name, event.filename);
   }
@@ -309,9 +279,9 @@ public class ScriptsFragment extends BaseSupportFragment
 
   private final class Adapter extends BaseAdapter {
 
-    private final List<ShellScript> scripts;
+    private final ArrayList<ShellScript> scripts;
 
-    public Adapter(List<ShellScript> scripts) {
+    public Adapter(ArrayList<ShellScript> scripts) {
       this.scripts = scripts;
     }
 
