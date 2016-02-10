@@ -48,7 +48,7 @@ public class Monetize {
   }
 
   public static boolean isProVersion() {
-    return Prefs.getInstance().get(ENCRYPTED_PRO_VERSION_PRODUCT_ID, true);
+    return Prefs.getInstance().get(ENCRYPTED_PRO_VERSION_PRODUCT_ID, false);
   }
 
 }

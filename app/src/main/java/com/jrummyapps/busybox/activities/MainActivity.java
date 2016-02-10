@@ -35,6 +35,8 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -116,6 +118,29 @@ public class MainActivity extends BaseCompatActivity implements
       adView.loadAd(adRequest);
       loadInterstitialAd();
     }
+  }
+
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.monetize_menu, menu);
+    return super.onCreateOptionsMenu(menu);
+  }
+
+  @Override public boolean onPrepareOptionsMenu(Menu menu) {
+    menu.findItem(R.id.action_remove_ads).setVisible(!Monetize.isAdsRemoved());
+    menu.findItem(R.id.action_unlock_premium).setVisible(!Monetize.isProVersion());
+    return super.onPrepareOptionsMenu(menu);
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.action_remove_ads:
+        onEventMainThread(new RequestRemoveAds());
+        return true;
+      case R.id.action_unlock_premium:
+        onEventMainThread(new RequestPremiumEvent());
+        return true;
+    }
+    return super.onOptionsItemSelected(item);
   }
 
   @TargetApi(Build.VERSION_CODES.M)
