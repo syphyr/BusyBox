@@ -92,6 +92,7 @@ import com.jrummyapps.busybox.activities.SettingsActivity;
 import com.jrummyapps.busybox.dialogs.BusyboxSuccessDialog;
 import com.jrummyapps.busybox.dialogs.CreateZipDialog;
 import com.jrummyapps.busybox.models.BinaryInfo;
+import com.jrummyapps.busybox.monetize.Monetize;
 import com.jrummyapps.busybox.tasks.BusyBoxFinder;
 import com.jrummyapps.busybox.tasks.BusyBoxMetaTask;
 import com.jrummyapps.busybox.tasks.DiskUsageTask;
@@ -406,11 +407,12 @@ public class InstallerFragment extends BaseSupportFragment implements
     installButton.setEnabled(true);
     busybox = BusyBox.from(new AFile(event.installer.path, event.installer.filename).path);
     new BusyBoxMetaTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, busybox);
-
-    BusyboxSuccessDialog dialog = new BusyboxSuccessDialog();
-    dialog.show(getActivity().getFragmentManager(), "BusyboxSuccessDialog");
-
-    //showMessage(R.string.successfully_installed_s, busybox.filename);
+    if (Monetize.isAdsRemoved()) {
+      showMessage(R.string.successfully_installed_s, busybox.filename);
+    } else {
+      BusyboxSuccessDialog dialog = new BusyboxSuccessDialog();
+      dialog.show(getActivity().getFragmentManager(), "BusyboxSuccessDialog");
+    }
   }
 
   @EventBusHook public void onEventMainThread(Installer.ErrorEvent event) {

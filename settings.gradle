@@ -23,6 +23,7 @@ include ':lib-baseapp'
 include ':lib-codeeditor'
 include ':lib-common'
 include ':lib-cpb'
+include ':lib-crypto'
 include ':lib-database'
 include ':lib-downloader'
 include ':lib-directorypicker'
@@ -54,6 +55,7 @@ project(':lib-baseapp').projectDir = new File(core, "lib-baseapp")
 project(':lib-codeeditor').projectDir = new File(core, "lib-codeeditor")
 project(':lib-common').projectDir = new File(core, "lib-common")
 project(':lib-cpb').projectDir = new File(core, "lib-cpb")
+project(':lib-crypto').projectDir = new File(core, "lib-crypto")
 project(':lib-database').projectDir = new File(core, "lib-database")
 project(':lib-downloader').projectDir = new File(core, "lib-downloader")
 project(':lib-directorypicker').projectDir = new File(core, "lib-directorypicker")

@@ -92,8 +92,10 @@ dependencies {
     compile 'com.jaredrummler:fastscroll-recyclerview:1.0.0'
     compile 'org.apache.commons:commons-compress:1.5'
     compile 'com.commit451:elasticdragdismisslayout:1.0.2'
+    compile 'com.anjlab.android.iab.v3:library:1.0.31'
     compile project(':lib-texteditor')
     compile project(':lib-downloader')
+    compile project(':lib-crypto')
 }
 
 afterEvaluate {

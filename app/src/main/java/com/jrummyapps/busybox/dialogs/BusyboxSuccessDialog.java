@@ -25,6 +25,8 @@ import android.support.v7.app.AlertDialog;
 
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.busybox.R;
+import com.jrummyapps.busybox.monetize.RequestPremiumEvent;
+import com.jrummyapps.busybox.monetize.RequestRemoveAds;
 import com.jrummyapps.busybox.monetize.ShowInterstitalAdEvent;
 
 public class BusyboxSuccessDialog extends DialogFragment {
@@ -39,14 +41,14 @@ public class BusyboxSuccessDialog extends DialogFragment {
 
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
-            // TODO: add in-app-purchase to unlock the pro version
+            Events.post(new RequestPremiumEvent());
           }
         })
         .setNeutralButton(R.string.remove_ads, new DialogInterface.OnClickListener() {
 
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
-            // TODO: add in-app-purchase to remove ads
+            Events.post(new RequestRemoveAds());
           }
         })
         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
