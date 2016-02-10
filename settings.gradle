@@ -15,7 +15,7 @@
  *
  */
 
-include ':app'
+include ':busybox-installer', ':busybox-free', ':busybox-pro'
 
 include ':lib-animations'
 include ':lib-astickyheader'
