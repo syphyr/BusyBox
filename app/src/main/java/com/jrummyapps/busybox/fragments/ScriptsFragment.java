@@ -54,6 +54,7 @@ import com.jrummyapps.android.theme.Themes;
 import com.jrummyapps.android.view.ViewHolder;
 import com.jrummyapps.android.widget.jazzylistview.JazzyListView;
 import com.jrummyapps.busybox.R;
+import com.jrummyapps.busybox.activities.AboutActivity;
 import com.jrummyapps.busybox.activities.CreateScriptActivity;
 import com.jrummyapps.busybox.activities.SettingsActivity;
 import com.jrummyapps.busybox.database.Database;
@@ -156,6 +157,9 @@ public class ScriptsFragment extends BaseSupportFragment
     menu.add(0, R.id.action_settings, 0, R.string.settings)
         .setIcon(R.drawable.ic_settings_white_24dp)
         .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+    menu.add(0, R.id.action_info, 0, R.string.about)
+        .setIcon(R.drawable.ic_information_white_24dp)
+        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
     ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
     super.onCreateOptionsMenu(menu, inflater);
   }
@@ -164,6 +168,9 @@ public class ScriptsFragment extends BaseSupportFragment
     switch (item.getItemId()) {
       case R.id.action_settings:
         startActivity(new Intent(getActivity(), SettingsActivity.class));
+        return true;
+      case R.id.action_info:
+        startActivity(new Intent(getActivity(), AboutActivity.class));
         return true;
       default:
         return super.onOptionsItemSelected(item);
