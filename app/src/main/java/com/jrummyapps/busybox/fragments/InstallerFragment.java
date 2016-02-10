@@ -89,6 +89,7 @@ import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.activities.AboutActivity;
 import com.jrummyapps.busybox.activities.SettingsActivity;
+import com.jrummyapps.busybox.dialogs.BusyboxSuccessDialog;
 import com.jrummyapps.busybox.dialogs.CreateZipDialog;
 import com.jrummyapps.busybox.models.BinaryInfo;
 import com.jrummyapps.busybox.tasks.BusyBoxFinder;
@@ -405,7 +406,11 @@ public class InstallerFragment extends BaseSupportFragment implements
     installButton.setEnabled(true);
     busybox = BusyBox.from(new AFile(event.installer.path, event.installer.filename).path);
     new BusyBoxMetaTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, busybox);
-    showMessage(R.string.successfully_installed_s, busybox.filename);
+
+    BusyboxSuccessDialog dialog = new BusyboxSuccessDialog();
+    dialog.show(getActivity().getFragmentManager(), "BusyboxSuccessDialog");
+
+    //showMessage(R.string.successfully_installed_s, busybox.filename);
   }
 
   @EventBusHook public void onEventMainThread(Installer.ErrorEvent event) {

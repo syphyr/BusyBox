@@ -32,6 +32,9 @@
   <string name="root_info">Root info</string>
   <string name="root_required">Root required</string>
   <string name="create">Create</string>
+  <string name="pro_version">Pro version</string>
+  <string name="remove_ads">Remove ads</string>
+  <string name="success">Success</string>
 
   <!-- DIALOG TITLES -->
   <string name="confirm_before_deleting">Confirm before deleting</string>
@@ -41,6 +44,7 @@
   <string name="are_you_sure_you_want_to_uninstall_s">Are you sure you want to uninstall %s?</string>
   <string name="are_you_sure_you_want_to_install_s_to_s">Are you sure you want to install %1$s to %2$s?</string>
   <string name="root_access_is_required_to_install_s">Root access is required to install %s.</string>
+  <string name="install_success_message">BusyBox was successfully installed.\n\nKeep the app installed to keep up-to-date with the latest BusyBox.\n</string>
 
   <!-- SNACKBAR MESSAGES -->
   <string name="error_uninstalling_s">Error uninstalling %s</string>

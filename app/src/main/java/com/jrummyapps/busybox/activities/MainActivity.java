@@ -40,11 +40,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.base.BaseCompatActivity;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
+import com.jrummyapps.android.eventbus.EventBusHook;
 import com.jrummyapps.android.exceptions.NotImplementedException;
 import com.jrummyapps.android.io.WriteExternalStoragePermissions;
 import com.jrummyapps.android.theme.ColorScheme;
@@ -55,6 +58,7 @@ import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.fragments.AppletsFragment;
 import com.jrummyapps.busybox.fragments.InstallerFragment;
 import com.jrummyapps.busybox.fragments.ScriptsFragment;
+import com.jrummyapps.busybox.monetize.ShowInterstitalAdEvent;
 import com.jrummyapps.busybox.utils.Utils;
 
 import java.io.File;
@@ -66,6 +70,7 @@ public class MainActivity extends BaseCompatActivity implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener {
 
+  private InterstitialAd interstitialAd;
   private ViewPager viewPager;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +90,7 @@ public class MainActivity extends BaseCompatActivity implements
     viewPager.setCurrentItem(1);
 
     AdView adView = (AdView) findViewById(R.id.ad_view);
+
     AdRequest adRequest;
     if (App.isDebug()) {
       adRequest = new AdRequest.Builder().addTestDevice(Utils.getDeviceId(this)).build();
@@ -92,6 +98,7 @@ public class MainActivity extends BaseCompatActivity implements
       adRequest = new AdRequest.Builder().build();
     }
     adView.loadAd(adRequest);
+    loadInterstitialAd();
   }
 
   @TargetApi(Build.VERSION_CODES.M)
@@ -172,6 +179,34 @@ public class MainActivity extends BaseCompatActivity implements
 
   @Override public int getActivityTheme() {
     return Themes.getNoActionBarTheme();
+  }
+
+  @EventBusHook public void onEvent(ShowInterstitalAdEvent event) {
+    if (interstitialAd != null && interstitialAd.isLoaded()) {
+      interstitialAd.show();
+    }
+  }
+
+  private void loadInterstitialAd() {
+    if (interstitialAd == null) {
+      interstitialAd = new InterstitialAd(this);
+    }
+    interstitialAd.setAdUnitId(getString(R.string.banner_ad_unit_id));
+    if (App.isDebug()) {
+      interstitialAd.loadAd(new AdRequest.Builder().addTestDevice(Utils.getDeviceId(this)).build());
+    } else {
+      interstitialAd.loadAd(new AdRequest.Builder().build());
+    }
+    interstitialAd.setAdListener(new AdListener() {
+
+      @Override public void onAdClosed() {
+        if (App.isDebug()) {
+          interstitialAd.loadAd(new AdRequest.Builder().addTestDevice(Utils.getDeviceId(getActivity())).build());
+        } else {
+          interstitialAd.loadAd(new AdRequest.Builder().build());
+        }
+      }
+    });
   }
 
   public static class SectionsAdapter extends FragmentPagerAdapter {
