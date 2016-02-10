@@ -30,7 +30,9 @@ import com.jrummyapps.busybox.monetize.ShowInterstitalAdEvent;
 public class BusyboxSuccessDialog extends DialogFragment {
 
   @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+    setCancelable(false);
     return new AlertDialog.Builder(getActivity())
+        .setCancelable(false)
         .setTitle(R.string.success)
         .setMessage(R.string.install_success_message)
         .setNegativeButton(R.string.pro_version, new DialogInterface.OnClickListener() {
