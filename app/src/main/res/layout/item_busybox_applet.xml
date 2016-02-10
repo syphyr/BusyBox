@@ -21,9 +21,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:height="48dp"
+    android:height="@dimen/single_list_item_item_height"
     android:background="?selectableItemBackground"
     android:clickable="true"
     android:gravity="center_vertical"
-    android:paddingEnd="16dp"
-    android:paddingStart="16dp"/>
+    android:paddingEnd="@dimen/list_item_padding_horizontal_material"
+    android:paddingStart="@dimen/list_item_padding_horizontal_material"/>
