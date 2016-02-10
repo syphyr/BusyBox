@@ -40,6 +40,9 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.base.BaseCompatActivity;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.exceptions.NotImplementedException;
@@ -52,6 +55,7 @@ import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.fragments.AppletsFragment;
 import com.jrummyapps.busybox.fragments.InstallerFragment;
 import com.jrummyapps.busybox.fragments.ScriptsFragment;
+import com.jrummyapps.busybox.utils.Utils;
 
 import java.io.File;
 
@@ -80,6 +84,14 @@ public class MainActivity extends BaseCompatActivity implements
     tabLayout.setupWithViewPager(viewPager);
     viewPager.setCurrentItem(1);
 
+    AdView adView = (AdView) findViewById(R.id.ad_view);
+    AdRequest adRequest;
+    if (App.isDebug()) {
+      adRequest = new AdRequest.Builder().addTestDevice(Utils.getDeviceId(this)).build();
+    } else {
+      adRequest = new AdRequest.Builder().build();
+    }
+    adView.loadAd(adRequest);
   }
 
   @TargetApi(Build.VERSION_CODES.M)

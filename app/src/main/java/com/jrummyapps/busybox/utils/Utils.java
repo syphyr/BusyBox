@@ -17,7 +17,9 @@
 
 package com.jrummyapps.busybox.utils;
 
+import android.content.Context;
 import android.os.Build;
+import android.provider.Settings;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
@@ -33,14 +35,45 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import static com.jrummyapps.android.app.App.getContext;
 
 public class Utils {
+
+  static String deviceId;
+  static String androidId;
+
+  public static String getDeviceId(Context context) {
+    if (deviceId == null) {
+      androidId =
+          Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+      try {
+        // Create MD5 Hash
+        MessageDigest digest = java.security.MessageDigest
+            .getInstance("MD5");
+        digest.update(androidId.getBytes());
+        byte messageDigest[] = digest.digest();
+        // Create Hex String
+        StringBuffer hexString = new StringBuffer();
+        for (int i = 0; i < messageDigest.length; i++) {
+          String h = Integer.toHexString(0xFF & messageDigest[i]);
+          while (h.length() < 2)
+            h = "0" + h;
+          hexString.append(h);
+        }
+        deviceId = hexString.toString().toUpperCase(Locale.ENGLISH);
+      } catch (NoSuchAlgorithmException ignored) {
+      }
+    }
+    return deviceId;
+  }
 
   public static List<String> getBusyBoxApplets() {
     BusyBox busyBox = BusyBox.getInstance();
