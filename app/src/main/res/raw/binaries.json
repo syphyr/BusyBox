@@ -3,7 +3,7 @@
     "name": "BusyBox 1.24.1",
     "filename": "busybox",
     "abi": "arm",
-    "path": "http://jrummyapps.com/files/android/binaries/busybox/jrummyapps/1.24.1/arm/pie/bin/busybox",
+    "path": "busybox/arm/pie/busybox",
     "md5sum": "edb009683a77aabc623d27a48aecab3e",
     "size": 739264
   },
