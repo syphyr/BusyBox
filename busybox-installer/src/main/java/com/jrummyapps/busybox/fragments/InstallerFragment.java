@@ -554,9 +554,11 @@ public class InstallerFragment extends BaseSupportFragment implements
   }
 
   private boolean isTerminalSupported() {
-    return isIntentAvailable(getActivity(), new Intent("jackpal.androidterm.RUN_SCRIPT")) ||
-        isIntentAvailable(getActivity(), new Intent("jrummy.androidterm.RUN_SCRIPT")) ||
-        isIntentAvailable(getActivity(), new Intent(Intent.ACTION_VIEW,
+    Context context = getActivity();
+    return context != null && 
+        isIntentAvailable(context, new Intent("jackpal.androidterm.RUN_SCRIPT")) ||
+        isIntentAvailable(context, new Intent("jrummy.androidterm.RUN_SCRIPT")) ||
+        isIntentAvailable(context, new Intent(Intent.ACTION_VIEW,
             Uri.parse("market://details?id=jackpal.androidterm")));
   }
 
