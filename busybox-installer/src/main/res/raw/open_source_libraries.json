@@ -36,6 +36,15 @@
     "avatar": "https://avatars.githubusercontent.com/u/47359?v=3&s=200"
   },
   {
+    "project": "Android-ObservableScrollView",
+    "authors": "Soichiro Kashima",
+    "url": "https://github.com/ksoichiro/Android-ObservableScrollView",
+    "year": 2014,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars2.githubusercontent.com/u/801987?v=3&s=200"
+  },
+  {
     "project": "ColorPickerView",
     "authors": "Daniel Nilsson",
     "url": "https://github.com/danielnilsson9/color-picker-view",
@@ -72,6 +81,15 @@
     "avatar": "https://avatars.githubusercontent.com/u/242242?v=3&s=200"
   },
   {
+    "project": "FastScroll-RecyclerView",
+    "authors": "Jared Rummler",
+    "url": "https://github.com/jaredrummler/FastScroll-RecyclerView",
+    "year": 2016,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/6203389?v=3&s=200"
+  },
+  {
     "project": "JazzyListView",
     "authors": "Two Toasters",
     "url": "https://github.com/twotoasters/JazzyListView",
@@ -79,6 +97,51 @@
     "license": "Apache Software License 2.0",
     "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
     "avatar": "https://avatars.githubusercontent.com/u/112994?v=3&s=200"
+  },
+  {
+    "project": "KenBurnsView",
+    "authors": "Flávio Faria",
+    "url": "https://github.com/flavioarfaria/KenBurnsView",
+    "year": 2014,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars1.githubusercontent.com/u/1800351?v=3&s=200"
+  },
+  {
+    "project": "MaterialViewPager",
+    "authors": "Florent Champigny",
+    "url": "https://github.com/florent37/MaterialViewPager",
+    "year": 2015,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars0.githubusercontent.com/u/5754972?v=3&s=200"
+  },
+  {
+    "project": "Material Design Icons",
+    "authors": "Austin Andrews, Google Inc.",
+    "url": "https://materialdesignicons.com/",
+    "year": 2015,
+    "license": "Creative Commons 4.0",
+    "license_url": "https://raw.githubusercontent.com/google/material-design-icons/master/LICENSE",
+    "avatar": "https://avatars.githubusercontent.com/u/338885?v=3&s=200"
+  },
+  {
+    "project": "Material Spinner",
+    "authors": "Jared Rummler",
+    "url": "https://github.com/jaredrummler/Material-Spinner",
+    "year": 2016,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/6203389?v=3&s=200"
+  },
+  {
+    "project": "PagerSlidingTabStrip",
+    "authors": "Andreas Stuetz",
+    "url": "https://github.com/jpardogo/PagerSlidingTabStrip",
+    "year": 2013,
+    "license": "Apache Software License 2.0",
+    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+    "avatar": "https://avatars2.githubusercontent.com/u/1172221?v=3&s=200"
   },
   {
     "project": "Picasso",
@@ -106,32 +169,5 @@
     "license": "Apache Software License 2.0",
     "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
     "avatar": "https://avatars.githubusercontent.com/u/649612?v=3&s=200"
-  },
-  {
-    "project": "Material Design Icons",
-    "authors": "Austin Andrews, Google Inc.",
-    "url": "https://materialdesignicons.com/",
-    "year": 2015,
-    "license": "Creative Commons 4.0",
-    "license_url": "https://raw.githubusercontent.com/google/material-design-icons/master/LICENSE",
-    "avatar": "https://avatars.githubusercontent.com/u/338885?v=3&s=200"
-  },
-  {
-    "project": "Material Spinner",
-    "authors": "Jared Rummler",
-    "url": "https://github.com/jaredrummler/Material-Spinner",
-    "year": 2016,
-    "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
-    "avatar": "https://avatars.githubusercontent.com/u/6203389?v=3&s=200"
-  },
-  {
-    "project": "RecyclerView-FastScroll",
-    "authors": "Jared Rummler",
-    "url": "https://github.com/jaredrummler/FastScroll-RecyclerView",
-    "year": 2016,
-    "license": "Apache Software License 2.0",
-    "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
-    "avatar": "https://avatars.githubusercontent.com/u/6203389?v=3&s=200"
   }
 ]
