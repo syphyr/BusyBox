@@ -259,7 +259,9 @@ public class InstallerFragment extends BaseSupportFragment implements
     progressItem = menu.findItem(R.id.menu_item_progress);
     progressItem.setVisible(uninstalling || installing);
     menu.findItem(R.id.action_terminal).setVisible(isTerminalSupported());
-    ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
+    if (getActivity() != null) {
+      ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
+    }
     super.onCreateOptionsMenu(menu, inflater);
   }
 
@@ -555,7 +557,7 @@ public class InstallerFragment extends BaseSupportFragment implements
 
   private boolean isTerminalSupported() {
     Context context = getActivity();
-    return context != null && 
+    return context != null &&
         isIntentAvailable(context, new Intent("jackpal.androidterm.RUN_SCRIPT")) ||
         isIntentAvailable(context, new Intent("jrummy.androidterm.RUN_SCRIPT")) ||
         isIntentAvailable(context, new Intent(Intent.ACTION_VIEW,

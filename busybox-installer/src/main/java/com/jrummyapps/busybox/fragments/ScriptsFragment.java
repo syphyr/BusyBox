@@ -125,7 +125,9 @@ public class ScriptsFragment extends BaseSupportFragment
     menu.add(0, R.id.action_info, 0, R.string.about)
         .setIcon(R.drawable.ic_information_white_24dp)
         .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-    ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
+    if (getActivity() != null) {
+      ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
+    }
     super.onCreateOptionsMenu(menu, inflater);
   }
 
