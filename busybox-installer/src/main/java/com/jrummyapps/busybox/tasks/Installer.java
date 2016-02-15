@@ -20,6 +20,7 @@ package com.jrummyapps.busybox.tasks;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -265,7 +266,11 @@ public class Installer implements Runnable {
       Bundle args = new Bundle();
       args.putParcelable("builder", this);
       dialog.setArguments(args);
-      dialog.show(activity.getFragmentManager(), "ConfirmInstallDialog");
+      // Fix “Error Can not perform this action after onSaveInstanceState”
+      // http://stackoverflow.com/a/12464899/1048340
+      FragmentTransaction transaction = activity.getFragmentManager().beginTransaction();
+      transaction.add(dialog, "ConfirmInstallDialog").commitAllowingStateLoss();
+      //dialog.show(activity.getFragmentManager(), "ConfirmInstallDialog");
     }
 
     public Builder setBinary(AFile binary) {
