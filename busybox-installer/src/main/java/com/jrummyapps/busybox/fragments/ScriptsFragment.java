@@ -41,6 +41,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.colors.Color;
 import com.jrummyapps.android.eventbus.EventBusHook;
@@ -169,6 +170,11 @@ public class ScriptsFragment extends BaseSupportFragment
     }
 
     ColorScheme.newMenuTint(popupMenu.getMenu()).forceIcons().apply(getActivity());
+
+    Analytics.newEvent("Clicked Script")
+        .put("script_name", script.name)
+        .put("script_file", script.path)
+        .log();
 
     popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 

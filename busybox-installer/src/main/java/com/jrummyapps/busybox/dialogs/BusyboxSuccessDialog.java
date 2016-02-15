@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
+import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.monetize.RequestPremiumEvent;
@@ -42,6 +43,7 @@ public class BusyboxSuccessDialog extends DialogFragment {
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
             Events.post(new RequestPremiumEvent());
+            Analytics.newEvent("Purchase pro version button click").log();
           }
         })
         .setNeutralButton(R.string.remove_ads, new DialogInterface.OnClickListener() {
@@ -49,6 +51,7 @@ public class BusyboxSuccessDialog extends DialogFragment {
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
             Events.post(new RequestRemoveAds());
+            Analytics.newEvent("Remove ads button click").log();
           }
         })
         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -56,6 +59,7 @@ public class BusyboxSuccessDialog extends DialogFragment {
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
             Events.post(new ShowInterstitalAdEvent());
+            Analytics.newEvent("Interstitial ad").log();
           }
         })
         .create();

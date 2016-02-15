@@ -55,6 +55,7 @@ import android.widget.TextView;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListener;
+import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.animations.Technique;
 import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.colors.Color;
@@ -326,6 +327,10 @@ public class InstallerFragment extends BaseSupportFragment implements
         try {
           BusyBox busybox = BusyBox.from(params[0]);
           String installPath = params[1];
+          Analytics.newEvent("Create ZIP")
+              .put("busybox", busybox)
+              .put("path", installPath)
+              .log();
           BusyBoxZipHelper.createBusyboxRecoveryZip(busybox, installPath, new File(params[2]));
           return R.string.created_installable_zip;
         } catch (Exception e) {
@@ -352,6 +357,7 @@ public class InstallerFragment extends BaseSupportFragment implements
       CreateZipDialog.show(getActivity(), directory, filename);
       createArchive = false;
     } else {
+      Analytics.newEvent("Selected path").put("path", directory.getPath()).log();
       if (paths.contains(directory.getAbsolutePath())) {
         for (int i = 0; i < paths.size(); i++) {
           if (paths.get(i).equals(directory.getAbsolutePath())) {
@@ -378,6 +384,13 @@ public class InstallerFragment extends BaseSupportFragment implements
 
   @EventBusHook public void onEventMainThread(DownloadFinished event) {
     if (download != null && download.getId() == event.download.getId()) {
+
+      Analytics.newEvent("Downloaded binary")
+          .put("command", downloadCompleteCommand)
+          .put("filename", event.download.getFilename())
+          .put("url", event.download.getUrl().toString())
+          .log();
+
       if (downloadCompleteCommand == CMD_TERMINAL) {
         openTerminal();
       } else if (downloadCompleteCommand == CMD_INSTALL) {
@@ -391,6 +404,9 @@ public class InstallerFragment extends BaseSupportFragment implements
 
   @EventBusHook public void onEventMainThread(DownloadError event) {
     if (download != null && download.getId() == event.download.getId()) {
+      Analytics.newEvent("Download error")
+          .put("error_code", event.download.getError())
+          .log();
       showMessage(R.string.download_unsuccessful);
     }
   }
@@ -408,6 +424,12 @@ public class InstallerFragment extends BaseSupportFragment implements
     uninstallButton.setEnabled(true);
     installButton.setEnabled(true);
     busybox = BusyBox.from(new AFile(event.installer.path, event.installer.filename).path);
+
+    Analytics.newEvent("Installed BusyBox")
+        .put("is_ads_removed", Monetize.isAdsRemoved())
+        .put("path", busybox.path)
+        .log();
+
     new BusyBoxMetaTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, busybox);
     if (Monetize.isAdsRemoved()) {
       showMessage(R.string.successfully_installed_s, busybox.filename);
@@ -423,6 +445,11 @@ public class InstallerFragment extends BaseSupportFragment implements
     progressItem.setVisible(false);
     uninstallButton.setEnabled(busybox != null && busybox.exists());
     installButton.setEnabled(true);
+
+    Analytics.newEvent("Error installing BusyBox")
+        .put("error", event.error)
+        .log();
+
     if (TextUtils.equals(event.error, Installer.ERROR_NOT_ROOTED)) {
       RootRequiredDialog dialog = new RootRequiredDialog();
       Bundle args = new Bundle();
@@ -467,6 +494,12 @@ public class InstallerFragment extends BaseSupportFragment implements
         break;
       }
     }
+
+    Analytics.newEvent("BusyBox Found Event")
+        .put("default_install_path", defaultInstallPath)
+        .put("busybox", busybox == null ? "null" : busybox.path)
+        .log();
+
     pathSpinner.setSelectedIndex(pathIndex);
     uninstallButton.setEnabled(busybox != null && busybox.exists() && !uninstalling && !installing);
     installButton.setEnabled(!uninstalling && !installing);
@@ -705,6 +738,12 @@ public class InstallerFragment extends BaseSupportFragment implements
     if (propertiesCard.getVisibility() != View.VISIBLE) {
       propertiesCard.setVisibility(View.VISIBLE);
     }
+
+    Analytics analytics = Analytics.newEvent("BusyBox Properties");
+    for (FileMeta property : properties) {
+      analytics.put(property.name, property.value);
+    }
+    analytics.log();
 
     TableLayout tableLayout = findById(R.id.table_properties);
 
