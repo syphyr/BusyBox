@@ -19,7 +19,7 @@ ANDROID_NATIVE_API_LEVEL="android-9"
 GCC_VERSION="4.9"
 MARCH="$1"
 PARAM="$2"
-PREFIX="../compiled/$MARCH"
+PREFIX="../compiled-$BB_VERSION/$MARCH"
 
 if [ -z "$ANDROID_NDK_ROOT" ]
 then
