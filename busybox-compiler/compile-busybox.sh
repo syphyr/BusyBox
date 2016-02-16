@@ -56,6 +56,10 @@ case "$(uname -s)" in
     HOST_OS="linux"
     NCPU=$(grep -ci processor /proc/cpuinfo)
     ;;
+  CYGWIN*|MINGW32*|MSYS*)
+    HOST_OS="windows"
+    NCPU=$(grep -ci processor /proc/cpuinfo)
+    ;;
   *)
     echo "Unknown OS"
     exit 1
