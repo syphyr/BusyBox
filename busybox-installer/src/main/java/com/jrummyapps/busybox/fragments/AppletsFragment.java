@@ -34,9 +34,11 @@ import android.widget.TextView;
 import com.jaredrummler.fastscrollrecyclerview.FastScrollRecyclerView;
 import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.theme.ColorScheme;
+import com.jrummyapps.android.widget.jazzylistview.JazzyHelper;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.activities.AboutActivity;
 import com.jrummyapps.busybox.activities.SettingsActivity;
+import com.jrummyapps.busybox.design.JazzyRecyclerViewScrollListener;
 import com.jrummyapps.busybox.dialogs.BusyBoxAppletDialog;
 import com.jrummyapps.busybox.utils.Utils;
 
@@ -56,6 +58,9 @@ public class AppletsFragment extends BaseSupportFragment {
 
   @Override public void onViewCreated(View view, Bundle savedInstanceState) {
     FastScrollRecyclerView recyclerView = findById(R.id.recycler);
+    JazzyRecyclerViewScrollListener scrollListener = new JazzyRecyclerViewScrollListener();
+    scrollListener.setTransitionEffect(JazzyHelper.SLIDE_IN);
+    recyclerView.addOnScrollListener(scrollListener);
     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     recyclerView.setAdapter(new RecyclerAdapter());
   }
