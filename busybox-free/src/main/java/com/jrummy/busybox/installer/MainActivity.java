@@ -54,6 +54,10 @@ public class MainActivity extends com.jrummyapps.busybox.activities.MainActivity
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    Crashlytics.setString("GIT_SHA", BuildConfig.GIT_SHA);
+    Crashlytics.setString("BUILD_TIME", BuildConfig.BUILD_TIME);
+
     final AdView adView = (AdView) findViewById(R.id.ad_view);
     bp = new BillingProcessor(this, Monetize.decrypt(Monetize.ENCRYPTED_LICENSE_KEY), this);
     if (!Monetize.isAdsRemoved()) {
