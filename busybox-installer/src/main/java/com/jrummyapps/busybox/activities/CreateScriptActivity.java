@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.base.BaseActivity;
 import com.jrummyapps.android.theme.BaseTheme;
 import com.jrummyapps.android.theme.Themes;
@@ -143,6 +144,7 @@ public class CreateScriptActivity extends BaseActivity implements View.OnClickLi
 
   @Override public void onClick(View v) {
     if (v == positiveButton) {
+      Analytics.newEvent("created script").log();
       Intent intent = new Intent();
       intent.putExtra(EXTRA_SCRIPT_NAME, editScriptName.getText().toString());
       intent.putExtra(EXTRA_FILE_NAME, editFileName.getText().toString());

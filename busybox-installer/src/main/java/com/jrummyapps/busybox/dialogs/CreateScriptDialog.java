@@ -30,6 +30,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.KeyboardUtils;
@@ -102,6 +103,7 @@ public class CreateScriptDialog extends DialogFragment {
         .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
 
           @Override public void onClick(DialogInterface dialog, int which) {
+            Analytics.newEvent("created script").log();
             String name = editScriptName.getText().toString();
             String filename = editFileName.getText().toString();
             Events.post(new CreateScriptEvent(name, filename));

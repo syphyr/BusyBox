@@ -171,7 +171,7 @@ public class ScriptsFragment extends BaseSupportFragment
 
     ColorScheme.newMenuTint(popupMenu.getMenu()).forceIcons().apply(getActivity());
 
-    Analytics.newEvent("Clicked Script")
+    Analytics.newEvent("clicked script")
         .put("script_name", script.name)
         .put("script_file", script.path)
         .log();

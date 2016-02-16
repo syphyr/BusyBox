@@ -70,10 +70,8 @@ public class MainActivity extends BaseCompatActivity implements
     TabLayout tabLayout = findById(R.id.tabs);
     viewPager = findById(R.id.container);
     Toolbar toolbar = findById(R.id.toolbar);
-
     String[] titles = {getString(R.string.applets), getString(R.string.installer), getString(R.string.scripts)};
     SectionsAdapter pagerAdapter = new SectionsAdapter(getSupportFragmentManager(), titles);
-
     setSupportActionBar(toolbar);
     viewPager.setOffscreenPageLimit(2);
     viewPager.setAdapter(pagerAdapter);

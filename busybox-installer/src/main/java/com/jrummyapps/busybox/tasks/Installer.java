@@ -168,7 +168,7 @@ public class Installer implements Runnable {
         Uninstaller.uninstall(dtFile);
       }
 
-      if (!RootTools.cp(srFile, dtFile)) {
+      if (!RootTools.cp(srFile, dtFile) && !dtFile.exists()) {
         Events.post(new ErrorEvent(this, "Failed copying " + srFile + " to " + dtFile));
         return;
       }

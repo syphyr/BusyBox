@@ -112,13 +112,7 @@ public class MainActivity extends com.jrummyapps.busybox.activities.MainActivity
 
   @Override public void onProductPurchased(String productId, TransactionDetails details) {
     // Called when requested PRODUCT ID was successfully purchased
-    Analytics.newEvent("Purchased Product")
-        .put("product_id", productId)
-        .put("order_id", details.orderId)
-        .put("token", details.purchaseToken)
-        .put("purchase_time", details.purchaseTime)
-        .log();
-
+    Analytics.newEvent("in-app purchase").put("product_id", productId).log();
     if (productId.equals(Monetize.decrypt(Monetize.ENCRYPTED_PRO_VERSION_PRODUCT_ID))) {
       Monetize.removeAds();
       Monetize.unlockProVersion();
@@ -137,7 +131,7 @@ public class MainActivity extends com.jrummyapps.busybox.activities.MainActivity
 
   @Override public void onBillingError(int errorCode, Throwable error) {
     // Called when some error occurred. See Constants class for more details
-    Analytics.newEvent("Billing error").put("error_code", errorCode).log();
+    Analytics.newEvent("billing error").put("error_code", errorCode).log();
     Crashlytics.logException(error);
   }
 

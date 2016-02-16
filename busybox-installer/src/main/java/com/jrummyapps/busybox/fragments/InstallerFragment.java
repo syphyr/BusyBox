@@ -52,6 +52,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListener;
@@ -327,13 +328,14 @@ public class InstallerFragment extends BaseSupportFragment implements
         try {
           BusyBox busybox = BusyBox.from(params[0]);
           String installPath = params[1];
-          Analytics.newEvent("Create ZIP")
-              .put("busybox", busybox)
-              .put("path", installPath)
-              .log();
+          if (!new File(installPath).getParentFile().exists()) {
+            throw new RuntimeException("Invalid install path: " + installPath);
+          }
+          Analytics.newEvent("create zip").put("busybox", busybox).put("path", installPath).log();
           BusyBoxZipHelper.createBusyboxRecoveryZip(busybox, installPath, new File(params[2]));
           return R.string.created_installable_zip;
         } catch (Exception e) {
+          Crashlytics.logException(e);
           return R.string.could_not_create_the_zip_archive;
         }
       }
@@ -357,7 +359,7 @@ public class InstallerFragment extends BaseSupportFragment implements
       CreateZipDialog.show(getActivity(), directory, filename);
       createArchive = false;
     } else {
-      Analytics.newEvent("Selected path").put("path", directory.getPath()).log();
+      Analytics.newEvent("selected path").put("path", directory.getPath()).log();
       if (paths.contains(directory.getAbsolutePath())) {
         for (int i = 0; i < paths.size(); i++) {
           if (paths.get(i).equals(directory.getAbsolutePath())) {
@@ -384,13 +386,11 @@ public class InstallerFragment extends BaseSupportFragment implements
 
   @EventBusHook public void onEventMainThread(DownloadFinished event) {
     if (download != null && download.getId() == event.download.getId()) {
-
-      Analytics.newEvent("Downloaded binary")
+      Analytics.newEvent("downloaded binary")
           .put("command", downloadCompleteCommand)
           .put("filename", event.download.getFilename())
           .put("url", event.download.getUrl().toString())
           .log();
-
       if (downloadCompleteCommand == CMD_TERMINAL) {
         openTerminal();
       } else if (downloadCompleteCommand == CMD_INSTALL) {
@@ -404,9 +404,7 @@ public class InstallerFragment extends BaseSupportFragment implements
 
   @EventBusHook public void onEventMainThread(DownloadError event) {
     if (download != null && download.getId() == event.download.getId()) {
-      Analytics.newEvent("Download error")
-          .put("error_code", event.download.getError())
-          .log();
+      Analytics.newEvent("download error").put("error_code", event.download.getError()).log();
       showMessage(R.string.download_unsuccessful);
     }
   }
@@ -423,14 +421,17 @@ public class InstallerFragment extends BaseSupportFragment implements
     progressItem.setVisible(false);
     uninstallButton.setEnabled(true);
     installButton.setEnabled(true);
+
     busybox = BusyBox.from(new AFile(event.installer.path, event.installer.filename).path);
 
-    Analytics.newEvent("Installed BusyBox")
+    Analytics.newEvent("installed busybox")
         .put("is_ads_removed", Monetize.isAdsRemoved())
+        .put("pro_version", Monetize.isProVersion())
         .put("path", busybox.path)
         .log();
 
     new BusyBoxMetaTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, busybox);
+
     if (Monetize.isAdsRemoved()) {
       showMessage(R.string.successfully_installed_s, busybox.filename);
     } else {
@@ -446,9 +447,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     uninstallButton.setEnabled(busybox != null && busybox.exists());
     installButton.setEnabled(true);
 
-    Analytics.newEvent("Error installing BusyBox")
-        .put("error", event.error)
-        .log();
+    Analytics.newEvent("error installing busybox").put("error", event.error).log();
 
     if (TextUtils.equals(event.error, Installer.ERROR_NOT_ROOTED)) {
       RootRequiredDialog dialog = new RootRequiredDialog();
@@ -473,6 +472,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     if (busybox == null || !busybox.equals(event.file)) {
       return;
     }
+    Analytics.newEvent("uninstalled busybox").put("busybox", busybox).log();
     uninstalling = false;
     installButton.setEnabled(!installing);
     if (event.success) {
@@ -495,9 +495,9 @@ public class InstallerFragment extends BaseSupportFragment implements
       }
     }
 
-    Analytics.newEvent("BusyBox Found Event")
-        .put("default_install_path", defaultInstallPath)
-        .put("busybox", busybox == null ? "null" : busybox.path)
+    Analytics.newEvent("busybox found")
+        .put("install_path", defaultInstallPath)
+        .put("busybox", busybox == null ? "[NOT INSTALLED]" : busybox.path)
         .log();
 
     pathSpinner.setSelectedIndex(pathIndex);
@@ -863,8 +863,8 @@ public class InstallerFragment extends BaseSupportFragment implements
 
             @Override public void onClick(DialogInterface dialog, int which) {
               try {
-                Intent intent = getActivity().getPackageManager().getLaunchIntentForPackage(
-                    "com.jrummyapps.rootchecker");
+                PackageManager pm = getActivity().getPackageManager();
+                Intent intent = pm.getLaunchIntentForPackage("com.jrummyapps.rootchecker");
                 if (intent == null) {
                   intent = IntentUtils.newGooglePlayIntent(getActivity(), "com.jrummyapps.rootchecker");
                 }

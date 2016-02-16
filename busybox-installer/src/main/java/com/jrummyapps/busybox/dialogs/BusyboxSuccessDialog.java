@@ -43,7 +43,7 @@ public class BusyboxSuccessDialog extends DialogFragment {
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
             Events.post(new RequestPremiumEvent());
-            Analytics.newEvent("Purchase pro version button click").log();
+            Analytics.newEvent("request in-app purchase").put("prodcut", "pro_version").log();
           }
         })
         .setNeutralButton(R.string.remove_ads, new DialogInterface.OnClickListener() {
@@ -51,7 +51,7 @@ public class BusyboxSuccessDialog extends DialogFragment {
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
             Events.post(new RequestRemoveAds());
-            Analytics.newEvent("Remove ads button click").log();
+            Analytics.newEvent("request in-app purchase").put("prodcut", "remove_ads").log();
           }
         })
         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -59,7 +59,7 @@ public class BusyboxSuccessDialog extends DialogFragment {
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
             Events.post(new ShowInterstitalAdEvent());
-            Analytics.newEvent("Interstitial ad").log();
+            Analytics.newEvent("show interstitial ad").log();
           }
         })
         .create();
