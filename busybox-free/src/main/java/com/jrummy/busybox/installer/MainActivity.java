@@ -92,7 +92,7 @@ public class MainActivity extends com.jrummyapps.busybox.activities.MainActivity
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.monetize_menu, menu);
+    getMenuInflater().inflate(R.menu.main_menu, menu);
     return super.onCreateOptionsMenu(menu);
   }
 
