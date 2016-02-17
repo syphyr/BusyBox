@@ -105,9 +105,11 @@ public class MainActivity extends com.jrummyapps.busybox.activities.MainActivity
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     int itemId = item.getItemId();
     if (itemId == R.id.action_remove_ads) {
+      Analytics.newEvent("remove ads menu item").log();
       onEventMainThread(new RequestRemoveAds());
       return true;
     } else if (itemId == R.id.action_unlock_premium) {
+      Analytics.newEvent("pre version menu item").log();
       onEventMainThread(new RequestPremiumEvent());
       return true;
     }
