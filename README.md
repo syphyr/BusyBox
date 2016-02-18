@@ -1,4 +1,4 @@
-# <a href="http://jaredrummler.github.io/BusyBox/" target="_blank">BusyBox</a>
+# <a href="http://jaredrummler.github.io/BusyBox/" target="_blank">BusyBox for Android</a>
 
 <img src="busybox-installer/src/main/res/mipmap-xxhdpi/ic_launcher.png" align="left" hspace="10" vspace="10">
 
@@ -24,7 +24,7 @@ Downloads
 Building
 --------
 
-BusyBox for Android has proprietary dependencies. You cannot build the project; it isn't fully open source. However, much of the code is available for your viewing pleasure. Contributions to localize the project is welcome and appreciated.
+BusyBox for Android has proprietary dependencies. You cannot build the project; it isn't fully open source. However, much of the code is available for your viewing pleasure. Contributions to localize the project are welcome and appreciated.
 
 Applets
 -------
