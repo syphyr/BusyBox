@@ -19,4 +19,7 @@
 <resources>
   <string name="dialog_transition" translatable="false">dialog_transition</string>
   <string name="banner_ad_unit_id">ca-app-pub-1915343032510958/9622649453</string>
+  <string name="website_main">http://busybox.jrummyapps.com</string>
+  <string name="website_faqs">http://busybox.jrummyapps.com/#faq</string>
+  <string name="website_tutorial">http://busybox.jrummyapps.com/#faq</string>
 </resources>
