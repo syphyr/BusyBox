@@ -83,6 +83,7 @@ import com.jrummyapps.android.prefs.Prefs;
 import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.roottools.shell.stericson.Shell;
+import com.jrummyapps.android.roottools.utils.Assets;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
 import com.jrummyapps.android.util.IntentUtils;
@@ -598,6 +599,7 @@ public class InstallerFragment extends BaseSupportFragment implements
   }
 
   private void openTerminal() {
+    final BinaryInfo binaryInfo = binaries.get(versionSpinner.getSelectedIndex());
     File file = getSelectedBinary(CMD_INSTALL);
     if (file == null) {
       return; // downloading or no network connection
@@ -608,6 +610,12 @@ public class InstallerFragment extends BaseSupportFragment implements
       private boolean openGooglePlay = true;
 
       @Override protected Intent doInBackground(File... params) {
+        File file = params[0];
+        if (!file.exists()) {
+          //noinspection OctalInteger
+          Assets.transferAsset(getActivity(), binaryInfo.path, binaryInfo.filename, 0755);
+        }
+
         Intent intent;
         String permission;
         if (isIntentAvailable(getActivity(), new Intent("jackpal.androidterm.RUN_SCRIPT"))) {
@@ -639,7 +647,6 @@ public class InstallerFragment extends BaseSupportFragment implements
         //noinspection ResultOfMethodCallIgnored
         bin.mkdirs();
 
-        File file = params[0];
         //noinspection OctalInteger
         Os.chmod(file.getAbsolutePath(), 0755);
         //noinspection OctalInteger
