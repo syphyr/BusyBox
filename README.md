@@ -1,4 +1,4 @@
-# <a href="http://jaredrummler.github.io/BusyBox/" target="_blank">BusyBox for Android</a>
+# <a href="http://busybox.jrummyapps.com" target="_blank">BusyBox for Android</a>
 
 <img src="busybox-installer/src/main/res/mipmap-xxhdpi/ic_launcher.png" align="left" hspace="10" vspace="10">
 
