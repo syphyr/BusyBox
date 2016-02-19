@@ -21,6 +21,7 @@ import android.app.Fragment;
 
 import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
 import com.jrummyapps.busybox.R;
+import com.jrummyapps.busybox.fragments.AboutFragment;
 import com.jrummyapps.busybox.fragments.SettingsFragment;
 
 public class SettingsActivity extends MainPreferenceActivity {
@@ -29,6 +30,8 @@ public class SettingsActivity extends MainPreferenceActivity {
     int stringId = getStringId(position);
     if (stringId == R.string.settings) {
       return new SettingsFragment();
+    } else if (stringId == R.string.about) {
+      return new AboutFragment();
     }
     return super.getFragment(position);
   }

@@ -22,4 +22,5 @@
   <string name="website_main">http://busybox.jrummyapps.com</string>
   <string name="website_faqs">http://busybox.jrummyapps.com/#faq</string>
   <string name="website_tutorial">http://busybox.jrummyapps.com/#faq</string>
+  <item name="action_view_profile" type="id"/>
 </resources>

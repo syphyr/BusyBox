@@ -32,8 +32,6 @@
   <string name="root_info">Root info</string>
   <string name="root_required">Root required</string>
   <string name="create">Create</string>
-  <string name="pro_version">Pro version</string>
-  <string name="remove_ads">Remove ads</string>
   <string name="success">Success</string>
 
   <!-- DIALOG TITLES -->
@@ -57,7 +55,12 @@
   <string name="installer">Installer</string>
   <string name="applets">Applets</string>
   <string name="scripts">Scripts</string>
+
+  <!-- MENU ITEMS -->
   <string name="terminal">Terminal</string>
+  <string name="profile">Profile</string>
+  <string name="pro_version">Pro version</string>
+  <string name="remove_ads">Remove ads</string>
 
   <!-- PREFERENCES -->
   <string name="replace_existing_applets">Replace existing applets</string>
@@ -78,5 +81,6 @@
   <string name="create_script">Create script</string>
   <string name="a_script_with_that_name_already_exists">A script with that name already exists</string>
   <string name="an_error_occurred_while_creating_the_file">An error occurred while creating the file</string>
+
 
 </resources>
