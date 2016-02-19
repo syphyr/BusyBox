@@ -81,6 +81,13 @@ public class AboutActivity extends BaseCompatActivity implements ElasticDragDism
         .append(" version 2.")
         .close();
 
+    html.h3().append("Learn more at ")
+        .a("https://busybox.net", "busybox.net")
+        .append(" or ")
+        .a("http://busybox.jrummyapps.com", "busybox.jrummyapps.com")
+        .append(".")
+        .close();
+
     aboutText.setText(html.toSpan());
     aboutText.setLinkTextColor(0xFF41A4C4);
     aboutText.setMovementMethod(LinkMovementMethod.getInstance());
