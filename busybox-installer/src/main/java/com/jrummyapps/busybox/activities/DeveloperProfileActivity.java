@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.transition.Transition;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.animations.Rebound;
@@ -96,6 +97,12 @@ public class DeveloperProfileActivity extends BaseActivity {
     linkedinView = findById(R.id.linkedin);
 
     findViewById(R.id.bottom_container).setBackgroundColor(ColorScheme.getAccent());
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      // fix color scheme not applying on Android 6.0+
+      ImageView profileImageBackground = findById(R.id.profile_background);
+      profileImageBackground.setColorFilter(ColorScheme.getAccent());
+    }
 
     FabDialogMorphSetup.setupSharedEelementTransitions(this, findViewById(R.id.container), ResUtils.dpToPx(2));
 
