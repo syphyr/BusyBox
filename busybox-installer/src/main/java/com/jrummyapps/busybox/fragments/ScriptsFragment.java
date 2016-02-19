@@ -48,6 +48,7 @@ import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.fileproperties.activities.FilePropertiesActivity;
 import com.jrummyapps.android.io.FileHelper;
 import com.jrummyapps.android.io.FileUtils;
+import com.jrummyapps.android.os.Os;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
 import com.jrummyapps.android.view.ViewHolder;
@@ -257,6 +258,8 @@ public class ScriptsFragment extends BaseSupportFragment
 
     try {
       FileUtils.touch(file);
+      //noinspection OctalInteger
+      Os.chmod(file.getAbsolutePath(), 0755);
     } catch (IOException e) {
       errorMessage = R.string.an_error_occurred_while_creating_the_file;
       Crashlytics.logException(e);
