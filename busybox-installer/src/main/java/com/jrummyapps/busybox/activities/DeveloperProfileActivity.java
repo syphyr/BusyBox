@@ -17,7 +17,6 @@
 
 package com.jrummyapps.busybox.activities;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.graphics.Color;
 import android.os.Build;
@@ -153,7 +152,6 @@ public class DeveloperProfileActivity extends BaseActivity {
   }
 
   public void dismiss(View view) {
-    setResult(Activity.RESULT_CANCELED);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       finishAfterTransition();
     } else {
