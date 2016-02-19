@@ -104,7 +104,9 @@ public class DeveloperProfileActivity extends BaseActivity {
       profileImageBackground.setColorFilter(ColorScheme.getAccent());
     }
 
-    FabDialogMorphSetup.setupSharedEelementTransitions(this, findViewById(R.id.container), ResUtils.dpToPx(2));
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      FabDialogMorphSetup.setupSharedEelementTransitions(this, findViewById(R.id.container), ResUtils.dpToPx(2));
+    }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
         && getWindow().getSharedElementEnterTransition() != null) {
