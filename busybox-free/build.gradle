@@ -36,7 +36,7 @@ repositories {
 
 def versionMajor = 5
 def versionMinor = 0
-def versionPatch = 2
+def versionPatch = 3
 def versionBuild = 0
 
 def initCrashlyticsPropertiesIfNeeded() {
