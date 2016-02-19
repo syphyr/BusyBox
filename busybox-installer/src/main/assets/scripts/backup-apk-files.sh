@@ -14,15 +14,15 @@ for i in "$@"
 do
   case $i in
     --ignore-system-apps)
-	  backup_system_apps=false
-	  shift
+	    backup_system_apps=false
+	    shift
 	  ;;
-	-d|--destination)
-	  backup_location="${i#*=}"
-	  shift
+	  -d|--destination)
+	    backup_location="${i#*=}"
+	    shift
 	  ;;
-	*)
-	  # unknown option
+	  *)
+	    # unknown option
   esac
 done
 
@@ -39,9 +39,9 @@ do
   if ! $backup_system_apps
   then
     if [[ "${apk_file}" == "/system/"* ]]
-	then
-	  continue # skip system apk
-	fi
+    then
+	    continue # skip system apk
+	  fi
   fi
   package_name=$(echo $line | cut -d= -f2)
   echo $package_name
