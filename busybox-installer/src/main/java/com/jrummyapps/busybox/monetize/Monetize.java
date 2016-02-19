@@ -17,6 +17,7 @@
 
 package com.jrummyapps.busybox.monetize;
 
+import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.crypto.Base64Obfuscate;
 import com.jrummyapps.android.prefs.Prefs;
 
@@ -44,11 +45,13 @@ public class Monetize {
   }
 
   public static boolean isAdsRemoved() {
-    return Prefs.getInstance().get(ENCRYPTED_REMOVE_ADS_PRODUCT_ID, false);
+    boolean defValue = App.getContext().getPackageName().endsWith("pro");
+    return Prefs.getInstance().get(ENCRYPTED_REMOVE_ADS_PRODUCT_ID, defValue);
   }
 
   public static boolean isProVersion() {
-    return Prefs.getInstance().get(ENCRYPTED_PRO_VERSION_PRODUCT_ID, false);
+    boolean defValue = App.getContext().getPackageName().endsWith("pro");
+    return Prefs.getInstance().get(ENCRYPTED_PRO_VERSION_PRODUCT_ID, defValue);
   }
 
 }
