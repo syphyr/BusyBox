@@ -84,6 +84,13 @@ public class MainActivity extends com.jrummyapps.busybox.activities.MainActivity
     }
   }
 
+  @Override public void onDestroy() {
+    super.onDestroy();
+    if (bp != null) {
+      bp.release();
+    }
+  }
+
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (bp.handleActivityResult(requestCode, resultCode, data)) {
       return;
