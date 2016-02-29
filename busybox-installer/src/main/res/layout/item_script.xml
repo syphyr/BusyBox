@@ -21,15 +21,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="@dimen/single_list_item_item_height">
+    android:minHeight="@dimen/mtrl_single_list_item_height">
 
   <ImageView
       android:id="@+id/icon"
       android:layout_width="24dp"
       android:layout_height="24dp"
       android:layout_gravity="center_vertical|start"
-      android:layout_marginLeft="@dimen/list_item_padding_horizontal_material"
-      android:layout_marginStart="@dimen/list_item_padding_horizontal_material"
+      android:layout_marginLeft="@dimen/margin_default"
+      android:layout_marginStart="@dimen/margin_default"
       tools:src="@drawable/ic_code_array_white_24dp"
       tools:tint="#0099cc"/>
 
@@ -38,8 +38,8 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_gravity="center_vertical"
-      android:layout_marginLeft="@dimen/list_item_content_padding_horizontal_material"
-      android:layout_marginStart="@dimen/list_item_content_padding_horizontal_material"
+      android:layout_marginLeft="@dimen/mtrl_content_padding_start"
+      android:layout_marginStart="@dimen/mtrl_content_padding_start"
       android:textAppearance="?android:textAppearanceMedium"
       tools:text="Reboot recovery"/>
 
@@ -47,8 +47,8 @@
       android:layout_width="match_parent"
       android:layout_height="0.5dp"
       android:layout_gravity="bottom"
-      android:layout_marginLeft="@dimen/list_item_content_padding_horizontal_material"
-      android:layout_marginStart="@dimen/list_item_content_padding_horizontal_material"
+      android:layout_marginLeft="@dimen/mtrl_content_padding_start"
+      android:layout_marginStart="@dimen/mtrl_content_padding_start"
       android:background="?dividerColor" />
 
 
