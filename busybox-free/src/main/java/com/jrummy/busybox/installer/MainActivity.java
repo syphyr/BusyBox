@@ -198,34 +198,4 @@ public class MainActivity extends com.jrummyapps.busybox.activities.MainActivity
     });
   }
 
-  /*
-
-  private static void createBusyboxAppletsJson() {
-    new Thread(new Runnable() {
-
-      @Override public void run() {
-        try {
-          String json = null;
-          JSONObject jsonObject = new JSONObject();
-          BusyBox busybox = BusyBox.getInstance();
-          for (String applet : busybox.getApplets()) {
-            String help = busybox.getHelp(applet);
-            if (TextUtils.isEmpty(help)) {
-              if (json == null) {
-                json = Utils.readRaw(R.raw.busybox_applets);
-              }
-              help = new JSONObject(json).optString(applet);
-            }
-            jsonObject.put(applet, help);
-          }
-          FileUtils.writeNewFile(new File(Storage.EXTERNAL_STORAGE, "busybox_applets.json"), jsonObject.toString());
-        } catch (JSONException ignored) {
-          ignored.printStackTrace();
-        }
-      }
-    }).start();
-  }
-
-   */
-
 }
