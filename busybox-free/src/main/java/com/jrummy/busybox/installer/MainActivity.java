@@ -36,6 +36,7 @@ import com.jrummyapps.android.animations.Technique;
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.eventbus.EventBusHook;
 import com.jrummyapps.android.eventbus.Events;
+import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.busybox.monetize.Monetize;
 import com.jrummyapps.busybox.monetize.OnAdsRemovedEvent;
 import com.jrummyapps.busybox.monetize.OnPurchasedPremiumEvent;
@@ -100,6 +101,7 @@ public class MainActivity extends com.jrummyapps.busybox.activities.MainActivity
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.main_menu, menu);
+    ColorScheme.newMenuTint(menu).forceIcons().apply(this);
     return super.onCreateOptionsMenu(menu);
   }
 
