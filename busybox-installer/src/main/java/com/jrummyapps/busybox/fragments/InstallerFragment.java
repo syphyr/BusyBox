@@ -154,7 +154,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
       Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
       if (item.equals(getString(R.string.choose_a_directory))) {
-        DirectoryPickerDialog.show(getActivity(), new File("/"));
+        DirectoryPickerDialog.show(getActivity(), new AFile("/"));
       } else {
         pathIndex = view.getSelectedIndex();
         updateDiskUsagePieChart();
@@ -353,7 +353,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     );
   }
 
-  @Override public void onDirectorySelected(File directory) {
+  @Override public void onDirectorySelected(AFile directory) {
     if (createArchive) {
       BinaryInfo binaryInfo = binaries.get(versionSpinner.getSelectedIndex());
       String filename = binaryInfo.filename + "-" + binaryInfo.abi + ".zip";

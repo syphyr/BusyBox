@@ -44,6 +44,7 @@ import com.jrummyapps.android.base.BaseCompatActivity;
 import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.exceptions.NotImplementedException;
 import com.jrummyapps.android.io.WriteExternalStoragePermissions;
+import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
 import com.jrummyapps.android.tinting.EdgeTint;
@@ -52,8 +53,6 @@ import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.fragments.AppletsFragment;
 import com.jrummyapps.busybox.fragments.InstallerFragment;
 import com.jrummyapps.busybox.fragments.ScriptsFragment;
-
-import java.io.File;
 
 import static com.jrummyapps.android.app.App.getContext;
 import static com.jrummyapps.android.util.FragmentUtils.getCurrentFragment;
@@ -141,7 +140,7 @@ public class MainActivity extends BaseCompatActivity implements
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
   }
 
-  @Override public void onDirectorySelected(File directory) {
+  @Override public void onDirectorySelected(AFile directory) {
     Fragment fragment = getCurrentFragment(getSupportFragmentManager(), viewPager);
     if (fragment instanceof DirectoryPickerDialog.OnDirectorySelectedListener) {
       ((DirectoryPickerDialog.OnDirectorySelectedListener) fragment).onDirectorySelected(directory);
