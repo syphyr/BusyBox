@@ -161,7 +161,8 @@ public class ScriptsFragment extends BaseSupportFragment
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       // hack to get the popupmenu color working on Android 6.0+ for custom color schemes
-      ContextCompat.getDrawable(getActivity(), R.drawable.bg_popup_material);
+      ContextCompat.getDrawable(getActivity(), R.drawable.bg_popup_dark);
+      ContextCompat.getDrawable(getActivity(), R.drawable.bg_popup_light);
     }
 
     PopupMenu popupMenu = new PopupMenu(getActivity(), view);
