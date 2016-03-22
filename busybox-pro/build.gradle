@@ -34,8 +34,9 @@ repositories {
 
 def versionMajor = 5
 def versionMinor = 0
-def versionPatch = 4
+def versionPatch = 5
 def versionBuild = 0
+def versionSuffix = versionBuild > 0 ? "-beta" : ""
 
 def initCrashlyticsPropertiesIfNeeded() {
     def propertiesFile = file('fabric.properties')
@@ -58,7 +59,7 @@ android {
         targetSdkVersion 23
         //noinspection GroovyAssignabilityCheck
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
-        versionName "${versionMajor}.${versionMinor}.${versionPatch}.${versionBuild}"
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}.${versionBuild}${versionSuffix}"
     }
     signingConfigs {
         release {
