@@ -76,5 +76,4 @@ project(':lib-roottools').projectDir = new File(core, "lib-roottools")
 project(':lib-slidinguppanellayout').projectDir = new File(core, "lib-slidinguppanellayout")
 project(':lib-support-v4').projectDir = new File(core, "lib-support-v4")
 project(':lib-svg').projectDir = new File(core, "lib-svg")
-
-project(':lib-texteditor').projectDir = new File(settingsDir, "../Android-Text-Editor/lib-texteditor")
+project(':lib-texteditor').projectDir = new File(core, "lib-texteditor")
