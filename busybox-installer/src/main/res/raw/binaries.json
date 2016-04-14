@@ -4,7 +4,7 @@
     "filename": "busybox",
     "abi": "arm",
     "path": "busybox/arm/pie/busybox",
-    "md5sum": "78e0a90e1fa1c6295aa4ae06909ca80b",
+    "md5sum": "5ba2769e399b8e7de76c9d0a9226f6e9",
     "size": 796472
   },
   {
@@ -12,7 +12,7 @@
     "filename": "busybox",
     "abi": "mips",
     "path": "http://jrummyapps.com/files/android/binaries/busybox/jrummyapps/1.24.2/mips/pie/bin/busybox",
-    "md5sum": "f54a74dc31a1d8f24a34c62daa47fd1c",
+    "md5sum": "8f0959be1e490dbc033f9f9433301826",
     "size": 1633408
   },
   {
@@ -20,7 +20,7 @@
     "filename": "busybox",
     "abi": "x86",
     "path": "http://jrummyapps.com/files/android/binaries/busybox/jrummyapps/1.24.2/x86/pie/bin/busybox",
-    "md5sum": "ed0dc4a1c176d063250ec679863a3736",
+    "md5sum": "42e2ffe154a3de2055b7fa05149846b2",
     "size": 878332
   },
   {
@@ -28,7 +28,7 @@
     "filename": "busybox",
     "abi": "arm",
     "path": "busybox/arm/nopie/busybox",
-    "md5sum": "cd07664e5d7553c1ad628f264e455a59",
+    "md5sum": "f90cbb588b831293597f057d254bb1d0",
     "size": 796472,
     "maxsdk": 20
   },
@@ -37,7 +37,7 @@
     "filename": "busybox",
     "abi": "mips",
     "path": "http://jrummyapps.com/files/android/binaries/busybox/jrummyapps/1.24.2/mips/nopie/bin/busybox",
-    "md5sum": "1083218c294290fc08430d3bc14b654c",
+    "md5sum": "ed887609b364fb8cfe3d9de3ffac5d84",
     "size": 1633356,
     "maxsdk": 20
   },
@@ -46,7 +46,7 @@
     "filename": "busybox",
     "abi": "x86",
     "path": "http://jrummyapps.com/files/android/binaries/busybox/jrummyapps/1.24.2/x86/nopie/bin/busybox",
-    "md5sum": "d3a9fa3f41c013e01f7f503e3c5248c0",
+    "md5sum": "c57d1f4b06c358d21ec2e58e96addfea",
     "size": 866044,
     "maxsdk": 20
   },
