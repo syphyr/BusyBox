@@ -36,6 +36,7 @@ include ':lib-io'
 include ':lib-io-external'
 include ':lib-jazzylistview'
 include ':lib-materialviewpager'
+include ':lib-networking'
 include ':lib-numberprogressbar'
 include ':lib-observablescrollview'
 include ':lib-picasso'
@@ -68,6 +69,7 @@ project(':lib-io').projectDir = new File(core, "lib-io")
 project(':lib-io-external').projectDir = new File(core, "lib-io-external")
 project(':lib-jazzylistview').projectDir = new File(core, "lib-jazzylistview")
 project(':lib-materialviewpager').projectDir = new File(core, "lib-materialviewpager")
+project(':lib-networking').projectDir = new File(core, "lib-networking")
 project(':lib-numberprogressbar').projectDir = new File(core, "lib-numberprogressbar")
 project(':lib-observablescrollview').projectDir = new File(core, "lib-observablescrollview")
 project(':lib-picasso').projectDir = new File(core, "lib-picasso")
