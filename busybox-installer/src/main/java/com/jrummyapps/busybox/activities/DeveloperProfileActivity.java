@@ -19,7 +19,8 @@ package com.jrummyapps.busybox.activities;
 
 import android.content.ActivityNotFoundException;
 import android.graphics.Color;
-import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.transition.Transition;
 import android.view.View;
@@ -32,14 +33,14 @@ import com.jrummyapps.android.constants.Websites;
 import com.jrummyapps.android.theme.BaseTheme;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
+import com.jrummyapps.android.transitions.FabDialogMorphSetup;
+import com.jrummyapps.android.transitions.TransitionUtils;
 import com.jrummyapps.android.util.IntentUtils;
 import com.jrummyapps.android.util.OrientationUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.android.widget.svg.SvgOutlineView;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.design.SvgIcons;
-import com.jrummyapps.busybox.transitions.FabDialogMorphSetup;
-import com.jrummyapps.busybox.utils.AnimUtils;
 
 public class DeveloperProfileActivity extends BaseActivity {
 
@@ -85,7 +86,7 @@ public class DeveloperProfileActivity extends BaseActivity {
 
     super.onCreate(savedInstanceState);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       getWindow().setStatusBarColor(Color.TRANSPARENT);
     }
 
@@ -98,19 +99,18 @@ public class DeveloperProfileActivity extends BaseActivity {
 
     findViewById(R.id.bottom_container).setBackgroundColor(ColorScheme.getAccent());
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    if (VERSION.SDK_INT >= VERSION_CODES.M) {
       // fix color scheme not applying on Android 6.0+
       ImageView profileImageBackground = findById(R.id.profile_background);
       profileImageBackground.setColorFilter(ColorScheme.getAccent());
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       FabDialogMorphSetup.setupSharedEelementTransitions(this, findViewById(R.id.container), ResUtils.dpToPx(2));
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-        && getWindow().getSharedElementEnterTransition() != null) {
-      getWindow().getSharedElementEnterTransition().addListener(new AnimUtils.TransitionListenerAdapter() {
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP && getWindow().getSharedElementEnterTransition() != null) {
+      getWindow().getSharedElementEnterTransition().addListener(new TransitionUtils.TransitionListenerAdapter() {
 
         @Override public void onTransitionEnd(Transition transition) {
           loadView();
@@ -161,7 +161,7 @@ public class DeveloperProfileActivity extends BaseActivity {
   }
 
   public void dismiss(View view) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       finishAfterTransition();
     } else {
       finish();

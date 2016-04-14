@@ -51,6 +51,7 @@ import com.jrummyapps.android.io.FileUtils;
 import com.jrummyapps.android.os.Os;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
+import com.jrummyapps.android.transitions.FabDialogMorphSetup;
 import com.jrummyapps.android.view.ViewHolder;
 import com.jrummyapps.android.widget.jazzylistview.JazzyListView;
 import com.jrummyapps.busybox.R;
@@ -62,7 +63,6 @@ import com.jrummyapps.busybox.database.ShellScriptTable;
 import com.jrummyapps.busybox.dialogs.CreateScriptDialog;
 import com.jrummyapps.busybox.models.ShellScript;
 import com.jrummyapps.busybox.tasks.ScriptLoader;
-import com.jrummyapps.busybox.transitions.FabDialogMorphSetup;
 import com.jrummyapps.texteditor.activities.TextEditorActivity;
 import com.jrummyapps.texteditor.shell.activities.ScriptExecutorActivity;
 

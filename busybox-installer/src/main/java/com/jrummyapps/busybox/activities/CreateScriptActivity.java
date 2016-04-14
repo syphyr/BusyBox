@@ -33,11 +33,11 @@ import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.base.BaseActivity;
 import com.jrummyapps.android.theme.BaseTheme;
 import com.jrummyapps.android.theme.Themes;
+import com.jrummyapps.android.transitions.FabDialogMorphSetup;
+import com.jrummyapps.android.transitions.TransitionUtils;
 import com.jrummyapps.android.util.KeyboardUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.busybox.R;
-import com.jrummyapps.busybox.transitions.FabDialogMorphSetup;
-import com.jrummyapps.busybox.utils.AnimUtils;
 
 import java.util.Locale;
 
@@ -102,7 +102,7 @@ public class CreateScriptActivity extends BaseActivity implements View.OnClickLi
     FabDialogMorphSetup.setupSharedEelementTransitions(this, findViewById(R.id.container), ResUtils.dpToPx(2));
 
     if (getWindow().getSharedElementEnterTransition() != null) {
-      getWindow().getSharedElementEnterTransition().addListener(new AnimUtils.TransitionListenerAdapter() {
+      getWindow().getSharedElementEnterTransition().addListener(new TransitionUtils.TransitionListenerAdapter() {
 
         @Override public void onTransitionEnd(Transition transition) {
           editScriptName.postDelayed(new Runnable() {

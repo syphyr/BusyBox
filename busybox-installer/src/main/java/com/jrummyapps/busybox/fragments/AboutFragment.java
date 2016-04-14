@@ -28,9 +28,9 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.jrummyapps.android.preferences.fragments.AboutPreferenceFragment;
+import com.jrummyapps.android.transitions.FabDialogMorphSetup;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.activities.DeveloperProfileActivity;
-import com.jrummyapps.busybox.transitions.FabDialogMorphSetup;
 
 public class AboutFragment extends AboutPreferenceFragment {
 
