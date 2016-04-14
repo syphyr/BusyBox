@@ -135,6 +135,24 @@
     "avatar": "https://avatars.githubusercontent.com/u/6203389?v=3&s=200"
   },
   {
+    "project": "OkHttp",
+    "authors": "Square",
+    "url": "http://square.github.io/okhttp/",
+    "year": 2014,
+    "license": "Apache Software License 2.0",
+    "license_url": "https://raw.githubusercontent.com/square/okhttp/master/LICENSE.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/82592?v=3&s=200"
+  },
+  {
+    "project": "Okio",
+    "authors": "Square",
+    "url": "https://github.com/square/okio",
+    "year": 2014,
+    "license": "Apache Software License 2.0",
+    "license_url": "https://raw.githubusercontent.com/square/okio/master/LICENSE.txt",
+    "avatar": "https://avatars.githubusercontent.com/u/82592?v=3&s=200"
+  },
+  {
     "project": "PagerSlidingTabStrip",
     "authors": "Andreas Stuetz",
     "url": "https://github.com/jpardogo/PagerSlidingTabStrip",
