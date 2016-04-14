@@ -13,7 +13,7 @@ print_usage() {
     exit 1
 }
 
-BB_VERSION="1.24.1"
+BB_VERSION="1.24.2"
 VERSION_SUFFIX="jrummy"
 ANDROID_NATIVE_API_LEVEL="android-9"
 GCC_VERSION="4.9"
