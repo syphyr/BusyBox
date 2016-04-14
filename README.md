@@ -17,9 +17,9 @@ Downloads
 
 | ABI  | SIZE   | MD5                              | DOWNLOAD                                                                                                                                |
 |------|--------|----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| ARM  | 912KB  | ccaf3bb1e7f41d1e401d124945df31c4 | [busybox 1.24.1](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.24.1/arm/static/bin/busybox?raw=true)  |
-| x86  | 1224KB | 5956265be9e79931c0e884ec3870f38c | [busybox 1.24.1](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.24.1/x86/static/bin/busybox?raw=true)  |
-| MIPS | 1972KB | 881657a52d66660e078fffc275d81a3e | [busybox 1.24.1](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.24.1/mips/static/bin/busybox?raw=true) |
+| ARM  | 912KB  | ccaf3bb1e7f41d1e401d124945df31c4 | [busybox 1.24.2](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.24.2/arm/static/bin/busybox?raw=true)  |
+| x86  | 1224KB | 5956265be9e79931c0e884ec3870f38c | [busybox 1.24.2](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.24.2/x86/static/bin/busybox?raw=true)  |
+| MIPS | 1972KB | 881657a52d66660e078fffc275d81a3e | [busybox 1.24.2](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.24.2/mips/static/bin/busybox?raw=true) |
 
 Building
 --------
