@@ -52,12 +52,10 @@ public class Utils {
 
   public static String getDeviceId(Context context) {
     if (deviceId == null) {
-      androidId =
-          Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+      androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
       try {
         // Create MD5 Hash
-        MessageDigest digest = java.security.MessageDigest
-            .getInstance("MD5");
+        MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
         digest.update(androidId.getBytes());
         byte messageDigest[] = digest.digest();
         // Create Hex String
@@ -81,8 +79,8 @@ public class Utils {
     if (applets.isEmpty()) {
       String json = readRaw(R.raw.busybox_applets);
       try {
-        JSONObject jsonObject=new JSONObject(json);
-        for(Iterator<String> iterator = jsonObject.keys(); iterator.hasNext(); ) {
+        JSONObject jsonObject = new JSONObject(json);
+        for (Iterator<String> iterator = jsonObject.keys(); iterator.hasNext(); ) {
           applets.add(iterator.next());
         }
       } catch (Exception ignored) {
@@ -135,11 +133,11 @@ public class Utils {
         String name = jsonObject.getString("name");
         String filename = jsonObject.getString("filename");
         String abi = jsonObject.getString("abi");
-        String path = jsonObject.getString("path");
+        String flavor = jsonObject.getString("flavor");
+        String url = jsonObject.getString("url");
         String md5sum = jsonObject.getString("md5sum");
         long size = jsonObject.getLong("size");
-        int minSdk = jsonObject.optInt("maxsdk", Build.VERSION.SDK_INT);
-        binaries.add(new BinaryInfo(name, filename, abi, path, md5sum, size, minSdk));
+        binaries.add(new BinaryInfo(name, filename, abi, flavor, url, md5sum, size));
       }
     } catch (Exception e) {
       Crashlytics.logException(e);
@@ -156,9 +154,10 @@ public class Utils {
    */
   public static ArrayList<BinaryInfo> getBinariesFromAssets(ABI abi) {
     ArrayList<BinaryInfo> binaries = getBinariesFromAssets();
+    String flavor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH ? "pie" : "nopie";
     for (Iterator<BinaryInfo> iterator = binaries.iterator(); iterator.hasNext(); ) {
       BinaryInfo binaryInfo = iterator.next();
-      if (!TextUtils.equals(binaryInfo.abi, abi.base) || binaryInfo.maxSdk < Build.VERSION.SDK_INT) {
+      if (!TextUtils.equals(binaryInfo.abi, abi.base) || !TextUtils.equals(binaryInfo.flavor, flavor)) {
         iterator.remove();
       }
     }

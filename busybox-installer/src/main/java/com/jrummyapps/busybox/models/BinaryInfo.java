@@ -29,19 +29,19 @@ public class BinaryInfo implements Parcelable {
   public final String name;
   public final String filename;
   public final String abi;
-  public final String path;
+  public final String flavor;
+  public final String url;
   public final String md5sum;
   public final long size;
-  public final int maxSdk;
 
-  public BinaryInfo(String name, String filename, String abi, String path, String md5sum, long size, int maxSdk) {
+  public BinaryInfo(String name, String filename, String abi, String flavor, String url, String md5sum, long size) {
     this.name = name;
     this.filename = filename;
     this.abi = abi;
-    this.path = path;
+    this.flavor = flavor;
+    this.url = url;
     this.md5sum = md5sum;
     this.size = size;
-    this.maxSdk = maxSdk;
   }
 
   public File getDownloadDestination() {
@@ -61,20 +61,20 @@ public class BinaryInfo implements Parcelable {
     dest.writeString(name);
     dest.writeString(filename);
     dest.writeString(abi);
-    dest.writeString(path);
+    dest.writeString(flavor);
+    dest.writeString(url);
     dest.writeString(md5sum);
     dest.writeLong(size);
-    dest.writeInt(maxSdk);
   }
 
   protected BinaryInfo(Parcel in) {
     name = in.readString();
     filename = in.readString();
     abi = in.readString();
-    path = in.readString();
+    flavor = in.readString();
+    url = in.readString();
     md5sum = in.readString();
     size = in.readLong();
-    maxSdk = in.readInt();
   }
 
   public static final Parcelable.Creator<BinaryInfo> CREATOR = new Parcelable.Creator<BinaryInfo>() {

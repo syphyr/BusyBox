@@ -40,6 +40,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.text.TextUtils;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -117,6 +118,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     View.OnClickListener {
 
   private static final String DEFAULT_INSTALL_PATH = "/system/xbin";
+  private static final String TAG = "InstallerFragment";
 
   private static final int REQUEST_TERM = 56;
 
@@ -405,6 +407,7 @@ public class InstallerFragment extends BaseSupportFragment implements
 
   @EventBusHook public void onEventMainThread(DownloadError event) {
     if (download != null && download.getId() == event.download.getId()) {
+      Log.i(TAG, "Error downloading " + event.download.getUrl() + ", error code " + event.download.getError());
       Analytics.newEvent("download error").put("error_code", event.download.getError()).log();
       showMessage(R.string.download_unsuccessful);
     }
@@ -558,7 +561,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     BinaryInfo binary = binaries.get(versionSpinner.getSelectedIndex());
 
     File file;
-    if (binary.path.startsWith("http")) {
+    if (binary.url.startsWith("http")) {
       file = binary.getDownloadDestination();
       if (!file.exists() || file.length() != binary.size) {
         // We need to download busybox before opening terminal
@@ -569,7 +572,7 @@ public class InstallerFragment extends BaseSupportFragment implements
           return null;
         }
         downloadCompleteCommand = command;
-        download = new Download.Builder(binary.path)
+        download = new Download.Builder(binary.url)
             .setDestination(file)
             .setFilename(binary.filename)
             .setShouldRedownload(true)
@@ -611,7 +614,7 @@ public class InstallerFragment extends BaseSupportFragment implements
         File file = params[0];
         if (!file.exists()) {
           //noinspection OctalInteger
-          Assets.transferAsset(getActivity(), binaryInfo.path, binaryInfo.filename, 0755);
+          Assets.transferAsset(getActivity(), binaryInfo.url, binaryInfo.filename, 0755);
         }
 
         Intent intent;
@@ -675,7 +678,7 @@ public class InstallerFragment extends BaseSupportFragment implements
   private void installBusyBox() {
     BinaryInfo binary = binaries.get(versionSpinner.getSelectedIndex());
     String path = paths.get(pathSpinner.getSelectedIndex());
-    if (binary.path.startsWith("http")) {
+    if (binary.url.startsWith("http")) {
       File destination = binary.getDownloadDestination();
       if (destination.exists() && destination.length() == binary.size) {
         Prefs prefs = Prefs.getInstance();
@@ -694,7 +697,7 @@ public class InstallerFragment extends BaseSupportFragment implements
           return;
         }
         downloadCompleteCommand = CMD_INSTALL;
-        download = new Download.Builder(binary.path)
+        download = new Download.Builder(binary.url)
             .setDestination(destination)
             .setFilename(binary.filename)
             .setShouldRedownload(true)
@@ -709,7 +712,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     } else {
       Prefs prefs = Prefs.getInstance();
       Installer.newBusyboxInstaller()
-          .setAsset(binary.path)
+          .setAsset(binary.url)
           .setFilename(binary.filename)
           .setPath(path)
           .setSymlink(prefs.get("symlink_busybox_applets", true))
