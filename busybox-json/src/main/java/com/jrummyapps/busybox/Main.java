@@ -50,15 +50,14 @@ public class Main {
     Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     List<Binary> binaries = new ArrayList<>();
 
-    for (String versionName : COMPILED_VERSION) {
-      File directory = new File(BUSYBOX_COMPILER_DIRECTORY, "compiled-" + versionName);
+    for (String version : COMPILED_VERSION) {
+      File directory = new File(BUSYBOX_COMPILER_DIRECTORY, "compiled-" + version);
       for (String abi : ABIS) {
         for (String flavor : FLAVORS) {
           try {
             File busybox = new File(directory, abi + separator + flavor + separator + "bin" + separator + "busybox");
             byte[] bytes = Files.readAllBytes(Paths.get(busybox.getAbsolutePath()));
             byte[] hash = MessageDigest.getInstance("MD5").digest(bytes);
-            String version = directory.getName().split("-")[1];
             Binary binary = new Binary();
             binary.name = "BusyBox " + version;
             binary.filename = busybox.getName();
@@ -68,7 +67,6 @@ public class Main {
             binary.flavor = flavor;
             if (version.equals(LATEST_VERSION) && abi.equals("arm") && !flavor.equals("static")) {
               // nopie and pie are included in the app's assets directory
-              // busybox/arm/nopie/busybox
               binary.url = "busybox/" + abi + "/" + flavor + "/busybox";
             } else {
               binary.url = String.format(DOWNLOAD_URL, version, abi, flavor);
