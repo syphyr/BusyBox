@@ -6,9 +6,7 @@
 
 BusyBox is currently available on Google Play:
 
-[![Get it on Google Play](
-    http://steverichey.github.io/google-play-badge-svg/img/en_get.svg)](
-    https://play.google.com/store/apps/details?id=com.jrummy.busybox.installer)
+<a href='https://play.google.com/store/apps/details?id=com.jrummy.busybox.installer'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' width="258" height="100"/></a>
 
 Please join this [Google+ community](https://plus.google.com/communities/113855814423561594889) to become a beta tester.
 
