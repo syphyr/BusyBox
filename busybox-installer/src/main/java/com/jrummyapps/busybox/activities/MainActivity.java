@@ -34,7 +34,6 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.base.BaseCompatActivity;
@@ -78,9 +77,6 @@ public class MainActivity extends BaseCompatActivity implements
   @Override public View onViewCreated(@NonNull View view, @Nullable AttributeSet attrs) {
     // We need to manually set the color scheme on Android 6.0+
     try {
-      if (view instanceof TextView) {
-        System.out.println(((TextView) view).getText());
-      }
       if (view instanceof CardView) {
         ((CardView) view).setCardBackgroundColor(ColorScheme.getBackgroundLight(getActivity()));
       }

@@ -44,7 +44,7 @@ android {
 }
 
 dependencies {
-    compile 'com.jaredrummler:material-spinner:1.0.4'
+    compile 'com.jaredrummler:material-spinner:1.0.9'
     compile 'com.jaredrummler:fastscroll-recyclerview:1.0.1'
     compile 'org.apache.commons:commons-compress:1.5'
     compile 'com.commit451:elasticdragdismisslayout:1.0.2'
