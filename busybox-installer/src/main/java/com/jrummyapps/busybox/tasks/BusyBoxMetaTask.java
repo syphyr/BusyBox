@@ -40,19 +40,19 @@ public class BusyBoxMetaTask extends AsyncTask<BusyBox, Void, ArrayList<FileMeta
     if (!file.exists() && file.path.equals("/sbin/busybox")) file.getFileInfo();
     if (!file.exists()) return null;
     ArrayList<FileMeta> properties = new ArrayList<>();
-    properties.add(new FileMeta(R.string.path, file.path));
+    properties.add(new FileMeta("path", R.string.path, file.path));
     String version = file.getVersion();
     if (!TextUtils.isEmpty(version)) {
-      properties.add(new FileMeta(R.string.version, version));
+      properties.add(new FileMeta("version", R.string.version, version));
     }
     FilePermissions permissions = file.getFilePermissions();
     if (permissions != null) {
       String value = Integer.toString(permissions.mode) + " (" + permissions.symbolicNotation + ")";
-      properties.add(new FileMeta(R.string.permissions, value));
+      properties.add(new FileMeta("permissions", R.string.permissions, value));
     }
-    properties.add(new FileMeta(R.string.size, Formatter.formatFileSize(App.getContext(), file.length())));
+    properties.add(new FileMeta("size", R.string.size, Formatter.formatFileSize(App.getContext(), file.length())));
     SimpleDateFormat sdf = DateUtils.getInstance().getDateTimeFormatter();
-    properties.add(new FileMeta(R.string.last_modified, sdf.format(file.lastModified())));
+    properties.add(new FileMeta("last_modified", R.string.last_modified, sdf.format(file.lastModified())));
     return properties;
   }
 

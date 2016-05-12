@@ -760,9 +760,9 @@ public class InstallerFragment extends BaseSupportFragment implements
       propertiesCard.setVisibility(View.VISIBLE);
     }
 
-    Analytics analytics = Analytics.newEvent("BusyBox Properties");
+    Analytics analytics = Analytics.newEvent("busybox properties");
     for (FileMeta property : properties) {
-      analytics.put(property.name, property.value);
+      analytics.put(property.label, property.value);
     }
     analytics.log();
 
