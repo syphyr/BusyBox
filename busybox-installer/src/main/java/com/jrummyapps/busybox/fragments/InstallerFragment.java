@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -219,6 +220,18 @@ public class InstallerFragment extends BaseSupportFragment implements
     installButton.setOnClickListener(this);
     infoButton.setOnClickListener(this);
     uninstallButton.setEnabled(busybox != null && busybox.exists() && !installing && !uninstalling);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      // fixes https://github.com/jrummyapps/BusyBox/issues/6
+      Resources.Theme theme = getActivity().getTheme();
+      Resources res = getResources();
+      if (Themes.isDark()) {
+        uninstallButton.setBackgroundTintList(res.getColorStateList(R.color.color_background_dark_lighter, theme));
+      } else {
+        uninstallButton.setBackgroundTintList(res.getColorStateList(R.color.color_background_light_lighter, theme));
+      }
+      installButton.setBackgroundTintList(res.getColorStateList(R.color.color_accent, theme));
+    }
   }
 
   @Override public void onSaveInstanceState(Bundle outState) {

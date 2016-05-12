@@ -20,7 +20,6 @@ package com.jrummyapps.busybox.activities;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -35,8 +34,6 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
@@ -47,8 +44,7 @@ import com.jrummyapps.android.io.WriteExternalStoragePermissions;
 import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
-import com.jrummyapps.android.tinting.EdgeTint;
-import com.jrummyapps.android.util.ReflectUtils;
+import com.jrummyapps.android.tinting.TintHelper;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.fragments.AppletsFragment;
 import com.jrummyapps.busybox.fragments.InstallerFragment;
@@ -83,22 +79,7 @@ public class MainActivity extends BaseCompatActivity implements
     // We need to manually set the color scheme on Android 6.0+
     try {
       if (view instanceof TextView) {
-        TextView textView = (TextView) view;
-        ColorStateList textColors = textView.getTextColors();
-        ColorScheme.applyColorScheme(textColors);
-        textView.setTextColor(textColors);
-        ColorScheme.applyColorScheme(textView.getBackgroundTintList());
-        ColorScheme.applyColorScheme(textView.getBackground());
-      }
-      if (view instanceof ViewGroup) {
-        if (view.getClass().getName().startsWith("android.widget")) {
-          ColorScheme.applyColorScheme(view.getBackground());
-        } else {
-          ColorScheme.applyColorScheme((Drawable) ReflectUtils.getFieldValue(view, "mBackground"));
-        }
-      }
-      if (view instanceof ImageButton) {
-        ColorScheme.applyColorScheme(view.getBackground());
+        System.out.println(((TextView) view).getText());
       }
       if (view instanceof CardView) {
         ((CardView) view).setCardBackgroundColor(ColorScheme.getBackgroundLight(getActivity()));
@@ -111,11 +92,10 @@ public class MainActivity extends BaseCompatActivity implements
         TabLayout tabLayout = (TabLayout) view;
         tabLayout.setSelectedTabIndicatorColor(ColorScheme.getAccent());
       }
-      EdgeTint.setEdgeGlowColor(view, ColorScheme.getPrimary());
     } catch (Exception e) {
       Crashlytics.logException(e);
     }
-    return view;
+    return TintHelper.applyColorScheme(view, attrs);
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
