@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.jaredrummler.fastscrollrecyclerview.FastScrollRecyclerView;
+import com.jrummyapps.android.activity.ActivityManager;
 import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.widget.jazzylistview.JazzyHelper;
@@ -123,7 +124,8 @@ public class AppletsFragment extends BaseSupportFragment {
         itemView.setOnClickListener(new View.OnClickListener() {
 
           @Override public void onClick(View v) {
-            BusyBoxAppletDialog.show((Activity) v.getContext(), text.getText().toString());
+            Activity currentActivity = ActivityManager.getInstance().getCurrentActivity();
+            BusyBoxAppletDialog.show(currentActivity, text.getText().toString());
           }
         });
       }

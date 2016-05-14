@@ -43,7 +43,6 @@ import com.jrummyapps.android.io.WriteExternalStoragePermissions;
 import com.jrummyapps.android.roottools.files.AFile;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
-import com.jrummyapps.android.tinting.TintHelper;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.fragments.AppletsFragment;
 import com.jrummyapps.busybox.fragments.InstallerFragment;
@@ -75,23 +74,25 @@ public class MainActivity extends BaseCompatActivity implements
 
   @TargetApi(Build.VERSION_CODES.M)
   @Override public View onViewCreated(@NonNull View view, @Nullable AttributeSet attrs) {
-    // We need to manually set the color scheme on Android 6.0+
-    try {
-      if (view instanceof CardView) {
-        ((CardView) view).setCardBackgroundColor(ColorScheme.getBackgroundLight(getActivity()));
+    if (Themes.isThemeChanged()) {
+      // We need to manually set the color scheme on Android 6.0+
+      try {
+        if (view instanceof CardView) {
+          ((CardView) view).setCardBackgroundColor(ColorScheme.getBackgroundLight(getActivity()));
+        }
+        if (view instanceof FloatingActionButton) {
+          FloatingActionButton fab = (FloatingActionButton) view;
+          fab.setBackgroundTintList(ColorStateList.valueOf(ColorScheme.getAccent()));
+        }
+        if (view instanceof TabLayout) {
+          TabLayout tabLayout = (TabLayout) view;
+          tabLayout.setSelectedTabIndicatorColor(ColorScheme.getAccent());
+        }
+      } catch (Exception e) {
+        Crashlytics.logException(e);
       }
-      if (view instanceof FloatingActionButton) {
-        FloatingActionButton fab = (FloatingActionButton) view;
-        fab.setBackgroundTintList(ColorStateList.valueOf(ColorScheme.getAccent()));
-      }
-      if (view instanceof TabLayout) {
-        TabLayout tabLayout = (TabLayout) view;
-        tabLayout.setSelectedTabIndicatorColor(ColorScheme.getAccent());
-      }
-    } catch (Exception e) {
-      Crashlytics.logException(e);
     }
-    return TintHelper.applyColorScheme(view, attrs);
+    return super.onViewCreated(view, attrs);
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
