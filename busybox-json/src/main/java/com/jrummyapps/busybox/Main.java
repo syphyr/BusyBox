@@ -40,7 +40,7 @@ public class Main {
   private static final String[] ABIS = {"arm", "mips", "x86"};
   private static final String[] FLAVORS = {"pie", "nopie"};
   private static final String DOWNLOAD_URL =
-      "https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-%s/%s/%s/bin/busybox?raw=true";
+      "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-%s/%s/%s/bin/busybox?raw=true";
 
   private static final File BUSYBOX_COMPILER_DIRECTORY = new File("busybox-compiler");
   private static final File BINARIES_JSON_FILE = new File("busybox-installer"
