@@ -19,6 +19,7 @@ package com.jrummyapps.busybox.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
@@ -64,6 +65,11 @@ public class AppletsFragment extends BaseSupportFragment {
     recyclerView.addOnScrollListener(scrollListener);
     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     recyclerView.setAdapter(new RecyclerAdapter());
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      recyclerView.setPopupBackgroundColor(ColorScheme.getAccent());
+      recyclerView.setThumbActiveColor(ColorScheme.getAccent());
+      recyclerView.setTrackInactiveColor(ColorScheme.getAccent());
+    }
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
