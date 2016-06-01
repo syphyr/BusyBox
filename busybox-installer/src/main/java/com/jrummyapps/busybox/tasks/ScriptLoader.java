@@ -22,8 +22,9 @@ import android.os.AsyncTask;
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.eventbus.Events;
+import com.jrummyapps.android.io.common.Assets;
+import com.jrummyapps.android.io.permissions.FilePermission;
 import com.jrummyapps.android.prefs.Prefs;
-import com.jrummyapps.android.roottools.utils.Assets;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.database.Database;
 import com.jrummyapps.busybox.database.ShellScriptTable;
@@ -56,7 +57,7 @@ public class ScriptLoader extends AsyncTask<Void, Void, ArrayList<ShellScript>> 
           String info = jsonObject.getString("info");
           String asset = "scripts/" + filename;
           //noinspection OctalInteger
-          Assets.transferAsset(App.getContext(), asset, asset, 0755);
+          Assets.transferAsset(asset, FilePermission.MODE_0755);
           File file = new File(App.getContext().getFilesDir(), asset);
           ShellScript script = new ShellScript(name, file.getAbsolutePath()).setInfo(info);
           table.insert(script);

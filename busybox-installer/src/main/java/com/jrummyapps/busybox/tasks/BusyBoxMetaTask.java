@@ -24,8 +24,8 @@ import android.text.format.Formatter;
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.fileproperties.models.FileMeta;
-import com.jrummyapps.android.io.FilePermissions;
-import com.jrummyapps.android.roottools.box.BusyBox;
+import com.jrummyapps.android.io.permissions.FilePermission;
+import com.jrummyapps.android.shell.tools.BusyBox;
 import com.jrummyapps.android.util.DateUtils;
 import com.jrummyapps.busybox.R;
 
@@ -45,7 +45,7 @@ public class BusyBoxMetaTask extends AsyncTask<BusyBox, Void, ArrayList<FileMeta
     if (!TextUtils.isEmpty(version)) {
       properties.add(new FileMeta("version", R.string.version, version));
     }
-    FilePermissions permissions = file.getFilePermissions();
+    FilePermission permissions = file.getFilePermissions();
     if (permissions != null) {
       String value = Integer.toString(permissions.mode) + " (" + permissions.symbolicNotation + ")";
       properties.add(new FileMeta("permissions", R.string.permissions, value));

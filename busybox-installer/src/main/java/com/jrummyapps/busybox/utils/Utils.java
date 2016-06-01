@@ -23,9 +23,9 @@ import android.provider.Settings;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
-import com.jrummyapps.android.io.IOUtils;
+import com.jrummyapps.android.io.common.IOUtils;
 import com.jrummyapps.android.os.ABI;
-import com.jrummyapps.android.roottools.box.BusyBox;
+import com.jrummyapps.android.shell.tools.BusyBox;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.models.BinaryInfo;
 
@@ -74,7 +74,7 @@ public class Utils {
   }
 
   public static List<String> getBusyBoxApplets() {
-    BusyBox busyBox = BusyBox.getInstance();
+    BusyBox busyBox = BusyBox.get();
     List<String> applets = busyBox.getApplets();
     if (applets.isEmpty()) {
       String json = readRaw(R.raw.busybox_applets);

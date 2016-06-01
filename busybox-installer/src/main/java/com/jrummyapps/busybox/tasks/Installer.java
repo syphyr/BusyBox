@@ -30,19 +30,20 @@ import android.support.v7.app.AlertDialog;
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.eventbus.Events;
-import com.jrummyapps.android.io.FileUtils;
-import com.jrummyapps.android.io.Storage;
+import com.jrummyapps.android.io.common.Assets;
+import com.jrummyapps.android.io.common.FileUtils;
 import com.jrummyapps.android.io.external.ExternalStorageHelper;
+import com.jrummyapps.android.io.files.LocalFile;
+import com.jrummyapps.android.io.permissions.FilePermission;
+import com.jrummyapps.android.io.storage.MountPoint;
+import com.jrummyapps.android.io.storage.Storage;
 import com.jrummyapps.android.prefs.Prefs;
-import com.jrummyapps.android.roottools.RootTools;
-import com.jrummyapps.android.roottools.box.BusyBox;
-import com.jrummyapps.android.roottools.check.RootCheck;
-import com.jrummyapps.android.roottools.files.AFile;
-import com.jrummyapps.android.roottools.files.FileLister;
-import com.jrummyapps.android.roottools.shell.stericson.Shell;
-import com.jrummyapps.android.roottools.utils.Assets;
-import com.jrummyapps.android.roottools.utils.Mount;
-import com.jrummyapps.android.roottools.utils.Reboot;
+import com.jrummyapps.android.shell.Shell;
+import com.jrummyapps.android.shell.files.FileLister;
+import com.jrummyapps.android.shell.superuser.check.RootCheck;
+import com.jrummyapps.android.shell.tools.BusyBox;
+import com.jrummyapps.android.shell.tools.Reboot;
+import com.jrummyapps.android.shell.tools.RootTools;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.utils.BusyBoxZipHelper;
 
@@ -50,13 +51,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static com.jrummyapps.android.io.PermissionsHelper.S_IRGRP;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IROTH;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IRUSR;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IWUSR;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IXGRP;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IXOTH;
-import static com.jrummyapps.android.io.PermissionsHelper.S_IXUSR;
+import static com.jrummyapps.android.io.permissions.FilePermission.S_IRGRP;
+import static com.jrummyapps.android.io.permissions.FilePermission.S_IROTH;
+import static com.jrummyapps.android.io.permissions.FilePermission.S_IRUSR;
+import static com.jrummyapps.android.io.permissions.FilePermission.S_IWUSR;
+import static com.jrummyapps.android.io.permissions.FilePermission.S_IXGRP;
+import static com.jrummyapps.android.io.permissions.FilePermission.S_IXOTH;
+import static com.jrummyapps.android.io.permissions.FilePermission.S_IXUSR;
 
 public class Installer implements Runnable {
 
@@ -68,7 +69,7 @@ public class Installer implements Runnable {
     return new Builder();
   }
 
-  public final AFile binary;
+  public final LocalFile binary;
   public final String asset;
   public final String path;
   public final String filename;
@@ -77,6 +78,7 @@ public class Installer implements Runnable {
   public final boolean recovery;
 
   private Installer(Builder builder) {
+    FilePermission p;
     binary = builder.binary;
     asset = builder.asset;
     path = builder.path;
@@ -94,13 +96,13 @@ public class Installer implements Runnable {
       return;
     }
 
-    AFile dtFile = new AFile(path, filename);
-    AFile parent = dtFile.getParentFile();
-    AFile srFile;
+    LocalFile dtFile = new LocalFile(path, filename);
+    LocalFile parent = dtFile.getParentFile();
+    LocalFile srFile;
 
     if (asset != null) {
-      Assets.transferAsset(App.getContext(), asset, filename, MODE_EXECUTABLE);
-      srFile = new AFile(App.getContext().getFilesDir(), filename);
+      Assets.transferAsset(asset, filename, MODE_EXECUTABLE);
+      srFile = new LocalFile(App.getContext().getFilesDir(), filename);
     } else {
       srFile = binary;
     }
@@ -112,14 +114,14 @@ public class Installer implements Runnable {
         BusyBoxZipHelper.createBusyboxRecoveryZip(busybox, dtFile.getAbsolutePath(), updateZip);
 
         File commandTemp = new File(App.getContext().getFilesDir(), "command");
-        FileUtils.writeNewFile(commandTemp, "--update_package=CACHE:busybox.zip'");
+        FileUtils.write(commandTemp, "--update_package=CACHE:busybox.zip'");
         RootTools.cp(commandTemp, new File("/cache/recovery/command"));
         RootTools.chmod("755", "/cache/recovery/command");
         RootTools.cp(updateZip, new File("/cache/busybox.zip"));
         RootTools.chmod("755", "/cache/busybox.zip");
 
         // TWRP reportedly does not find the update package
-        FileUtils.writeNewFile(commandTemp, "install /cache/busybox.zip");
+        FileUtils.write(commandTemp, "install /cache/busybox.zip");
         RootTools.cp(commandTemp, new File("/cache/recovery/openrecoveryscript"));
         RootTools.chmod("755", "/cache/recovery/openrecoveryscript");
 
@@ -134,16 +136,18 @@ public class Installer implements Runnable {
         Crashlytics.logException(e);
       }
     } else {
-      Mount mount = Mount.getMount(path);
-      if (mount == null) {
+      MountPoint mountPoint;
+      try {
+        mountPoint = MountPoint.findMountPoint(path);
+      } catch (MountPoint.InvalidMountPointException e) {
         Events.post(new ErrorEvent(this, "Error getting mount point for " + path));
         return;
       }
 
-      boolean mountedReadWrite = mount.isMountedReadWrite();
+      boolean mountedReadWrite = mountPoint.isReadWrite();
 
-      if (!mount.remountReadWrite()) {
-        Events.post(new ErrorEvent(this, "Error mounting " + mount.mountPoint + " read/write"));
+      if (!mountPoint.remount("rw") && !mountedReadWrite) {
+        Events.post(new ErrorEvent(this, "Error mounting " + mountPoint.getMountPoint() + " read/write"));
         return;
       }
 
@@ -179,7 +183,7 @@ public class Installer implements Runnable {
       BusyBox busyBox = BusyBox.from(dtFile.getAbsolutePath());
 
       if (overwrite && symlink && Storage.isSystemFile(dtFile)) {
-        mount.remountReadWrite();
+        mountPoint.remount("rw");
         List<String> applets = busyBox.getApplets();
         for (String applet : applets) {
           File file = new File(path, applet);
@@ -190,19 +194,19 @@ public class Installer implements Runnable {
       }
 
       if (symlink && Storage.isSystemFile(dtFile)) {
-        mount.remountReadWrite();
+        mountPoint.remount("rw");
         if (!Shell.SU.run("\"" + busyBox.path + "\" --install -s \"" + path + "\"").success()) {
           // "--install" is not a command, symlink applets one by one.
           List<String> applets = busyBox.getApplets();
           for (String applet : applets) {
-            AFile file = new AFile(path, applet);
+            LocalFile file = new LocalFile(path, applet);
             RootTools.ln(busyBox, file);
           }
         }
       }
 
       if (!mountedReadWrite) {
-        mount.remountReadOnly();
+        mountPoint.remount("ro");
       }
 
       Events.post(new FinishedEvent(this));
@@ -243,7 +247,7 @@ public class Installer implements Runnable {
 
   public static final class Builder implements Parcelable {
 
-    private AFile binary;
+    private LocalFile binary;
     private String asset;
     private String path;
     private String filename;
@@ -273,7 +277,7 @@ public class Installer implements Runnable {
       //dialog.show(activity.getFragmentManager(), "ConfirmInstallDialog");
     }
 
-    public Builder setBinary(AFile binary) {
+    public Builder setBinary(LocalFile binary) {
       this.binary = binary;
       return this;
     }
@@ -322,7 +326,7 @@ public class Installer implements Runnable {
     }
 
     protected Builder(Parcel in) {
-      this.binary = in.readParcelable(AFile.class.getClassLoader());
+      this.binary = in.readParcelable(LocalFile.class.getClassLoader());
       this.asset = in.readString();
       this.path = in.readString();
       this.filename = in.readString();

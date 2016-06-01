@@ -38,16 +38,16 @@ import com.jrummyapps.android.transitions.TransitionUtils;
 import com.jrummyapps.android.util.IntentUtils;
 import com.jrummyapps.android.util.OrientationUtils;
 import com.jrummyapps.android.util.ResUtils;
-import com.jrummyapps.android.widget.svg.SvgOutlineView;
+import com.jrummyapps.android.widget.AnimatedSvgView;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.design.SvgIcons;
 
 public class DeveloperProfileActivity extends BaseActivity {
 
-  private SvgOutlineView twitterView;
-  private SvgOutlineView googlePlusView;
-  private SvgOutlineView githubView;
-  private SvgOutlineView linkedinView;
+  private AnimatedSvgView twitterView;
+  private AnimatedSvgView googlePlusView;
+  private AnimatedSvgView githubView;
+  private AnimatedSvgView linkedinView;
 
   private final Rebound.SpringyTouchListener touchListener = new Rebound.SpringyTouchListener() {
 
@@ -124,15 +124,10 @@ public class DeveloperProfileActivity extends BaseActivity {
   private void loadView() {
     Analytics.newEvent("viewed developer profile").log();
 
-    twitterView.setSvgData(SvgIcons.TWITTER.getSvgData());
-    googlePlusView.setSvgData(SvgIcons.GOOGLE_PLUS.getSvgData());
-    githubView.setSvgData(SvgIcons.GITHUB.getSvgData());
-    linkedinView.setSvgData(SvgIcons.LINKEDIN.getSvgData());
-
-    twitterView.start();
-    googlePlusView.start();
-    githubView.start();
-    linkedinView.start();
+    SvgIcons.TWITTER.into(twitterView).start();
+    SvgIcons.GOOGLE_PLUS.into(googlePlusView).start();
+    SvgIcons.GITHUB.into(githubView).start();
+    SvgIcons.LINKEDIN.into(linkedinView).start();
 
     touchListener.setEndValue(-0.3);
     twitterView.setOnTouchListener(touchListener);

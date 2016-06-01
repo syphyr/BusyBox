@@ -31,7 +31,7 @@ import com.jrummyapps.android.base.BaseCompatActivity;
 import com.jrummyapps.android.html.HtmlBuilder;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
-import com.jrummyapps.android.widget.svg.SvgOutlineView;
+import com.jrummyapps.android.widget.AnimatedSvgView;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.design.SvgIcons;
 
@@ -43,15 +43,12 @@ public class AboutActivity extends BaseCompatActivity implements ElasticDragDism
 
     final ElasticDragDismissFrameLayout draggableLayout = findById(R.id.draggable_frame);
     final View backgroundView = findById(R.id.about_background);
-    final SvgOutlineView svgView = findById(R.id.svg);
+    final AnimatedSvgView svgView = findById(R.id.svg);
     final TextView aboutText = findById(R.id.about_text);
     final TextView creditsText = findById(R.id.credits_text);
 
     backgroundView.setBackgroundColor(ColorScheme.getBackgroundLight(this));
-    svgView.setSvgData(SvgIcons.LOGO.getSvgData());
-    svgView.adjustDuration(1.25f);
-    svgView.setSvgColorsAsTrace(true);
-    svgView.start();
+    SvgIcons.LOGO.into(svgView).start();
 
     svgView.setOnLongClickListener(new View.OnLongClickListener() {
 

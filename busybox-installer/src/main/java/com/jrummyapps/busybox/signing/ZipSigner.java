@@ -24,7 +24,7 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
-import com.jrummyapps.android.io.IOUtils;
+import com.jrummyapps.android.io.common.IOUtils;
 
 import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
 import org.apache.commons.compress.archivers.jar.JarArchiveOutputStream;

@@ -26,10 +26,9 @@ import android.support.v7.app.AlertDialog;
 
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.io.external.ExternalStorageHelper;
-import com.jrummyapps.android.roottools.RootTools;
-import com.jrummyapps.android.roottools.files.AFile;
-import com.jrummyapps.android.roottools.utils.Mount;
-import com.jrummyapps.android.roottools.utils.RootUtils;
+import com.jrummyapps.android.io.files.LocalFile;
+import com.jrummyapps.android.shell.tools.Box;
+import com.jrummyapps.android.shell.tools.RootTools;
 import com.jrummyapps.busybox.R;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ import java.util.List;
 
 public class Uninstaller implements Runnable {
 
-  public static void showConfirmationDialog(Activity activity, AFile file) {
+  public static void showConfirmationDialog(Activity activity, LocalFile file) {
     ConfirmUninstallDialog dialog = new ConfirmUninstallDialog();
     Bundle args = new Bundle();
     args.putParcelable("file", file);
@@ -45,28 +44,28 @@ public class Uninstaller implements Runnable {
     dialog.show(activity.getFragmentManager(), "ConfirmUninstallDialog");
   }
 
-  public static boolean uninstall(AFile binary) {
+  public static boolean uninstall(LocalFile binary) {
     return deleteFile(binary) && uninstallSymlinks(binary);
   }
 
-  public static boolean uninstallSymlinks(AFile binary) {
-    List<AFile> symlinks = getSymlinks(binary);
+  public static boolean uninstallSymlinks(LocalFile binary) {
+    List<LocalFile> symlinks = getSymlinks(binary);
     if (symlinks.isEmpty()) {
       return true;
     }
 
-    String rm = RootUtils.getUtil("rm");
+    String rm = Box.getTool("rm");
     if (rm != null) {
       StringBuilder command = new StringBuilder(rm);
-      for (AFile symlink : symlinks) {
+      for (LocalFile symlink : symlinks) {
         command.append(" \"").append(symlink.path).append("\"");
       }
-      if (Mount.remountThenRun(binary, command.toString()).success()) {
+      if (RootTools.remountThenRun(binary, command.toString()).success()) {
         return true;
       }
     }
 
-    for (AFile symlink : symlinks) {
+    for (LocalFile symlink : symlinks) {
       if (!deleteFile(symlink)) {
         return false;
       }
@@ -75,13 +74,13 @@ public class Uninstaller implements Runnable {
     return true;
   }
 
-  private static List<AFile> getSymlinks(AFile binary) {
-    List<AFile> symlinks = new ArrayList<>();
-    AFile parent = binary.getParentFile();
+  private static List<LocalFile> getSymlinks(LocalFile binary) {
+    List<LocalFile> symlinks = new ArrayList<>();
+    LocalFile parent = binary.getParentFile();
     if (parent != null) {
-      AFile[] files = parent.listFiles();
+      LocalFile[] files = parent.listFiles();
       if (files != null) {
-        for (AFile file : files) {
+        for (LocalFile file : files) {
           if (file.isSymbolicLink() && file.readlink().equals(binary)) {
             symlinks.add(file);
           }
@@ -91,13 +90,13 @@ public class Uninstaller implements Runnable {
     return symlinks;
   }
 
-  private static boolean deleteFile(AFile file) {
+  private static boolean deleteFile(LocalFile file) {
     return file.isOnRemovableStorage() && ExternalStorageHelper.delete(file) || file.delete() || RootTools.rm(file);
   }
 
-  private final AFile file;
+  private final LocalFile file;
 
-  public Uninstaller(AFile file) {
+  public Uninstaller(LocalFile file) {
     this.file = file;
   }
 
@@ -108,9 +107,9 @@ public class Uninstaller implements Runnable {
 
   public static final class StartEvent {
 
-    public final AFile file;
+    public final LocalFile file;
 
-    public StartEvent(AFile file) {
+    public StartEvent(LocalFile file) {
       this.file = file;
     }
 
@@ -118,10 +117,10 @@ public class Uninstaller implements Runnable {
 
   public static final class FinishedEvent {
 
-    public final AFile file;
+    public final LocalFile file;
     public final boolean success;
 
-    public FinishedEvent(AFile file, boolean success) {
+    public FinishedEvent(LocalFile file, boolean success) {
       this.file = file;
       this.success = success;
     }
@@ -131,7 +130,7 @@ public class Uninstaller implements Runnable {
   public static class ConfirmUninstallDialog extends DialogFragment {
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-      final AFile file = getArguments().getParcelable("file");
+      final LocalFile file = getArguments().getParcelable("file");
       return new AlertDialog.Builder(getActivity())
           .setTitle(R.string.confirm_before_deleting)
           .setMessage(getString(R.string.are_you_sure_you_want_to_uninstall_s, file.filename))

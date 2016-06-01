@@ -37,10 +37,10 @@ import com.jrummyapps.android.activity.ActivityManager;
 import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.widget.jazzylistview.JazzyHelper;
+import com.jrummyapps.android.widget.jazzylistview.JazzyRecyclerViewScrollListener;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.activities.AboutActivity;
 import com.jrummyapps.busybox.activities.SettingsActivity;
-import com.jrummyapps.busybox.design.JazzyRecyclerViewScrollListener;
 import com.jrummyapps.busybox.dialogs.BusyBoxAppletDialog;
 import com.jrummyapps.busybox.utils.Utils;
 

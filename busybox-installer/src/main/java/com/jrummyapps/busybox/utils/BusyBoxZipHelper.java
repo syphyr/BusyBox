@@ -18,10 +18,11 @@
 package com.jrummyapps.busybox.utils;
 
 import com.jrummyapps.android.app.App;
-import com.jrummyapps.android.io.FileUtils;
-import com.jrummyapps.android.io.IOUtils;
-import com.jrummyapps.android.roottools.box.BusyBox;
-import com.jrummyapps.android.roottools.utils.Assets;
+import com.jrummyapps.android.io.common.Assets;
+import com.jrummyapps.android.io.common.FileUtils;
+import com.jrummyapps.android.io.common.IOUtils;
+import com.jrummyapps.android.io.permissions.FilePermission;
+import com.jrummyapps.android.shell.tools.BusyBox;
 import com.jrummyapps.busybox.signing.ZipSigner;
 
 import java.io.BufferedOutputStream;
@@ -60,10 +61,9 @@ public class BusyBoxZipHelper {
     files.add(new String[]{updateBinary.getAbsolutePath(), UPDATE_BINARY_PATH});
     files.add(new String[]{script.getAbsolutePath(), UPDATE_SCRIPT_PATH});
 
-    // transfer the update-binary if it doesn't exist in our files directory yet.
     if (!updateBinary.exists()) {
       //noinspection OctalInteger
-      Assets.transferAsset(App.getContext(), "signing/update-binary", "update-binary", 0755);
+      Assets.transferAsset("signing/update-binary", "update-binary", FilePermission.MODE_0755);
     }
 
     // create the ZIP
@@ -167,7 +167,10 @@ public class BusyBoxZipHelper {
     sb.append("ui_print(\"****************************************\");\n");
     sb.append("ui_print(\"*          Install Complete!           *\");\n");
     sb.append("ui_print(\"****************************************\");\n");
-    FileUtils.writeNewFile(script, sb.toString());
+    try {
+      FileUtils.write(script, sb.toString());
+    } catch (IOException ignored) {
+    }
   }
 
 }

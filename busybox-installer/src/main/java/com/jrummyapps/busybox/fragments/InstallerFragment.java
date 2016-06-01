@@ -62,7 +62,7 @@ import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.animations.Technique;
 import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.colors.Color;
-import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
+import com.jrummyapps.android.directorypicker.dialog.DirectoryPickerDialog;
 import com.jrummyapps.android.downloader.Download;
 import com.jrummyapps.android.downloader.DownloadRequest;
 import com.jrummyapps.android.downloader.dialogs.DownloadProgressDialog;
@@ -77,15 +77,16 @@ import com.jrummyapps.android.fileproperties.charts.PieChart;
 import com.jrummyapps.android.fileproperties.charts.PieModel;
 import com.jrummyapps.android.fileproperties.models.FileMeta;
 import com.jrummyapps.android.html.HtmlBuilder;
-import com.jrummyapps.android.io.FileHelper;
-import com.jrummyapps.android.io.Storage;
+import com.jrummyapps.android.io.common.Assets;
+import com.jrummyapps.android.io.files.FileIntentUtils;
+import com.jrummyapps.android.io.files.LocalFile;
+import com.jrummyapps.android.io.permissions.FilePermission;
+import com.jrummyapps.android.io.storage.Storage;
 import com.jrummyapps.android.os.ABI;
 import com.jrummyapps.android.os.Os;
 import com.jrummyapps.android.prefs.Prefs;
-import com.jrummyapps.android.roottools.box.BusyBox;
-import com.jrummyapps.android.roottools.files.AFile;
-import com.jrummyapps.android.roottools.shell.stericson.Shell;
-import com.jrummyapps.android.roottools.utils.Assets;
+import com.jrummyapps.android.shell.Shell;
+import com.jrummyapps.android.shell.tools.BusyBox;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
 import com.jrummyapps.android.util.IntentUtils;
@@ -157,7 +158,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
       Technique.FADE_OUT.getComposer().duration(500).hideOnFinished().playOn(backgroundShadow);
       if (item.equals(getString(R.string.choose_a_directory))) {
-        DirectoryPickerDialog.show(getActivity(), new AFile("/"));
+        DirectoryPickerDialog.show(getActivity(), new LocalFile("/"));
       } else {
         pathIndex = view.getSelectedIndex();
         updateDiskUsagePieChart();
@@ -327,7 +328,7 @@ public class InstallerFragment extends BaseSupportFragment implements
       installBusyBox();
     } else if (v == infoButton) {
       Intent intent = new Intent(getActivity(), FilePropertiesActivity.class);
-      intent.putExtra(FileHelper.INTENT_EXTRA_FILE, (Parcelable) busybox);
+      intent.putExtra(FileIntentUtils.INTENT_EXTRA_FILE, (Parcelable) busybox);
       startActivity(intent);
     }
   }
@@ -368,7 +369,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     );
   }
 
-  @Override public void onDirectorySelected(AFile directory) {
+  @Override public void onDirectorySelected(LocalFile directory) {
     if (createArchive) {
       BinaryInfo binaryInfo = binaries.get(versionSpinner.getSelectedIndex());
       String filename = binaryInfo.filename + "-" + binaryInfo.abi + ".zip";
@@ -439,7 +440,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     uninstallButton.setEnabled(true);
     installButton.setEnabled(true);
 
-    busybox = BusyBox.from(new AFile(event.installer.path, event.installer.filename).path);
+    busybox = BusyBox.from(new LocalFile(event.installer.path, event.installer.filename).path);
 
     Analytics.newEvent("installed busybox")
         .put("is_ads_removed", Monetize.isAdsRemoved())
@@ -627,7 +628,7 @@ public class InstallerFragment extends BaseSupportFragment implements
         File file = params[0];
         if (!file.exists()) {
           //noinspection OctalInteger
-          Assets.transferAsset(getActivity(), binaryInfo.url, binaryInfo.filename, 0755);
+          Assets.transferAsset(binaryInfo.url, binaryInfo.filename, FilePermission.MODE_0755);
         }
 
         Intent intent;
@@ -697,7 +698,7 @@ public class InstallerFragment extends BaseSupportFragment implements
         Prefs prefs = Prefs.getInstance();
         Installer.newBusyboxInstaller()
             .setFilename(binary.filename)
-            .setBinary(new AFile(destination))
+            .setBinary(new LocalFile(destination))
             .setPath(path)
             .setSymlink(prefs.get("symlink_busybox_applets", true))
             .setOverwrite(prefs.get("replace_with_busybox_applets", false))

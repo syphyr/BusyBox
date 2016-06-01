@@ -18,9 +18,8 @@
 package com.jrummyapps.busybox.design;
 
 import android.graphics.Color;
-import android.graphics.PointF;
 
-import com.jrummyapps.android.svg.SVGData;
+import com.jrummyapps.android.widget.AnimatedSvgView;
 
 public enum SvgIcons {
   LOGO(
@@ -91,10 +90,10 @@ public enum SvgIcons {
       24, 24
   );
 
-  final String[] glyphs;
-  final int[] colors;
-  final int width;
-  final int height;
+  public final String[] glyphs;
+  public final int[] colors;
+  public final int width;
+  public final int height;
 
   SvgIcons(String[] glyphs, int[] colors, int width, int height) {
     this.glyphs = glyphs;
@@ -103,8 +102,14 @@ public enum SvgIcons {
     this.height = height;
   }
 
-  public SVGData getSvgData() {
-    return new SVGData(new PointF(width, height), glyphs, colors);
+  public AnimatedSvgView into(AnimatedSvgView view) {
+    view.setGlyphStrings(glyphs);
+    view.setFillColors(colors);
+    view.setTraceColors(colors);
+    view.setTraceResidueColor(0x32000000);
+    view.setViewportSize(width, height);
+    view.rebuildGlyphData();
+    return view;
   }
 
 }

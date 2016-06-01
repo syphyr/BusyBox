@@ -21,8 +21,8 @@ import android.os.AsyncTask;
 import android.os.StatFs;
 
 import com.jrummyapps.android.eventbus.Events;
-import com.jrummyapps.android.io.Storage;
-import com.jrummyapps.android.roottools.utils.Mount;
+import com.jrummyapps.android.io.storage.MountPoint;
+import com.jrummyapps.android.io.storage.Storage;
 import com.jrummyapps.busybox.models.BinaryInfo;
 
 public class DiskUsageTask extends AsyncTask<Void, Void, Long[]> {
@@ -36,14 +36,20 @@ public class DiskUsageTask extends AsyncTask<Void, Void, Long[]> {
   }
 
   @Override protected Long[] doInBackground(Void... params) {
-    Mount mount = Mount.getMount(path);
+    MountPoint mountPoint;
+    try {
+      mountPoint = MountPoint.findMountPoint(path);
+    } catch (MountPoint.InvalidMountPointException e) {
+      mountPoint = null;
+    }
+
     long total, free;
 
     String fileSystemPath;
-    if (mount == null || mount.mountPoint.equals("/")) {
+    if (mountPoint == null || mountPoint.getMountPoint().equals("/")) {
       fileSystemPath = Storage.ANDROID_ROOT.getAbsolutePath();
     } else {
-      fileSystemPath = mount.mountPoint;
+      fileSystemPath = mountPoint.getMountPoint();
     }
 
     StatFs statFs = new StatFs(fileSystemPath);

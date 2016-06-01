@@ -21,10 +21,10 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
 import com.jrummyapps.android.eventbus.Events;
-import com.jrummyapps.android.io.Storage;
-import com.jrummyapps.android.roottools.box.BusyBox;
-import com.jrummyapps.android.roottools.files.FileInfo;
-import com.jrummyapps.android.roottools.files.FileLister;
+import com.jrummyapps.android.io.storage.Storage;
+import com.jrummyapps.android.shell.files.FileInfo;
+import com.jrummyapps.android.shell.files.FileLister;
+import com.jrummyapps.android.shell.tools.BusyBox;
 
 import java.io.File;
 

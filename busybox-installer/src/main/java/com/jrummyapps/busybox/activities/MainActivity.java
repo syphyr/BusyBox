@@ -37,10 +37,10 @@ import android.view.View;
 
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.base.BaseCompatActivity;
-import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
+import com.jrummyapps.android.directorypicker.dialog.DirectoryPickerDialog;
 import com.jrummyapps.android.exceptions.NotImplementedException;
-import com.jrummyapps.android.io.WriteExternalStoragePermissions;
-import com.jrummyapps.android.roottools.files.AFile;
+import com.jrummyapps.android.io.files.LocalFile;
+import com.jrummyapps.android.io.permissions.WriteExternalStoragePermissions;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
 import com.jrummyapps.busybox.R;
@@ -111,13 +111,13 @@ public class MainActivity extends BaseCompatActivity implements
 
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    if (WriteExternalStoragePermissions.INSTANCE.onRequestPermissionsResult(requestCode, permissions, grantResults)) {
+    if (WriteExternalStoragePermissions.get().onRequestPermissionsResult(requestCode, permissions, grantResults)) {
       return;
     }
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
   }
 
-  @Override public void onDirectorySelected(AFile directory) {
+  @Override public void onDirectorySelected(LocalFile directory) {
     Fragment fragment = getCurrentFragment(getSupportFragmentManager(), viewPager);
     if (fragment instanceof DirectoryPickerDialog.OnDirectorySelectedListener) {
       ((DirectoryPickerDialog.OnDirectorySelectedListener) fragment).onDirectorySelected(directory);

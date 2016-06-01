@@ -46,8 +46,8 @@ import com.jrummyapps.android.colors.Color;
 import com.jrummyapps.android.eventbus.EventBusHook;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.fileproperties.activities.FilePropertiesActivity;
-import com.jrummyapps.android.io.FileHelper;
-import com.jrummyapps.android.io.FileUtils;
+import com.jrummyapps.android.io.common.FileUtils;
+import com.jrummyapps.android.io.files.FileIntentUtils;
 import com.jrummyapps.android.os.Os;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
@@ -185,19 +185,19 @@ public class ScriptsFragment extends BaseSupportFragment
         switch (item.getItemId()) {
           case 1: { // run
             Intent intent = new Intent(getActivity(), ScriptExecutorActivity.class);
-            intent.putExtra(FileHelper.INTENT_EXTRA_PATH, script.path);
+            intent.putExtra(FileIntentUtils.INTENT_EXTRA_PATH, script.path);
             startActivity(intent);
             return true;
           }
           case 2: { // edit
             Intent intent = new Intent(getActivity(), TextEditorActivity.class);
-            intent.putExtra(FileHelper.INTENT_EXTRA_PATH, script.path);
+            intent.putExtra(FileIntentUtils.INTENT_EXTRA_PATH, script.path);
             startActivity(intent);
             return true;
           }
           case 3: { // info
             Intent intent = new Intent(getActivity(), FilePropertiesActivity.class);
-            intent.putExtra(FileHelper.INTENT_EXTRA_FILE, new File(script.path));
+            intent.putExtra(FileIntentUtils.INTENT_EXTRA_FILE, new File(script.path));
             intent.putExtra(FilePropertiesActivity.EXTRA_DESCRIPTION, script.info);
             startActivity(intent);
             return true;
@@ -285,7 +285,7 @@ public class ScriptsFragment extends BaseSupportFragment
     adapter.notifyDataSetChanged();
 
     Intent intent = new Intent(getActivity(), TextEditorActivity.class);
-    intent.putExtra(FileHelper.INTENT_EXTRA_PATH, script.path);
+    intent.putExtra(FileIntentUtils.INTENT_EXTRA_PATH, script.path);
     startActivity(intent);
   }
 

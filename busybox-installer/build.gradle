@@ -48,7 +48,8 @@ dependencies {
     compile 'com.jaredrummler:fastscroll-recyclerview:1.0.1'
     compile 'org.apache.commons:commons-compress:1.5'
     compile 'com.commit451:elasticdragdismisslayout:1.0.2'
-    compile project(':lib-texteditor')
-    compile project(':lib-downloader')
-    compile project(':lib-crypto')
+    compile 'com.facebook.rebound:rebound:0.3.8'
+    compile 'com.jrummyapps:texteditor:1.0.0'
+    compile 'com.jrummyapps:downloader:1.0.0'
+    compile 'com.jrummyapps:android-crypto:1.0.0'
 }
