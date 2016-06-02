@@ -62,6 +62,7 @@ import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.animations.Technique;
 import com.jrummyapps.android.base.BaseSupportFragment;
 import com.jrummyapps.android.colors.Color;
+import com.jrummyapps.android.common.Toasts;
 import com.jrummyapps.android.directorypicker.dialog.DirectoryPickerDialog;
 import com.jrummyapps.android.downloader.Download;
 import com.jrummyapps.android.downloader.DownloadRequest;
@@ -617,7 +618,8 @@ public class InstallerFragment extends BaseSupportFragment implements
     final BinaryInfo binaryInfo = binaries.get(versionSpinner.getSelectedIndex());
     File file = getSelectedBinary(CMD_INSTALL);
     if (file == null) {
-      return; // downloading or no network connection
+      Log.i(TAG, "No network connection available to download the BusyBox binary");
+      return;
     }
 
     new AsyncTask<File, String, Intent>() {
@@ -627,8 +629,8 @@ public class InstallerFragment extends BaseSupportFragment implements
       @Override protected Intent doInBackground(File... params) {
         File file = params[0];
         if (!file.exists()) {
-          //noinspection OctalInteger
-          Assets.transferAsset(binaryInfo.url, binaryInfo.filename, FilePermission.MODE_0755);
+          boolean transferred = Assets.transferAsset(binaryInfo.url, binaryInfo.filename, FilePermission.MODE_0755);
+          Log.i(TAG, String.format(Locale.ENGLISH, "Transferred %s to %s: %b", binaryInfo.url, binaryInfo.filename, transferred));
         }
 
         Intent intent;
@@ -640,11 +642,13 @@ public class InstallerFragment extends BaseSupportFragment implements
           intent = new Intent("jrummy.androidterm.RUN_SCRIPT");
           permission = "jrummy.androidterm.permission.RUN_SCRIPT";
         } else {
+          Log.i(TAG, "No intent available to open a terminal");
           return null;
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
           if (getActivity().checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "Requesting permission " + permission);
             OrientationUtils.lockOrientation(getActivity());
             requestPermissions(new String[]{permission}, REQUEST_TERM);
             synchronized (termLock) {
@@ -662,12 +666,10 @@ public class InstallerFragment extends BaseSupportFragment implements
         //noinspection ResultOfMethodCallIgnored
         bin.mkdirs();
 
-        //noinspection OctalInteger
-        Os.chmod(file.getAbsolutePath(), 0755);
-        //noinspection OctalInteger
-        Os.chmod(bin.getAbsolutePath(), 0777);
-        //noinspection OctalInteger
-        Os.chmod(file.getParent(), 0777);
+        Log.i(TAG, "Installing busybox to " + bin.getAbsolutePath());
+        Os.chmod(file.getAbsolutePath(), FilePermission.MODE_0755);
+        Os.chmod(bin.getAbsolutePath(), FilePermission.MODE_0777);
+        Os.chmod(file.getParent(), FilePermission.MODE_0777);
         Shell.SH.run(file + " --install -s " + bin);
         Shell.SH.run(file + " ln -s " + file + " " + bin + "/busybox");
 
@@ -679,11 +681,14 @@ public class InstallerFragment extends BaseSupportFragment implements
 
       @Override protected void onPostExecute(Intent intent) {
         if (intent == null && openGooglePlay) {
+          Log.i(TAG, "Opening Google Play to download Terminal Emulator by JackPal");
           intent = IntentUtils.newMarketForAppIntent(getActivity(), "jackpal.androidterm");
         }
         try {
           startActivity(intent);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+          Toasts.show("Error opening Terminal Emulator");
+          Crashlytics.logException(e);
         }
       }
     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, file);

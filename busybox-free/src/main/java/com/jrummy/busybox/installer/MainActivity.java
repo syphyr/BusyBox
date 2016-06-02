@@ -31,11 +31,13 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
 import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.animations.Technique;
 import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.eventbus.EventBusHook;
 import com.jrummyapps.android.eventbus.Events;
+import com.jrummyapps.android.prefs.Prefs;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.busybox.monetize.Monetize;
 import com.jrummyapps.busybox.monetize.OnAdsRemovedEvent;
@@ -52,15 +54,23 @@ public class MainActivity extends com.jrummyapps.busybox.activities.MainActivity
 
   private InterstitialAd interstitialAd;
   private BillingProcessor bp;
+  private AdView adView;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     Crashlytics.setString("GIT_SHA", BuildConfig.GIT_SHA);
     Crashlytics.setString("BUILD_TIME", BuildConfig.BUILD_TIME);
+    MobileAds.initialize(getApplicationContext(), "ca-app-pub-1915343032510958/9622649453");
 
-    final AdView adView = (AdView) findViewById(R.id.ad_view);
+    adView = (AdView) findViewById(R.id.ad_view);
     bp = new BillingProcessor(this, Monetize.decrypt(Monetize.ENCRYPTED_LICENSE_KEY), this);
+
+    if (Prefs.getInstance().get("loaded_purchases_from_google", true)) {
+      Prefs.getInstance().save("loaded_purchases_from_google", false);
+      bp.loadOwnedPurchasesFromGoogle();
+    }
+
     if (!Monetize.isAdsRemoved()) {
       AdRequest adRequest;
       if (App.isDebug()) {
@@ -85,10 +95,27 @@ public class MainActivity extends com.jrummyapps.busybox.activities.MainActivity
     }
   }
 
+  @Override protected void onPause() {
+    if (adView != null) {
+      adView.pause();
+    }
+    super.onPause();
+  }
+
+  @Override protected void onResume() {
+    super.onResume();
+    if (adView != null) {
+      adView.resume();
+    }
+  }
+
   @Override public void onDestroy() {
     super.onDestroy();
     if (bp != null) {
       bp.release();
+    }
+    if (adView != null) {
+      adView.destroy();
     }
   }
 

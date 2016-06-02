@@ -19,6 +19,8 @@ package com.jrummyapps.busybox.activities;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,9 +35,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.jrummyapps.android.base.BaseApp;
 import com.jrummyapps.android.base.BaseCompatActivity;
 import com.jrummyapps.android.directorypicker.dialog.DirectoryPickerDialog;
 import com.jrummyapps.android.exceptions.NotImplementedException;
@@ -55,9 +60,11 @@ public class MainActivity extends BaseCompatActivity implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener {
 
+  private FirebaseAnalytics firebaseAnalytics;
   private ViewPager viewPager;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
+    BaseApp app;
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     TabLayout tabLayout = findById(R.id.tabs);
@@ -70,6 +77,9 @@ public class MainActivity extends BaseCompatActivity implements
     viewPager.setAdapter(pagerAdapter);
     tabLayout.setupWithViewPager(viewPager);
     viewPager.setCurrentItem(1);
+    if (savedInstanceState == null) {
+      initFirebaseAnalytics();
+    }
   }
 
   @TargetApi(Build.VERSION_CODES.M)
@@ -164,6 +174,20 @@ public class MainActivity extends BaseCompatActivity implements
       return titles[position];
     }
 
+  }
+
+  private void initFirebaseAnalytics() {
+    Bundle bundle = new Bundle();
+    try {
+      PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+      bundle.putString("packageName", packageInfo.packageName);
+      bundle.putString("versionName", packageInfo.versionName);
+      bundle.putInt("versionCode", packageInfo.versionCode);
+    } catch (PackageManager.NameNotFoundException wtf) {
+      Log.w("MainActivity", "Error getting package info", wtf);
+    }
+    firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle);
   }
 
 }
