@@ -36,7 +36,7 @@ repositories {
 
 def versionMajor = 5
 def versionMinor = 3
-def versionPatch = 8
+def versionPatch = 9
 def versionBuild = 0
 def versionSuffix = versionBuild > 0 ? "-beta" : ""
 
