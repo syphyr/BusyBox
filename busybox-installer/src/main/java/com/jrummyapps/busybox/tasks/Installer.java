@@ -91,7 +91,7 @@ public class Installer implements Runnable {
   @Override public void run() {
     Events.post(new StartEvent(this));
 
-    if (!RootCheck.getInstance().accessGranted) {
+    if (!RootCheck.get().accessGranted) {
       Events.post(new ErrorEvent(this, ERROR_NOT_ROOTED));
       return;
     }
