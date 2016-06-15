@@ -40,7 +40,6 @@ import android.view.View;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.jrummyapps.android.base.BaseApp;
 import com.jrummyapps.android.base.BaseCompatActivity;
 import com.jrummyapps.android.directorypicker.dialog.DirectoryPickerDialog;
 import com.jrummyapps.android.exceptions.NotImplementedException;
@@ -64,7 +63,6 @@ public class MainActivity extends BaseCompatActivity implements
   private ViewPager viewPager;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
-    BaseApp app;
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     TabLayout tabLayout = findById(R.id.tabs);
