@@ -185,6 +185,7 @@ public class MainActivity extends BaseCompatActivity implements
       Log.w("MainActivity", "Error getting package info", wtf);
     }
     firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+    firebaseAnalytics.setAnalyticsCollectionEnabled(true);
     firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle);
   }
 
