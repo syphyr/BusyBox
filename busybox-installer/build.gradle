@@ -51,7 +51,7 @@ dependencies {
   compile 'com.commit451:elasticdragdismisslayout:1.0.2'
   compile 'com.facebook.rebound:rebound:0.3.8'
   compile 'com.google.firebase:firebase-core:9.0.1'
-  compile 'com.jrummyapps:texteditor:1.0.0'
+  compile 'com.jrummyapps:texteditor:1.0.1'
   compile 'com.jrummyapps:downloader:1.0.2'
   compile 'com.jrummyapps:android-crypto:1.0.0'
 }
