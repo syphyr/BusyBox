@@ -35,8 +35,8 @@ repositories {
 }
 
 def versionMajor = 5
-def versionMinor = 3
-def versionPatch = 9
+def versionMinor = 4
+def versionPatch = 0
 def versionBuild = 0
 def versionSuffix = versionBuild > 0 ? "-beta" : ""
 
@@ -62,13 +62,13 @@ def buildTime() {
 }
 
 android {
-  compileSdkVersion 23
-  buildToolsVersion "23.0.3"
+  compileSdkVersion 24
+  buildToolsVersion "24"
 
   defaultConfig {
     applicationId "com.jrummy.busybox.installer"
     minSdkVersion 14
-    targetSdkVersion 23
+    targetSdkVersion 24
     //noinspection GroovyAssignabilityCheck
     versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
     versionName "${versionMajor}.${versionMinor}.${versionPatch}.${versionBuild}${versionSuffix}"
