@@ -90,6 +90,7 @@ import com.jrummyapps.android.shell.Shell;
 import com.jrummyapps.android.shell.tools.BusyBox;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.theme.Themes;
+import com.jrummyapps.android.util.ArrayUtils;
 import com.jrummyapps.android.util.IntentUtils;
 import com.jrummyapps.android.util.OrientationUtils;
 import com.jrummyapps.android.util.ResUtils;
@@ -120,7 +121,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
     View.OnClickListener {
 
-  private static final String DEFAULT_INSTALL_PATH = "/system/xbin";
+  private static final String DEFAULT_INSTALL_PATH;
   private static final String TAG = "InstallerFragment";
 
   private static final int REQUEST_TERM = 56;
@@ -128,6 +129,14 @@ public class InstallerFragment extends BaseSupportFragment implements
   private static final int CMD_INSTALL = 0;
   private static final int CMD_TERMINAL = 1;
   private static final int CMD_CREATE_ZIP = 2;
+
+  static {
+    if (ArrayUtils.contains(Storage.PATH, "/su/xbin")) {
+      DEFAULT_INSTALL_PATH = "/su/xbin";
+    } else {
+      DEFAULT_INSTALL_PATH = "/system/xbin";
+    }
+  }
 
   private final Object termLock = new Object();
 
