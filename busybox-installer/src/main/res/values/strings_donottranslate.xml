@@ -18,7 +18,7 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools">
   <string name="banner_ad_unit_id">ca-app-pub-1915343032510958/9622649453</string>
-  <string name="website_main">http://busybox.jrummyapps.com</string>
+  <string name="website_main">http://jrummyapps.com</string>
   <string name="website_faqs">http://support.jrummyapps.com/knowledge-base/faqs/busybox-for-android</string>
   <string name="website_tutorial">http://busybox.jrummyapps.com/#faq</string>
   <string name="website_support">http://support.jrummyapps.com</string>
