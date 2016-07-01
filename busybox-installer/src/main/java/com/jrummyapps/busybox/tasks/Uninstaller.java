@@ -25,7 +25,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
 import com.jrummyapps.android.eventbus.Events;
-import com.jrummyapps.android.io.external.ExternalStorageHelper;
+import com.jrummyapps.android.io.files.FileOperation;
 import com.jrummyapps.android.io.files.LocalFile;
 import com.jrummyapps.android.shell.tools.Box;
 import com.jrummyapps.android.shell.tools.RootTools;
@@ -45,7 +45,7 @@ public class Uninstaller implements Runnable {
   }
 
   public static boolean uninstall(LocalFile binary) {
-    return deleteFile(binary) && uninstallSymlinks(binary);
+    return FileOperation.delete(binary) && uninstallSymlinks(binary);
   }
 
   public static boolean uninstallSymlinks(LocalFile binary) {
@@ -66,7 +66,7 @@ public class Uninstaller implements Runnable {
     }
 
     for (LocalFile symlink : symlinks) {
-      if (!deleteFile(symlink)) {
+      if (!FileOperation.delete(symlink)) {
         return false;
       }
     }
@@ -88,10 +88,6 @@ public class Uninstaller implements Runnable {
       }
     }
     return symlinks;
-  }
-
-  private static boolean deleteFile(LocalFile file) {
-    return file.isOnRemovableStorage() && ExternalStorageHelper.delete(file) || file.delete() || RootTools.rm(file);
   }
 
   private final LocalFile file;

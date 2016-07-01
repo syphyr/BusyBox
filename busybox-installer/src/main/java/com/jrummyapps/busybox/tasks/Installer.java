@@ -32,7 +32,7 @@ import com.jrummyapps.android.app.App;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.io.common.Assets;
 import com.jrummyapps.android.io.common.FileUtils;
-import com.jrummyapps.android.io.external.ExternalStorageHelper;
+import com.jrummyapps.android.io.files.FileOperation;
 import com.jrummyapps.android.io.files.LocalFile;
 import com.jrummyapps.android.io.permissions.FilePermission;
 import com.jrummyapps.android.io.storage.MountPoint;
@@ -153,7 +153,7 @@ public class Installer implements Runnable {
 
       if (parent != null && !parent.isDirectory()) {
         if (parent.isOnRemovableStorage()) {
-          ExternalStorageHelper.mkdir(parent);
+          FileOperation.mkdir(parent);
         } else if (parent.isOnExternalStorage()) {
           //noinspection ResultOfMethodCallIgnored
           parent.mkdirs();
