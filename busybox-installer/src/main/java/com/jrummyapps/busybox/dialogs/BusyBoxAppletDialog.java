@@ -28,6 +28,7 @@ import android.text.TextUtils;
 
 import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.shell.tools.BusyBox;
+import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.utils.Utils;
 
@@ -63,6 +64,11 @@ public class BusyBoxAppletDialog extends DialogFragment {
           }
         })
         .create();
+  }
+
+  @Override public void onStart() {
+    super.onStart();
+    ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ColorScheme.getAccent());
   }
 
   private static class AppletHelpTask extends AsyncTask<Void, Void, String> {
