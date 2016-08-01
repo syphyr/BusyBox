@@ -43,6 +43,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jrummyapps.android.base.BaseCompatActivity;
 import com.jrummyapps.android.directorypicker.dialog.DirectoryPickerDialog;
 import com.jrummyapps.android.exceptions.NotImplementedException;
+import com.jrummyapps.android.io.files.DocumentManager;
 import com.jrummyapps.android.io.files.LocalFile;
 import com.jrummyapps.android.io.permissions.WriteExternalStoragePermissions;
 import com.jrummyapps.android.theme.ColorScheme;
@@ -104,6 +105,9 @@ public class MainActivity extends BaseCompatActivity implements
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (DocumentManager.get().onActivityResult(requestCode, resultCode, data)) {
+      return;
+    }
     if (requestCode == ScriptsFragment.REQUEST_CREATE_SCRIPT) {
       Fragment fragment = getCurrentFragment(getSupportFragmentManager(), viewPager);
       if (fragment instanceof ScriptsFragment) {
