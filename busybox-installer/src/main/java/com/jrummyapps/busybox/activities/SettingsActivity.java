@@ -19,10 +19,13 @@ package com.jrummyapps.busybox.activities;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.view.View;
+import android.view.ViewGroup;
 
-import com.jrummyapps.android.common.Toasts;
+import com.jrummyapps.android.animations.Technique;
 import com.jrummyapps.android.easteregg.EasterEggCallback;
 import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
+import com.jrummyapps.android.util.ViewUtils;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.fragments.AboutFragment;
 import com.jrummyapps.busybox.fragments.SettingsFragment;
@@ -30,19 +33,6 @@ import com.jrummyapps.busybox.fragments.SettingsFragment;
 import java.util.Random;
 
 public class SettingsActivity extends MainPreferenceActivity implements EasterEggCallback {
-
-  private static final String[] INSULTS = {
-      "I'm not saying I hate you, but I would unplug your life support to charge my phone.",
-      "I bet your brain feels as good as new, seeing that you never use it.",
-      "You bring everyone a lot of joy, when you leave the room.",
-      "Two wrongs don't make a right, take your parents as an example.",
-      "If laughter is the best medicine, your face must be curing the world.",
-      "You're the reason the gene pool needs a lifeguard.",
-      "I don't exactly hate you, but if you were on fire and I had water, I'd drink it.",
-      "You're as bright as a black hole, and twice as dense.",
-      "If you spoke your mind, you'd be speechless.",
-      "Don't feel sad, don't feel blue, Frankenstein was ugly too."
-  };
 
   @Override protected Fragment getFragment(int position) {
     int stringId = getStringId(position);
@@ -55,8 +45,36 @@ public class SettingsActivity extends MainPreferenceActivity implements EasterEg
   }
 
   @Override public void onRequestEgg(Activity activity, int id, int count) {
-    // insult our most valued customers for finding our precious easter egg
-    Toasts.show(INSULTS[new Random().nextInt(INSULTS.length)]);
+    Technique[] techniques = {
+        Technique.SHAKE,
+        Technique.BOUNCE,
+        Technique.FLASH,
+        Technique.PULSE,
+        Technique.ROTATE,
+        Technique.SWING,
+        Technique.TADA,
+        Technique.WAVE,
+        Technique.WOBBLE
+    };
+    Random random = new Random();
+    Technique technique = techniques[random.nextInt(techniques.length)];
+    ViewGroup viewGroup = ViewUtils.getRootView(activity);
+    if (random.nextInt(10) == 0) {
+      Technique.ROTATE.playOn(viewGroup);
+      return;
+    }
+    animate(viewGroup, technique);
+  }
+
+  private void animate(ViewGroup viewGroup, Technique technique) {
+    for (int i = 0, len = viewGroup.getChildCount(); i < len; i++) {
+      View child = viewGroup.getChildAt(i);
+      if (child instanceof ViewGroup) {
+        animate((ViewGroup) child, technique);
+      } else {
+        technique.playOn(child);
+      }
+    }
   }
 
 }
