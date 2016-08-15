@@ -14,10 +14,10 @@ allprojects {
   repositories {
     jcenter()
     maven {
-      url "${JRUMMYAPPS_ARTIFACTORY_URL}"
+      url "${artifactory_url}"
       credentials {
-        username = "${JRUMMYAPPS_ARTIFACTORY_USERNAME}"
-        password = "${JRUMMYAPPS_ARTIFACTORY_PASSWORD}"
+        username = "${artifactory_username}"
+        password = "${artifactory_password}"
       }
     }
   }
