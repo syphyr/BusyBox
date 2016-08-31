@@ -19,7 +19,6 @@ package com.jrummyapps.busybox.dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,6 +26,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 
 import com.jrummyapps.android.analytics.Analytics;
+import com.jrummyapps.android.dialog.BaseDialogFragment;
 import com.jrummyapps.android.shell.tools.BusyBox;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.busybox.R;
@@ -37,7 +37,7 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
-public class BusyBoxAppletDialog extends DialogFragment {
+public class BusyBoxAppletDialog extends BaseDialogFragment {
 
   public static void show(Activity activity, String applet) {
     new AppletHelpTask(activity, applet).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

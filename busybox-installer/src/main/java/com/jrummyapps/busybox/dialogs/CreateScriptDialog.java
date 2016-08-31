@@ -19,7 +19,6 @@ package com.jrummyapps.busybox.dialogs;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -31,6 +30,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.jrummyapps.android.analytics.Analytics;
+import com.jrummyapps.android.dialog.BaseDialogFragment;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.android.util.KeyboardUtils;
@@ -38,7 +38,7 @@ import com.jrummyapps.busybox.R;
 
 import java.util.Locale;
 
-public class CreateScriptDialog extends DialogFragment {
+public class CreateScriptDialog extends BaseDialogFragment {
 
   private Button positiveButton;
   private EditText editScriptName;

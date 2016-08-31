@@ -18,19 +18,19 @@
 package com.jrummyapps.busybox.dialogs;
 
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
 import com.jrummyapps.android.analytics.Analytics;
+import com.jrummyapps.android.dialog.BaseDialogFragment;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.monetize.RequestPremiumEvent;
 import com.jrummyapps.busybox.monetize.RequestRemoveAds;
 import com.jrummyapps.busybox.monetize.ShowInterstitalAdEvent;
 
-public class BusyboxSuccessDialog extends DialogFragment {
+public class BusyboxSuccessDialog extends BaseDialogFragment {
 
   @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
     setCancelable(false);

@@ -19,19 +19,16 @@ package com.jrummyapps.busybox.tasks;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.os.Build;
-import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
+import com.jrummyapps.android.dialog.BaseDialogFragment;
 import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.io.files.FileOperation;
 import com.jrummyapps.android.io.files.LocalFile;
 import com.jrummyapps.android.shell.tools.Box;
 import com.jrummyapps.android.shell.tools.RootTools;
-import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.busybox.R;
 
 import java.util.ArrayList;
@@ -126,7 +123,7 @@ public class Uninstaller implements Runnable {
 
   }
 
-  public static class ConfirmUninstallDialog extends DialogFragment {
+  public static class ConfirmUninstallDialog extends BaseDialogFragment {
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
       final LocalFile file = getArguments().getParcelable("file");
@@ -144,15 +141,6 @@ public class Uninstaller implements Runnable {
           .create();
     }
 
-    @Override public void onStart() {
-      super.onStart();
-      if (VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        // The button text is showing as white on white on Android Nougat.
-        // TODO: Find out what is going on.
-        ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ColorScheme.getAccent());
-        ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ColorScheme.getAccent());
-      }
-    }
   }
 
 }
