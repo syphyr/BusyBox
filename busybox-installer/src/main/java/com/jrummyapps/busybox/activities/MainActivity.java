@@ -19,11 +19,12 @@ package com.jrummyapps.busybox.activities;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -35,11 +36,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.base.BaseCompatActivity;
 import com.jrummyapps.android.directorypicker.dialog.DirectoryPickerDialog;
 import com.jrummyapps.android.exceptions.NotImplementedException;
@@ -53,6 +53,8 @@ import com.jrummyapps.busybox.fragments.AppletsFragment;
 import com.jrummyapps.busybox.fragments.InstallerFragment;
 import com.jrummyapps.busybox.fragments.ScriptsFragment;
 
+import java.util.Locale;
+
 import static com.jrummyapps.android.app.App.getContext;
 import static com.jrummyapps.android.util.FragmentUtils.getCurrentFragment;
 
@@ -60,7 +62,6 @@ public class MainActivity extends BaseCompatActivity implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener {
 
-  private FirebaseAnalytics firebaseAnalytics;
   private ViewPager viewPager;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +78,7 @@ public class MainActivity extends BaseCompatActivity implements
     tabLayout.setupWithViewPager(viewPager);
     viewPager.setCurrentItem(1);
     if (savedInstanceState == null) {
-      initFirebaseAnalytics();
+      sendAnalytics();
     }
   }
 
@@ -178,19 +179,31 @@ public class MainActivity extends BaseCompatActivity implements
 
   }
 
-  private void initFirebaseAnalytics() {
-    Bundle bundle = new Bundle();
-    try {
-      PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-      bundle.putString("packageName", packageInfo.packageName);
-      bundle.putString("versionName", packageInfo.versionName);
-      bundle.putInt("versionCode", packageInfo.versionCode);
-    } catch (PackageManager.NameNotFoundException wtf) {
-      Log.w("MainActivity", "Error getting package info", wtf);
-    }
-    firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-    firebaseAnalytics.setAnalyticsCollectionEnabled(true);
-    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle);
+  private void sendAnalytics() {
+    new Thread(new Runnable() {
+
+      @Override public void run() {
+        try {
+          Locale locale;
+          if (VERSION.SDK_INT >= VERSION_CODES.N) {
+            LocaleList locales = getResources().getConfiguration().getLocales();
+            locale = locales.get(0);
+          } else {
+            locale = getResources().getConfiguration().locale;
+          }
+          Analytics localeAnalytics = Analytics.newEvent("Preferred Locale");
+          localeAnalytics.put("Language", locale.getLanguage());
+          localeAnalytics.put("Country", locale.getCountry());
+          if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+            localeAnalytics.put("Language Tag", locale.toLanguageTag());
+          }
+          localeAnalytics.log();
+        } catch (Exception e) {
+          Crashlytics.logException(e);
+        }
+      }
+    }).start();
+
   }
 
 }
