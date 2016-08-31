@@ -22,6 +22,8 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
+import android.os.Build;
+import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -44,6 +46,7 @@ import com.jrummyapps.android.shell.superuser.check.RootCheck;
 import com.jrummyapps.android.shell.tools.BusyBox;
 import com.jrummyapps.android.shell.tools.Reboot;
 import com.jrummyapps.android.shell.tools.RootTools;
+import com.jrummyapps.android.theme.ColorScheme;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.utils.BusyBoxZipHelper;
 
@@ -365,6 +368,15 @@ public class Installer implements Runnable {
           .create();
     }
 
+    @Override public void onStart() {
+      super.onStart();
+      if (VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        // The button text is showing as white on white on Android Nougat.
+        // TODO: Find out what is going on.
+        ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ColorScheme.getAccent());
+        ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ColorScheme.getAccent());
+      }
+    }
   }
 
 }

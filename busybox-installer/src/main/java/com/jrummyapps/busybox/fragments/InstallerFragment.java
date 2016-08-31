@@ -31,6 +31,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -912,6 +913,16 @@ public class InstallerFragment extends BaseSupportFragment implements
           .create();
     }
 
+    @Override public void onStart() {
+      super.onStart();
+      if (VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        // The button text is showing as white on white on Android Nougat.
+        // TODO: Find out what is going on.
+        ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ColorScheme.getAccent());
+        ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(ColorScheme.getAccent());
+        ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ColorScheme.getAccent());
+      }
+    }
   }
 
 }
