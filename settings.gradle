@@ -1,1 +1,1 @@
-include ':busybox-installer', ':busybox-free', ':busybox-pro', ':busybox-json'
+include ':app', ':busybox-json'

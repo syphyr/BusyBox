@@ -43,7 +43,7 @@ public class Main {
       "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-%s/%s/%s/bin/busybox?raw=true";
 
   private static final File BUSYBOX_COMPILER_DIRECTORY = new File("busybox-compiler");
-  private static final File BINARIES_JSON_FILE = new File("busybox-installer"
+  private static final File BINARIES_JSON_FILE = new File("app"
       + separator + "src" + separator + "main" + separator + "res" + separator + "raw" + separator + "binaries.json");
 
   public static void main(String[] args) throws IOException {
