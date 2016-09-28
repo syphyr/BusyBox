@@ -1,6 +1,6 @@
 # <a href="http://busybox.jrummyapps.com" target="_blank">BusyBox for Android</a>
 
-<a href='https://play.google.com/store/apps/details?id=com.jrummy.busybox.installer'><img src="busybox-installer/src/main/res/mipmap-xxhdpi/ic_launcher.png" align="left" hspace="10" vspace="10"></a>
+<a href='https://play.google.com/store/apps/details?id=com.jrummy.busybox.installer'><img src="app/src/main/res/mipmap-xxhdpi/ic_launcher.png" align="left" hspace="10" vspace="10"></a>
 
 **The most reliable and advanced BusyBox installer for Android.**
 
