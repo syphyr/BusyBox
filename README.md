@@ -13,11 +13,12 @@ Please join this [Google+ community](https://plus.google.com/communities/1138558
 Downloads
 ---------
 
-| ABI  | SIZE   | MD5                              | DOWNLOAD                                                                                                                                |
-|------|--------|----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| ARM  | 912KB  | 04ecf44f33aa0696910d00995c6e23a0 | [busybox 1.25.1](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/arm/static/bin/busybox?raw=true)  |
-| x86  | 1224KB | 08934f386126844c9ced9ab8d1edd282 | [busybox 1.25.1](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/x86/static/bin/busybox?raw=true)  |
-| MIPS | 1972KB | cab5717c3e79322b3a774765ba5538c0 | [busybox 1.25.1](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/mips/static/bin/busybox?raw=true) |
+| ABI  | SIZE   | MD5                              | DOWNLOAD                                                                                                                                   |
+|------|--------|----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| ARM    | 1048  | 2dd534732ee7b304f773464f627dde9e | [busybox 1.25.1](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/arm/static/bin/busybox?raw=true)    |
+| ARM64  | 1500  | 28f0328418cafba5c294b9d26c17d4ad | [busybox 1.25.1](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/arm64/static/bin/busybox?raw=true)  |
+| x86    | 1628  | b9f5c59fc9ffc12de5fa36004836c02a | [busybox 1.25.1](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/x86/static/bin/busybox?raw=true)    |
+| MIPS   | 2232  | b3fc2b7697dfe1e581762544e57fe58e | [busybox 1.25.1](https://github.com/jaredrummler/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/mips/static/bin/busybox?raw=true)   |
 
 Building
 --------
