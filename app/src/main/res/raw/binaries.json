@@ -1,11 +1,65 @@
 [
   {
-    "name": "BusyBox 1.24.2",
+    "name": "BusyBox 1.25.1",
     "filename": "busybox",
     "abi": "arm",
     "flavor": "pie",
     "url": "busybox/arm/pie/busybox",
-    "md5sum": "5BA2769E399B8E7DE76C9D0A9226F6E9",
+    "md5sum": "0C9045A72C89AC3730A5F7981F32F9D3",
+    "size": 796464
+  },
+  {
+    "name": "BusyBox 1.25.1",
+    "filename": "busybox",
+    "abi": "arm",
+    "flavor": "nopie",
+    "url": "busybox/arm/nopie/busybox",
+    "md5sum": "5271F559ED560093736443A858E33EC3",
+    "size": 796464
+  },
+  {
+    "name": "BusyBox 1.25.1",
+    "filename": "busybox",
+    "abi": "mips",
+    "flavor": "pie",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/mips/pie/bin/busybox?raw=true",
+    "md5sum": "7ACD34C070214C464DE0F018CD2FCAA1",
+    "size": 1629792
+  },
+  {
+    "name": "BusyBox 1.25.1",
+    "filename": "busybox",
+    "abi": "mips",
+    "flavor": "nopie",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/mips/nopie/bin/busybox?raw=true",
+    "md5sum": "A5ECF8B6195C62CE4323F5BB1C6109E0",
+    "size": 1564208
+  },
+  {
+    "name": "BusyBox 1.25.1",
+    "filename": "busybox",
+    "abi": "x86",
+    "flavor": "pie",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/x86/pie/bin/busybox?raw=true",
+    "md5sum": "0084977C696E26976A4E496DDCA268D9",
+    "size": 870136
+  },
+  {
+    "name": "BusyBox 1.25.1",
+    "filename": "busybox",
+    "abi": "x86",
+    "flavor": "nopie",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/x86/nopie/bin/busybox?raw=true",
+    "md5sum": "02AB15A1C5BD98CCEF108D36307DA190",
+    "size": 857848
+  },
+  {
+    "name": "BusyBox 1.24.2",
+    "filename": "busybox",
+    "abi": "arm",
+    "flavor": "pie",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.24.2/arm/pie/bin/busybox?raw=true",
+    "md5sum": "F7BB388ACA63C04FE07AF242EA9BD0C0",
     "size": 796472
   },
   {
@@ -13,8 +67,8 @@
     "filename": "busybox",
     "abi": "arm",
     "flavor": "nopie",
-    "url": "busybox/arm/nopie/busybox",
-    "md5sum": "F90CBB588B831293597F057D254BB1D0",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.24.2/arm/nopie/bin/busybox?raw=true",
+    "md5sum": "BC075D1EBC24C561A673FEE6302BB3BB",
     "size": 796472
   },
   {
@@ -23,8 +77,8 @@
     "abi": "mips",
     "flavor": "pie",
     "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.24.2/mips/pie/bin/busybox?raw=true",
-    "md5sum": "8F0959BE1E490DBC033F9F9433301826",
-    "size": 1633408
+    "md5sum": "B92CF2F32E9FB6A24413F3F6A14B6959",
+    "size": 1633436
   },
   {
     "name": "BusyBox 1.24.2",
@@ -32,8 +86,8 @@
     "abi": "mips",
     "flavor": "nopie",
     "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.24.2/mips/nopie/bin/busybox?raw=true",
-    "md5sum": "ED887609B364FB8CFE3D9DE3FFAC5D84",
-    "size": 1633356
+    "md5sum": "81AFC3C04D17F9C3E1CE96A7720F302A",
+    "size": 1633384
   },
   {
     "name": "BusyBox 1.24.2",
@@ -41,7 +95,7 @@
     "abi": "x86",
     "flavor": "pie",
     "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.24.2/x86/pie/bin/busybox?raw=true",
-    "md5sum": "42E2FFE154A3DE2055B7FA05149846B2",
+    "md5sum": "6663DA5533400D0A5566244D2CEC6318",
     "size": 878332
   },
   {
@@ -50,7 +104,7 @@
     "abi": "x86",
     "flavor": "nopie",
     "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.24.2/x86/nopie/bin/busybox?raw=true",
-    "md5sum": "C57D1F4B06C358D21EC2E58E96ADDFEA",
+    "md5sum": "6779071563DC38C6B539A6810A82F20B",
     "size": 866044
   },
   {
