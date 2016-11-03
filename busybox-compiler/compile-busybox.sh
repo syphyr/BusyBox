@@ -13,9 +13,9 @@ print_usage() {
     exit 1
 }
 
-BB_VERSION="1.24.2"
+BB_VERSION="1.25.1"
 VERSION_SUFFIX="jrummy"
-ANDROID_NATIVE_API_LEVEL="android-9"
+ANDROID_NATIVE_API_LEVEL="android-21"
 GCC_VERSION="4.9"
 MARCH="$1"
 PARAM="$2"
@@ -27,7 +27,7 @@ then
   exit 1
 fi
 
-[ "$MARCH" == "arm64" ] && ANDROID_NATIVE_API_LEVEL="android-21"
+#[ "$MARCH" == "arm64" ] && ANDROID_NATIVE_API_LEVEL="android-21"
 
 # Extra config required for specific API levels
 # This will be prepended to the .config before building
