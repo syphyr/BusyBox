@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat
 
 def versionMajor = 5
-def versionMinor = 5
+def versionMinor = 6
 def versionPatch = 1
 def versionBuild = 0
 def versionSuffix = versionBuild > 0 ? "-beta" : ""
@@ -24,8 +24,8 @@ repositories {
 }
 
 android {
-  compileSdkVersion 24
-  buildToolsVersion "24.0.2"
+  compileSdkVersion 25
+  buildToolsVersion "24.0.3"
 
   productFlavors {
     free {
@@ -48,7 +48,7 @@ android {
   defaultConfig {
     applicationId "com.jrummyapps.busybox"
     minSdkVersion 14
-    targetSdkVersion 24
+    targetSdkVersion 25
     versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
     versionName "${versionMajor}.${versionMinor}.${versionPatch}.${versionBuild}${versionSuffix}"
     buildConfigField "String", "GIT_SHA", "\"${gitSha()}\""
