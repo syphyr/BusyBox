@@ -7,6 +7,8 @@
 #   param1: the file system (default is "/system")
 #   param2: the mount option (default is "rw")
 #
+# NOTE: Run this script as root
+#
 
 ########################
 # FUNCTIONS

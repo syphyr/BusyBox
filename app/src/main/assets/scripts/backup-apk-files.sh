@@ -6,6 +6,8 @@
 # USAGE:
 #   backup-apk-file.sh [--ignore-system-apps] [--destination=PATH]
 #
+# NOTE: Run this script as root to backup all APK files
+#
 
 backup_system_apps=true
 backup_location=$EXTERNAL_STORAGE/apk_files
