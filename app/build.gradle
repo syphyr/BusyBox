@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat
 
 def versionMajor = 5
-def versionMinor = 6
+def versionMinor = 7
 def versionPatch = 1
 def versionBuild = 0
 def versionSuffix = versionBuild > 0 ? "-beta" : ""

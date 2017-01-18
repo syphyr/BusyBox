@@ -35,8 +35,8 @@ import static java.io.File.separator;
 
 public class Main {
 
-  private static final String[] COMPILED_VERSION = {"1.25.1", "1.24.2", "1.24.1", "1.23.2"};
-  private static final String LATEST_VERSION = "1.25.1";
+  private static final String[] COMPILED_VERSION = {"1.26.2", "1.25.1", "1.24.2", "1.24.1", "1.23.2"};
+  private static final String LATEST_VERSION = "1.26.2";
   private static final String[] ABIS = {"arm", "mips", "x86"};
   private static final String[] FLAVORS = {"pie", "nopie"};
   private static final String DOWNLOAD_URL =

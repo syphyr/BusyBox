@@ -1,10 +1,64 @@
 [
   {
-    "name": "BusyBox 1.25.1",
+    "name": "BusyBox 1.26.2",
     "filename": "busybox",
     "abi": "arm",
     "flavor": "pie",
     "url": "busybox/arm/pie/busybox",
+    "md5sum": "0984E6ECA40B5CBB6DFC7F1ACFC12BA0",
+    "size": 800560
+  },
+  {
+    "name": "BusyBox 1.26.2",
+    "filename": "busybox",
+    "abi": "arm",
+    "flavor": "nopie",
+    "url": "busybox/arm/nopie/busybox",
+    "md5sum": "66FFE7543FBE8EBB6A059D7DC53992F1",
+    "size": 800560
+  },
+  {
+    "name": "BusyBox 1.26.2",
+    "filename": "busybox",
+    "abi": "mips",
+    "flavor": "pie",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.26.2/mips/pie/bin/busybox?raw=true",
+    "md5sum": "D3F828024D6A0DC40F7C3BCB79B47F19",
+    "size": 1632016
+  },
+  {
+    "name": "BusyBox 1.26.2",
+    "filename": "busybox",
+    "abi": "mips",
+    "flavor": "nopie",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.26.2/mips/nopie/bin/busybox?raw=true",
+    "md5sum": "BF6BBDEF1B07F4DC5B3436A5E3DEE128",
+    "size": 1631964
+  },
+  {
+    "name": "BusyBox 1.26.2",
+    "filename": "busybox",
+    "abi": "x86",
+    "flavor": "pie",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.26.2/x86/pie/bin/busybox?raw=true",
+    "md5sum": "3E8B4D51BCCBCF779E77EFDACCAB0F87",
+    "size": 886520
+  },
+  {
+    "name": "BusyBox 1.26.2",
+    "filename": "busybox",
+    "abi": "x86",
+    "flavor": "nopie",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.26.2/x86/nopie/bin/busybox?raw=true",
+    "md5sum": "AF46D86BC38032EDB36D94768DB5E123",
+    "size": 878328
+  },
+  {
+    "name": "BusyBox 1.25.1",
+    "filename": "busybox",
+    "abi": "arm",
+    "flavor": "pie",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/arm/pie/bin/busybox?raw=true",
     "md5sum": "0C9045A72C89AC3730A5F7981F32F9D3",
     "size": 796464
   },
@@ -13,7 +67,7 @@
     "filename": "busybox",
     "abi": "arm",
     "flavor": "nopie",
-    "url": "busybox/arm/nopie/busybox",
+    "url": "https://github.com/jrummyapps/BusyBox/blob/master/busybox-compiler/compiled-1.25.1/arm/nopie/bin/busybox?raw=true",
     "md5sum": "5271F559ED560093736443A858E33EC3",
     "size": 796464
   },
