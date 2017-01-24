@@ -19,38 +19,58 @@ package com.jrummyapps.busybox.dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
-
+import android.util.LruCache;
 import com.jrummyapps.android.analytics.Analytics;
-import com.jrummyapps.android.dialog.BaseDialogFragment;
-import com.jrummyapps.android.shell.tools.BusyBox;
-import com.jrummyapps.android.theme.ColorScheme;
+import com.jrummyapps.android.radiant.Radiant;
+import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.utils.Utils;
-
+import java.lang.ref.WeakReference;
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
+public class AppletUsageDialog extends DialogFragment {
 
-public class BusyBoxAppletDialog extends BaseDialogFragment {
+  static final LruCache<String, String> APPLET_USAGE_CACHE = new LruCache<String, String>(15) {
+
+    private String json;
+
+    @Override protected String create(String key) {
+      if (BusyBox.getInstance().exists()) {
+        String usage = BusyBox.getInstance().getUsage(key);
+        if (!TextUtils.isEmpty(usage)) {
+          return usage;
+        }
+      }
+      if (json == null) {
+        json = Utils.readRaw(R.raw.busybox_applets);
+      }
+      try {
+        return new JSONObject(json).optString(key, null);
+      } catch (JSONException e) {
+        return null;
+      }
+    }
+  };
 
   public static void show(Activity activity, String applet) {
     new AppletHelpTask(activity, applet).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
   }
 
   public static void show(Activity activity, String applet, String help) {
-    BusyBoxAppletDialog dialog = new BusyBoxAppletDialog();
+    AppletUsageDialog dialog = new AppletUsageDialog();
     Bundle args = new Bundle();
     args.putString("applet_name", applet);
     args.putString("applet_help", help);
     dialog.setArguments(args);
-    dialog.show(activity.getFragmentManager(), "BusyBoxAppletDialog");
-    Analytics.newEvent("applet help").put("applet", applet).log();
+    dialog.show(activity.getFragmentManager(), "AppletUsageDialog");
+    Analytics.newEvent("dialog_applet_usage").put("applet", applet).log();
   }
 
   @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -68,57 +88,30 @@ public class BusyBoxAppletDialog extends BaseDialogFragment {
 
   @Override public void onStart() {
     super.onStart();
-    ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ColorScheme.getAccent());
+    ((AlertDialog) getDialog()).getButton(AlertDialog.BUTTON_POSITIVE)
+        .setTextColor(Radiant.getInstance(getActivity()).accentColor());
   }
 
-  private static class AppletHelpTask extends AsyncTask<Void, Void, String> {
+  static final class AppletHelpTask extends AsyncTask<Void, Void, String> {
 
-    private static final HashMap<String, String> CACHE = new HashMap<>();
-
-    private static String json;
-
-    private final WeakReference<Activity> activityWeakReference;
+    private final WeakReference<Activity> activityRef;
     private final String applet;
 
-    private AppletHelpTask(Activity activity, String name) {
-      activityWeakReference = new WeakReference<>(activity);
+    AppletHelpTask(Activity activity, String name) {
+      activityRef = new WeakReference<>(activity);
       applet = name;
     }
 
     @Override protected String doInBackground(Void... params) {
-      String help = CACHE.get(applet);
-      if (help != null) {
-        return help;
-      }
-      if (BusyBox.get().exists()) {
-        try {
-          help = BusyBox.get().getHelp(applet);
-        } catch (Exception ignored) {
-        }
-        if (!TextUtils.isEmpty(help)) {
-          CACHE.put(applet, help);
-          return help;
-        }
-      }
-      try {
-        if (json == null) {
-          json = Utils.readRaw(R.raw.busybox_applets);
-        }
-        help = new JSONObject(json).getString(applet);
-        if (help != null) {
-          CACHE.put(applet, help);
-        }
-      } catch (Exception ignored) {
-      }
-      return help;
+      return APPLET_USAGE_CACHE.get(applet);
     }
 
     @Override protected void onPostExecute(String help) {
-      Activity activity = activityWeakReference.get();
+      Activity activity = activityRef.get();
       if (activity == null || activity.isFinishing()) {
         return;
       }
-      show(activity, applet, help);
+      AppletUsageDialog.show(activity, applet, help);
     }
 
   }

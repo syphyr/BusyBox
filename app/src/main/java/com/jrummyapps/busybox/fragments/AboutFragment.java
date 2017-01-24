@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.jrummyapps.android.preferences.fragments.AboutPreferenceFragment;
+import com.jrummyapps.android.radiant.Radiant;
 import com.jrummyapps.android.transitions.FabDialogMorphSetup;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.activities.DeveloperProfileActivity;
@@ -48,13 +49,14 @@ public class AboutFragment extends AboutPreferenceFragment {
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == R.id.action_view_profile) {
+      Radiant radiant = Radiant.getInstance(getActivity());
       Intent intent = new Intent(getActivity(), DeveloperProfileActivity.class);
-      intent.putExtra(FabDialogMorphSetup.EXTRA_SHARED_ELEMENT_START_COLOR, 0xFF00BCD4);
+      intent.putExtra(FabDialogMorphSetup.EXTRA_SHARED_ELEMENT_START_COLOR, radiant.primaryColor());
       intent.putExtra(FabDialogMorphSetup.EXTRA_SHARED_ELEMENT_START_CORNER_RADIUS, 0);
       if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
         View menuItemView = getActivity().findViewById(R.id.action_view_profile);
         ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
-            getActivity(), menuItemView, getString(R.string.dialog_transition));
+            getActivity(), menuItemView, getString(R.string.morphing_dialog_transition));
         startActivity(intent, options.toBundle());
       } else {
         startActivity(intent);

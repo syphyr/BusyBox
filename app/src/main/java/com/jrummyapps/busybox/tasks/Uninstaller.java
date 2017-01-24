@@ -19,20 +19,17 @@ package com.jrummyapps.busybox.tasks;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-
-import com.jrummyapps.android.dialog.BaseDialogFragment;
-import com.jrummyapps.android.eventbus.Events;
-import com.jrummyapps.android.io.files.FileOperation;
-import com.jrummyapps.android.io.files.LocalFile;
-import com.jrummyapps.android.shell.tools.Box;
-import com.jrummyapps.android.shell.tools.RootTools;
+import com.jrummyapps.android.files.FileOperation;
+import com.jrummyapps.android.files.LocalFile;
+import com.jrummyapps.android.roottools.RootTools;
 import com.jrummyapps.busybox.R;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.greenrobot.eventbus.EventBus;
 
 public class Uninstaller implements Runnable {
 
@@ -54,13 +51,13 @@ public class Uninstaller implements Runnable {
       return true;
     }
 
-    String rm = Box.getTool("rm");
+    String rm = RootTools.getTool("rm");
     if (rm != null) {
       StringBuilder command = new StringBuilder(rm);
       for (LocalFile symlink : symlinks) {
         command.append(" \"").append(symlink.path).append("\"");
       }
-      if (RootTools.remountThenRun(binary, command.toString()).success()) {
+      if (RootTools.remountThenRun(binary, command.toString()).isSuccessful()) {
         return true;
       }
     }
@@ -81,7 +78,7 @@ public class Uninstaller implements Runnable {
       LocalFile[] files = parent.listFiles();
       if (files != null) {
         for (LocalFile file : files) {
-          if (file.isSymbolicLink() && file.readlink().equals(binary)) {
+          if (file.isSymlink() && file.getCanonicalFile().equals(binary)) {
             symlinks.add(file);
           }
         }
@@ -97,8 +94,8 @@ public class Uninstaller implements Runnable {
   }
 
   @Override public void run() {
-    Events.post(new StartEvent(file));
-    Events.post(new FinishedEvent(file, uninstall(file)));
+    EventBus.getDefault().post(new StartEvent(file));
+    EventBus.getDefault().post(new FinishedEvent(file, uninstall(file)));
   }
 
   public static final class StartEvent {
@@ -123,13 +120,13 @@ public class Uninstaller implements Runnable {
 
   }
 
-  public static class ConfirmUninstallDialog extends BaseDialogFragment {
+  public static class ConfirmUninstallDialog extends DialogFragment {
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
       final LocalFile file = getArguments().getParcelable("file");
       return new AlertDialog.Builder(getActivity())
           .setTitle(R.string.confirm_before_deleting)
-          .setMessage(getString(R.string.are_you_sure_you_want_to_uninstall_s, file.filename))
+          .setMessage(getString(R.string.are_you_sure_you_want_to_uninstall_s, file.name))
           .setNegativeButton(android.R.string.cancel, null)
           .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 

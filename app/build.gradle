@@ -1,6 +1,6 @@
 import java.text.SimpleDateFormat
 
-def versionMajor = 5
+def versionMajor = 6
 def versionMinor = 7
 def versionPatch = 1
 def versionBuild = 0
@@ -66,16 +66,18 @@ android {
 }
 
 dependencies {
-  freeCompile 'com.google.firebase:firebase-ads:9.4.0'
+  freeCompile 'com.google.firebase:firebase-ads:10.0.1'
   freeCompile 'com.anjlab.android.iab.v3:library:1.0.32'
 
   compile 'com.jaredrummler:material-spinner:1.0.9'
   compile 'com.jaredrummler:fastscroll-recyclerview:1.0.1'
   compile 'org.apache.commons:commons-compress:1.5'
   compile 'com.commit451:elasticdragdismisslayout:1.0.2'
-  compile 'com.jrummyapps:texteditor:1.0.0'
-  compile 'com.jrummyapps:downloader:1.0.0'
-  compile 'com.jrummyapps:android-crypto:1.0.0'
+  compile 'com.jrummyapps:texteditor:2.0.0'
+  compile 'com.jrummyapps:downloader:2.0.0'
+  compile 'com.jrummyapps:morphing-dialog:1.0.0'
+  compile 'com.jrummyapps:html-builder:1.0.1'
+  compile 'com.jrummyapps:legacy-obfuscate:1.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

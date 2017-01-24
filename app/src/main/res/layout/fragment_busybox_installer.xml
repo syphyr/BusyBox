@@ -86,7 +86,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:ms_background_color="?backgroundColorLight"
-            app:ms_dropdown_max_height="320dp"/>
+            app:ms_dropdown_max_height="340dp"/>
       </android.support.v7.widget.CardView>
 
       <android.support.v7.widget.CardView
@@ -102,7 +102,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:ms_background_color="?backgroundColorLight"
-            app:ms_dropdown_max_height="320dp"/>
+            app:ms_dropdown_max_height="340dp"/>
       </android.support.v7.widget.CardView>
 
       <android.support.v7.widget.CardView
@@ -121,7 +121,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-          <com.jrummyapps.android.fileproperties.charts.PieChart
+          <com.jrummyapps.android.charts.PieChart
               android:id="@+id/piechart"
               android:layout_width="120dp"
               android:layout_height="120dp"
@@ -242,7 +242,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:background="@drawable/directorypicker__button_selector"
+                android:background="@drawable/bg_button_selector"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"

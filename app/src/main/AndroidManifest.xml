@@ -34,24 +34,24 @@
   <uses-permission android:name="com.android.vending.BILLING"/>
 
   <application
-      android:name="com.jrummyapps.android.base.BaseApp"
+      android:name="com.jrummyapps.busybox.MainApp"
       android:allowBackup="true"
       android:icon="@mipmap/ic_launcher"
       android:label="@string/app_name"
       android:supportsRtl="true"
-      android:theme="@style/Theme.Light.DarkActionBar">
+      android:theme="@style/Radiant.Light.DarkActionBar">
 
     <activity android:name="com.jrummyapps.busybox.activities.SettingsActivity"/>
 
     <activity
         android:name="com.jrummyapps.busybox.activities.AboutActivity"
-        android:theme="@style/Theme.Light.NoActionBar.Translucent"/>
+        android:theme="@style/Radiant.Light.NoActionBar.Translucent"/>
 
     <activity
         android:name="com.jrummyapps.texteditor.activities.TextEditorActivity"
         android:icon="@mipmap/ic_launcher_code_editor"
         android:label="@string/activity_text_editor"
-        android:theme="@style/Theme.Light.DarkActionBar.NoActionBar.Overlay"
+        android:theme="@style/Radiant.Light.DarkActionBar.NoActionBar.Overlay"
         android:windowSoftInputMode="stateHidden|adjustResize"/>
 
     <activity android:name="com.jrummyapps.texteditor.activities.TextEditorSettings"/>
@@ -82,12 +82,12 @@
 
     <activity
         android:name="com.jrummyapps.busybox.activities.CreateScriptActivity"
-        android:theme="@style/Theme.Light.NoActionBar.MaterialDialog"
+        android:theme="@style/Radiant.Light.NoActionBar.MaterialDialog"
         android:windowSoftInputMode="stateHidden|adjustResize"/>
 
     <activity
         android:name="com.jrummyapps.busybox.activities.DeveloperProfileActivity"
-        android:theme="@style/Theme.Light.NoActionBar.MaterialDialog"/>
+        android:theme="@style/Radiant.Light.NoActionBar.MaterialDialog"/>
   </application>
 
 </manifest>

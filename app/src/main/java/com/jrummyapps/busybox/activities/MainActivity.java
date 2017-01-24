@@ -17,48 +17,29 @@
 
 package com.jrummyapps.busybox.activities;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.os.Build;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.os.LocaleList;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
-import android.view.View;
-
-import com.crashlytics.android.Crashlytics;
-import com.jrummyapps.android.analytics.Analytics;
-import com.jrummyapps.android.base.BaseCompatActivity;
-import com.jrummyapps.android.directorypicker.dialog.DirectoryPickerDialog;
+import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.exceptions.NotImplementedException;
-import com.jrummyapps.android.io.files.DocumentManager;
-import com.jrummyapps.android.io.files.LocalFile;
-import com.jrummyapps.android.io.permissions.WriteExternalStoragePermissions;
-import com.jrummyapps.android.theme.ColorScheme;
-import com.jrummyapps.android.theme.Themes;
+import com.jrummyapps.android.files.LocalFile;
+import com.jrummyapps.android.files.external.ExternalStorageHelper;
+import com.jrummyapps.android.permiso.Permiso;
+import com.jrummyapps.android.radiant.activity.RadiantAppCompatActivity;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.fragments.AppletsFragment;
 import com.jrummyapps.busybox.fragments.InstallerFragment;
 import com.jrummyapps.busybox.fragments.ScriptsFragment;
-
-import java.util.Locale;
-
 import static com.jrummyapps.android.app.App.getContext;
-import static com.jrummyapps.android.util.FragmentUtils.getCurrentFragment;
+import static com.jrummyapps.busybox.utils.FragmentUtils.getCurrentFragment;
 
-public class MainActivity extends BaseCompatActivity implements
+public class MainActivity extends RadiantAppCompatActivity implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener {
 
@@ -66,10 +47,10 @@ public class MainActivity extends BaseCompatActivity implements
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
-    TabLayout tabLayout = findById(R.id.tabs);
-    viewPager = findById(R.id.container);
-    Toolbar toolbar = findById(R.id.toolbar);
+    setContentView(R.layout.activity_busybox_main);
+    TabLayout tabLayout = getViewById(R.id.tabs);
+    viewPager = getViewById(R.id.container);
+    Toolbar toolbar = getViewById(R.id.toolbar);
     String[] titles = {getString(R.string.applets), getString(R.string.installer), getString(R.string.scripts)};
     SectionsAdapter pagerAdapter = new SectionsAdapter(getSupportFragmentManager(), titles);
     setSupportActionBar(toolbar);
@@ -77,36 +58,10 @@ public class MainActivity extends BaseCompatActivity implements
     viewPager.setAdapter(pagerAdapter);
     tabLayout.setupWithViewPager(viewPager);
     viewPager.setCurrentItem(1);
-    if (savedInstanceState == null) {
-      sendAnalytics();
-    }
-  }
-
-  @TargetApi(Build.VERSION_CODES.M)
-  @Override public View onViewCreated(@NonNull View view, @Nullable AttributeSet attrs) {
-    if (Themes.isThemeChanged()) {
-      // We need to manually set the color scheme on Android 6.0+
-      try {
-        if (view instanceof CardView) {
-          ((CardView) view).setCardBackgroundColor(ColorScheme.getBackgroundLight(getActivity()));
-        }
-        if (view instanceof FloatingActionButton) {
-          FloatingActionButton fab = (FloatingActionButton) view;
-          fab.setBackgroundTintList(ColorStateList.valueOf(ColorScheme.getAccent()));
-        }
-        if (view instanceof TabLayout) {
-          TabLayout tabLayout = (TabLayout) view;
-          tabLayout.setSelectedTabIndicatorColor(ColorScheme.getAccent());
-        }
-      } catch (Exception e) {
-        Crashlytics.logException(e);
-      }
-    }
-    return super.onViewCreated(view, attrs);
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (DocumentManager.get().onActivityResult(requestCode, resultCode, data)) {
+    if (ExternalStorageHelper.getInstance().onActivityResult(requestCode, resultCode, data)) {
       return;
     }
     if (requestCode == ScriptsFragment.REQUEST_CREATE_SCRIPT) {
@@ -124,7 +79,7 @@ public class MainActivity extends BaseCompatActivity implements
 
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    if (WriteExternalStoragePermissions.get().onRequestPermissionsResult(requestCode, permissions, grantResults)) {
+    if (Permiso.getInstance().onRequestPermissionsResult(requestCode, permissions, grantResults)) {
       return;
     }
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -144,8 +99,8 @@ public class MainActivity extends BaseCompatActivity implements
     }
   }
 
-  @Override public int getActivityTheme() {
-    return Themes.getNoActionBarTheme();
+  @Override public int getThemeResId() {
+    return getRadiant().getNoActionBarTheme();
   }
 
   public static class SectionsAdapter extends FragmentPagerAdapter {
@@ -176,33 +131,6 @@ public class MainActivity extends BaseCompatActivity implements
     @Override public CharSequence getPageTitle(int position) {
       return titles[position];
     }
-
-  }
-
-  private void sendAnalytics() {
-    new Thread(new Runnable() {
-
-      @Override public void run() {
-        try {
-          Locale locale;
-          if (VERSION.SDK_INT >= VERSION_CODES.N) {
-            LocaleList locales = getResources().getConfiguration().getLocales();
-            locale = locales.get(0);
-          } else {
-            locale = getResources().getConfiguration().locale;
-          }
-          Analytics localeAnalytics = Analytics.newEvent("Preferred Locale");
-          localeAnalytics.put("Language", locale.getLanguage());
-          localeAnalytics.put("Country", locale.getCountry());
-          if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-            localeAnalytics.put("Language Tag", locale.toLanguageTag());
-          }
-          localeAnalytics.log();
-        } catch (Exception e) {
-          Crashlytics.logException(e);
-        }
-      }
-    }).start();
 
   }
 

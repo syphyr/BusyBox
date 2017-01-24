@@ -40,7 +40,7 @@
       android:background="?backgroundColor"
       android:clickable="true"
       android:elevation="6dp"
-      android:transitionName="@string/dialog_transition">
+      android:transitionName="@string/morphing_dialog_transition">
 
     <RelativeLayout
         android:id="@+id/bottom_container"

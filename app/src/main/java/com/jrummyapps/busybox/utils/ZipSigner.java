@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Jared Rummler <jared.rummler@gmail.com>
+ * Copyright (C) 2017 JRummy Apps Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,23 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.jrummyapps.busybox.signing;
+package com.jrummyapps.busybox.utils;
 
 import android.annotation.SuppressLint;
 import android.content.res.AssetManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
-import com.jrummyapps.android.io.common.IOUtils;
-
-import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
-import org.apache.commons.compress.archivers.jar.JarArchiveOutputStream;
-
+import com.jrummyapps.android.util.IoUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -62,13 +56,14 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.EncryptedPrivateKeyInfo;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import org.apache.commons.compress.archivers.jar.JarArchiveEntry;
+import org.apache.commons.compress.archivers.jar.JarArchiveOutputStream;
 
 public class ZipSigner {
 
@@ -207,8 +202,8 @@ public class ZipSigner {
       Crashlytics.logException(e);
       return false;
     } finally {
-      IOUtils.closeQuietly(inputJar);
-      IOUtils.closeQuietly(outputJar);
+      IoUtils.closeQuietly(inputJar);
+      IoUtils.closeQuietly(outputJar);
     }
     return true;
   }

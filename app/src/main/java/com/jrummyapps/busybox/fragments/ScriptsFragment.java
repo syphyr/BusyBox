@@ -20,6 +20,7 @@ package com.jrummyapps.busybox.fragments;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -38,20 +39,14 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.analytics.Analytics;
-import com.jrummyapps.android.base.BaseSupportFragment;
-import com.jrummyapps.android.colors.Color;
-import com.jrummyapps.android.eventbus.EventBusHook;
-import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.fileproperties.activities.FilePropertiesActivity;
-import com.jrummyapps.android.io.common.FileUtils;
-import com.jrummyapps.android.io.files.FileIntentUtils;
+import com.jrummyapps.android.files.FileIntents;
 import com.jrummyapps.android.os.Os;
-import com.jrummyapps.android.theme.ColorScheme;
-import com.jrummyapps.android.theme.Themes;
+import com.jrummyapps.android.radiant.fragments.RadiantSupportFragment;
 import com.jrummyapps.android.transitions.FabDialogMorphSetup;
+import com.jrummyapps.android.util.FileUtils;
 import com.jrummyapps.android.view.ViewHolder;
 import com.jrummyapps.android.widget.jazzylistview.JazzyListView;
 import com.jrummyapps.busybox.R;
@@ -65,12 +60,14 @@ import com.jrummyapps.busybox.models.ShellScript;
 import com.jrummyapps.busybox.tasks.ScriptLoader;
 import com.jrummyapps.texteditor.activities.TextEditorActivity;
 import com.jrummyapps.texteditor.shell.activities.ScriptExecutorActivity;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
-public class ScriptsFragment extends BaseSupportFragment
+public class ScriptsFragment extends RadiantSupportFragment
     implements AdapterView.OnItemClickListener, View.OnClickListener {
 
   public static final int REQUEST_CREATE_SCRIPT = 27;
@@ -82,12 +79,12 @@ public class ScriptsFragment extends BaseSupportFragment
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setHasOptionsMenu(true);
-    Events.register(this);
+    EventBus.getDefault().register(this);
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
-    Events.unregister(this);
+    EventBus.getDefault().unregister(this);
   }
 
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -95,8 +92,8 @@ public class ScriptsFragment extends BaseSupportFragment
   }
 
   @Override public void onViewCreated(View view, Bundle savedInstanceState) {
-    listView = findById(android.R.id.list);
-    fab = findById(R.id.fab);
+    listView = getViewById(android.R.id.list);
+    fab = getViewById(R.id.fab);
     onRestoreInstanceState(savedInstanceState);
     listView.setOnItemClickListener(this);
     fab.setOnClickListener(this);
@@ -109,8 +106,7 @@ public class ScriptsFragment extends BaseSupportFragment
     }
   }
 
-  @Override public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
-    super.onRestoreInstanceState(savedInstanceState);
+  public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
     if (savedInstanceState == null || !savedInstanceState.containsKey("scripts")) {
       new ScriptLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     } else {
@@ -127,9 +123,6 @@ public class ScriptsFragment extends BaseSupportFragment
     menu.add(0, R.id.action_info, 0, R.string.about)
         .setIcon(R.drawable.ic_information_white_24dp)
         .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-    if (getActivity() != null) {
-      ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
-    }
     super.onCreateOptionsMenu(menu, inflater);
   }
 
@@ -172,7 +165,7 @@ public class ScriptsFragment extends BaseSupportFragment
     popupMenu.getMenu().add(0, 3, 0, R.string.info).setIcon(R.drawable.ic_information_white_24dp);
     popupMenu.getMenu().add(0, 4, 0, R.string.delete).setIcon(R.drawable.ic_delete_white_24dp);
 
-    ColorScheme.newMenuTint(popupMenu.getMenu()).forceIcons().apply(getActivity());
+    getRadiant().tint(popupMenu.getMenu()).forceIcons().apply(getActivity());
 
     Analytics.newEvent("clicked script")
         .put("script_name", script.name)
@@ -185,19 +178,19 @@ public class ScriptsFragment extends BaseSupportFragment
         switch (item.getItemId()) {
           case 1: { // run
             Intent intent = new Intent(getActivity(), ScriptExecutorActivity.class);
-            intent.putExtra(FileIntentUtils.INTENT_EXTRA_PATH, script.path);
+            intent.putExtra(FileIntents.INTENT_EXTRA_PATH, script.path);
             startActivity(intent);
             return true;
           }
           case 2: { // edit
             Intent intent = new Intent(getActivity(), TextEditorActivity.class);
-            intent.putExtra(FileIntentUtils.INTENT_EXTRA_PATH, script.path);
+            intent.putExtra(FileIntents.INTENT_EXTRA_PATH, script.path);
             startActivity(intent);
             return true;
           }
           case 3: { // info
             Intent intent = new Intent(getActivity(), FilePropertiesActivity.class);
-            intent.putExtra(FileIntentUtils.INTENT_EXTRA_FILE, new File(script.path));
+            intent.putExtra(FileIntents.INTENT_EXTRA_FILE, new File(script.path));
             intent.putExtra(FilePropertiesActivity.EXTRA_DESCRIPTION, script.info);
             startActivity(intent);
             return true;
@@ -225,9 +218,9 @@ public class ScriptsFragment extends BaseSupportFragment
     if (view == fab) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         Intent intent = new Intent(getActivity(), CreateScriptActivity.class);
-        intent.putExtra(FabDialogMorphSetup.EXTRA_SHARED_ELEMENT_START_COLOR, ColorScheme.getAccent());
+        intent.putExtra(FabDialogMorphSetup.EXTRA_SHARED_ELEMENT_START_COLOR, getRadiant().accentColor());
         ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
-            getActivity(), view, getString(R.string.dialog_transition));
+            getActivity(), view, getString(R.string.morphing_dialog_transition));
         getActivity().startActivityForResult(intent, REQUEST_CREATE_SCRIPT, options.toBundle());
       } else {
         new CreateScriptDialog().show(getActivity().getFragmentManager(), "CreateScriptDialog");
@@ -235,12 +228,14 @@ public class ScriptsFragment extends BaseSupportFragment
     }
   }
 
-  @EventBusHook public void onEvent(ScriptLoader.ScriptsLoadedEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEvent(ScriptLoader.ScriptsLoadedEvent event) {
     adapter = new Adapter(event.scripts);
     listView.setAdapter(adapter);
   }
 
-  @EventBusHook public void onEvent(CreateScriptDialog.CreateScriptEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEvent(CreateScriptDialog.CreateScriptEvent event) {
     createScript(event.name, event.filename);
   }
 
@@ -266,12 +261,12 @@ public class ScriptsFragment extends BaseSupportFragment
     }
 
     if (errorMessage != 0) {
-      Snackbar snackbar = Snackbar.make(findById(R.id.fab), errorMessage, Snackbar.LENGTH_LONG);
+      Snackbar snackbar = Snackbar.make(getViewById(R.id.fab), errorMessage, Snackbar.LENGTH_LONG);
       View view = snackbar.getView();
       TextView messageText = (TextView) view.findViewById(R.id.snackbar_text);
-      if (Themes.isDark()) {
-        messageText.setTextColor(ColorScheme.getPrimaryText(getActivity()));
-        view.setBackgroundColor(ColorScheme.getBackgroundDark(getActivity()));
+      if (getRadiant().isDark()) {
+        messageText.setTextColor(getRadiant().primaryTextColor());
+        view.setBackgroundColor(getRadiant().backgroundColorDark());
       } else {
         messageText.setTextColor(Color.WHITE);
       }
@@ -285,7 +280,7 @@ public class ScriptsFragment extends BaseSupportFragment
     adapter.notifyDataSetChanged();
 
     Intent intent = new Intent(getActivity(), TextEditorActivity.class);
-    intent.putExtra(FileIntentUtils.INTENT_EXTRA_PATH, script.path);
+    intent.putExtra(FileIntents.INTENT_EXTRA_PATH, script.path);
     startActivity(intent);
   }
 
@@ -318,7 +313,7 @@ public class ScriptsFragment extends BaseSupportFragment
         holder = new ViewHolder(convertView);
 
         ImageView imageView = holder.find(R.id.icon);
-        imageView.setColorFilter(ColorScheme.getAccent());
+        imageView.setColorFilter(getRadiant().accentColor());
         imageView.setImageResource(R.drawable.ic_code_array_white_24dp);
       } else {
         holder = (ViewHolder) convertView.getTag();

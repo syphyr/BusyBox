@@ -20,23 +20,22 @@ package com.jrummyapps.busybox.dialogs;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
-import com.jrummyapps.android.dialog.BaseDialogFragment;
-import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.util.KeyboardUtils;
 import com.jrummyapps.busybox.R;
-
 import java.io.File;
+import org.greenrobot.eventbus.EventBus;
 
-public class CreateZipDialog extends BaseDialogFragment {
+public class CreateZipDialog extends DialogFragment {
 
   /**
    * Display the dialog
@@ -70,7 +69,6 @@ public class CreateZipDialog extends BaseDialogFragment {
     editText.setHint(name);
     editText.setText(name);
 
-    // TODO: make sure filename is valid. Show error message if invalid.
     editText.addTextChangedListener(new TextWatcher() {
 
       @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -83,18 +81,19 @@ public class CreateZipDialog extends BaseDialogFragment {
         if (getDialog() instanceof AlertDialog) {
           AlertDialog dialog = (AlertDialog) getDialog();
           Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-          String text = s.toString().trim();
-          if (text.length() == 0 && button.isEnabled()) {
-            button.setEnabled(false);
-          } else {
+          String filename = s.toString().trim();
+          boolean enable = isValidFilename(filename);
+          if (enable && filename.length() > 0) {
             if (!button.isEnabled()) {
               button.setEnabled(true);
             }
-            if (new File(path, text).exists()) {
+            if (new File(path, filename).exists()) {
               button.setText(R.string.overwrite);
             } else {
               button.setText(R.string.save);
             }
+          } else {
+            button.setEnabled(false);
           }
         }
       }
@@ -110,7 +109,7 @@ public class CreateZipDialog extends BaseDialogFragment {
             dialog.dismiss();
             String filename = editText.getText().toString().trim();
             File file = new File(path, filename);
-            Events.post(new CreateZipEvent(file));
+            EventBus.getDefault().post(new CreateZipEvent(file));
           }
         }).create();
   }
@@ -121,11 +120,24 @@ public class CreateZipDialog extends BaseDialogFragment {
     KeyboardUtils.showKeyboard(editText, true);
   }
 
+  boolean isValidFilename(String filename) {
+    if (TextUtils.isEmpty(filename)) {
+      return false;
+    }
+    for (char c : filename.toCharArray()) {
+      if (c == '/' || c == '\n' || c == '\r' || c == '\t' || c == '\0' || c == '\f' || c == '`' || c == '?' ||
+          c == '*' || c == '\\' || c == '<' || c == '>' || c == '|' || c == '\"' || c == ':') {
+        return false;
+      }
+    }
+    return true;
+  }
+
   public static final class CreateZipEvent {
 
     public final File file;
 
-    public CreateZipEvent(File file) {
+     CreateZipEvent(File file) {
       this.file = file;
     }
 

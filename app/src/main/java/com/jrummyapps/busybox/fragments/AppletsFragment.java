@@ -19,7 +19,6 @@ package com.jrummyapps.busybox.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
@@ -31,23 +30,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import com.jaredrummler.fastscrollrecyclerview.FastScrollRecyclerView;
-import com.jrummyapps.android.activity.ActivityManager;
-import com.jrummyapps.android.base.BaseSupportFragment;
-import com.jrummyapps.android.theme.ColorScheme;
+import com.jrummyapps.android.app.ActivityMonitor;
+import com.jrummyapps.android.radiant.fragments.RadiantSupportFragment;
 import com.jrummyapps.android.widget.jazzylistview.JazzyHelper;
 import com.jrummyapps.android.widget.jazzylistview.JazzyRecyclerViewScrollListener;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.activities.AboutActivity;
 import com.jrummyapps.busybox.activities.SettingsActivity;
-import com.jrummyapps.busybox.dialogs.BusyBoxAppletDialog;
+import com.jrummyapps.busybox.dialogs.AppletUsageDialog;
 import com.jrummyapps.busybox.utils.Utils;
-
 import java.util.List;
 import java.util.Locale;
 
-public class AppletsFragment extends BaseSupportFragment {
+public class AppletsFragment extends RadiantSupportFragment {
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -59,17 +55,12 @@ public class AppletsFragment extends BaseSupportFragment {
   }
 
   @Override public void onViewCreated(View view, Bundle savedInstanceState) {
-    FastScrollRecyclerView recyclerView = findById(R.id.recycler);
+    FastScrollRecyclerView recyclerView = getViewById(R.id.recycler);
     JazzyRecyclerViewScrollListener scrollListener = new JazzyRecyclerViewScrollListener();
     scrollListener.setTransitionEffect(JazzyHelper.SLIDE_IN);
     recyclerView.addOnScrollListener(scrollListener);
     recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     recyclerView.setAdapter(new RecyclerAdapter());
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      recyclerView.setPopupBackgroundColor(ColorScheme.getAccent());
-      recyclerView.setThumbActiveColor(ColorScheme.getAccent());
-      recyclerView.setTrackInactiveColor(ColorScheme.getAccent());
-    }
   }
 
   @Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -79,9 +70,6 @@ public class AppletsFragment extends BaseSupportFragment {
     menu.add(0, R.id.action_info, 0, R.string.about)
         .setIcon(R.drawable.ic_information_white_24dp)
         .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-    if (getActivity() != null) {
-      ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
-    }
     super.onCreateOptionsMenu(menu, inflater);
   }
 
@@ -98,7 +86,7 @@ public class AppletsFragment extends BaseSupportFragment {
     }
   }
 
-  private static class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder>
+  static class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder>
       implements FastScrollRecyclerView.SectionedAdapter {
 
     private final List<String> applets = Utils.getBusyBoxApplets();
@@ -122,16 +110,21 @@ public class AppletsFragment extends BaseSupportFragment {
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
-      public TextView text;
+      TextView text;
 
-      public ViewHolder(View itemView) {
+      ViewHolder(View itemView) {
         super(itemView);
         text = (TextView) itemView.findViewById(R.id.text);
         itemView.setOnClickListener(new View.OnClickListener() {
 
           @Override public void onClick(View v) {
-            Activity currentActivity = ActivityManager.getInstance().getCurrentActivity();
-            BusyBoxAppletDialog.show(currentActivity, text.getText().toString());
+            Activity activity;
+            if (v.getContext() instanceof Activity) {
+              activity = (Activity) v.getContext();
+            } else {
+              activity = ActivityMonitor.getInstance().getCurrentActivity();
+            }
+            AppletUsageDialog.show(activity, text.getText().toString());
           }
         });
       }

@@ -18,12 +18,14 @@
 package com.jrummyapps.busybox.fragments;
 
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -52,18 +54,15 @@ import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-
 import com.crashlytics.android.Crashlytics;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnItemSelectedListener;
 import com.jaredrummler.materialspinner.MaterialSpinner.OnNothingSelectedListener;
 import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.animations.Technique;
-import com.jrummyapps.android.base.BaseSupportFragment;
-import com.jrummyapps.android.colors.Color;
-import com.jrummyapps.android.common.Toasts;
-import com.jrummyapps.android.dialog.BaseDialogFragment;
-import com.jrummyapps.android.directorypicker.dialog.DirectoryPickerDialog;
+import com.jrummyapps.android.charts.PieChart;
+import com.jrummyapps.android.charts.PieModel;
+import com.jrummyapps.android.directorypicker.DirectoryPickerDialog;
 import com.jrummyapps.android.downloader.Download;
 import com.jrummyapps.android.downloader.DownloadRequest;
 import com.jrummyapps.android.downloader.dialogs.DownloadProgressDialog;
@@ -71,36 +70,34 @@ import com.jrummyapps.android.downloader.events.DownloadError;
 import com.jrummyapps.android.downloader.events.DownloadFinished;
 import com.jrummyapps.android.drawable.CircleDrawable;
 import com.jrummyapps.android.drawable.TextDrawable;
-import com.jrummyapps.android.eventbus.EventBusHook;
-import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.android.fileproperties.activities.FilePropertiesActivity;
-import com.jrummyapps.android.fileproperties.charts.PieChart;
-import com.jrummyapps.android.fileproperties.charts.PieModel;
 import com.jrummyapps.android.fileproperties.models.FileMeta;
-import com.jrummyapps.android.html.HtmlBuilder;
-import com.jrummyapps.android.io.common.Assets;
-import com.jrummyapps.android.io.files.FileIntentUtils;
-import com.jrummyapps.android.io.files.LocalFile;
-import com.jrummyapps.android.io.permissions.FilePermission;
-import com.jrummyapps.android.io.storage.Storage;
+import com.jrummyapps.android.files.FileIntents;
+import com.jrummyapps.android.files.FilePermission;
+import com.jrummyapps.android.files.LocalFile;
 import com.jrummyapps.android.os.ABI;
 import com.jrummyapps.android.os.Os;
 import com.jrummyapps.android.prefs.Prefs;
+import com.jrummyapps.android.radiant.Radiant;
+import com.jrummyapps.android.radiant.fragments.RadiantSupportFragment;
+import com.jrummyapps.android.roottools.box.BusyBox;
 import com.jrummyapps.android.shell.Shell;
-import com.jrummyapps.android.shell.tools.BusyBox;
-import com.jrummyapps.android.theme.ColorScheme;
-import com.jrummyapps.android.theme.Themes;
+import com.jrummyapps.android.storage.Storage;
 import com.jrummyapps.android.util.ArrayUtils;
-import com.jrummyapps.android.util.IntentUtils;
+import com.jrummyapps.android.util.Assets;
+import com.jrummyapps.android.util.Colors;
+import com.jrummyapps.android.util.HtmlBuilder;
+import com.jrummyapps.android.util.Intents;
 import com.jrummyapps.android.util.OrientationUtils;
 import com.jrummyapps.android.util.ResUtils;
+import com.jrummyapps.android.util.Toasts;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.activities.AboutActivity;
 import com.jrummyapps.busybox.activities.SettingsActivity;
 import com.jrummyapps.busybox.dialogs.BusyboxSuccessDialog;
 import com.jrummyapps.busybox.dialogs.CreateZipDialog;
 import com.jrummyapps.busybox.models.BinaryInfo;
-import com.jrummyapps.busybox.monetize.Monetize;
+import com.jrummyapps.busybox.utils.Monetize;
 import com.jrummyapps.busybox.tasks.BusyBoxFinder;
 import com.jrummyapps.busybox.tasks.BusyBoxMetaTask;
 import com.jrummyapps.busybox.tasks.DiskUsageTask;
@@ -108,15 +105,16 @@ import com.jrummyapps.busybox.tasks.Installer;
 import com.jrummyapps.busybox.tasks.Uninstaller;
 import com.jrummyapps.busybox.utils.BusyBoxZipHelper;
 import com.jrummyapps.busybox.utils.Utils;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+import static com.jrummyapps.android.util.Intents.isIntentAvailable;
 
-import static com.jrummyapps.android.util.IntentUtils.isIntentAvailable;
-
-public class InstallerFragment extends BaseSupportFragment implements
+public class InstallerFragment extends RadiantSupportFragment implements
     DirectoryPickerDialog.OnDirectorySelectedListener,
     DirectoryPickerDialog.OnDirectoryPickerCancelledListener,
     View.OnClickListener {
@@ -150,13 +148,13 @@ public class InstallerFragment extends BaseSupportFragment implements
   private Button installButton;
   private Button uninstallButton;
   private ImageButton infoButton;
-  private View backgroundShadow;
-  private MenuItem progressItem;
+  View backgroundShadow;
+  MenuItem progressItem;
   private PieModel usedSlice;
   private PieModel freeSlice;
   private PieModel itemSlice;
   private BusyBox busybox;
-  private int pathIndex;
+  int pathIndex;
   private int downloadCompleteCommand;
   private boolean uninstalling;
   private boolean installing;
@@ -194,13 +192,13 @@ public class InstallerFragment extends BaseSupportFragment implements
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    Events.register(this);
+    EventBus.getDefault().register(this);
     setHasOptionsMenu(true);
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
-    Events.unregister(this);
+    EventBus.getDefault().unregister(this);
   }
 
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -208,14 +206,14 @@ public class InstallerFragment extends BaseSupportFragment implements
   }
 
   @Override public void onViewCreated(View view, Bundle savedInstanceState) {
-    backgroundShadow = findById(R.id.background_shadow);
-    installButton = findById(R.id.button_install);
-    uninstallButton = findById(R.id.button_uninstall);
-    pieChart = findById(R.id.piechart);
-    propertiesCard = findById(R.id.properties_layout);
-    versionSpinner = findById(R.id.binary_spinner);
-    pathSpinner = findById(R.id.directory_spinner);
-    infoButton = findById(R.id.properties_button);
+    backgroundShadow = getViewById(R.id.background_shadow);
+    installButton = getViewById(R.id.button_install);
+    uninstallButton = getViewById(R.id.button_uninstall);
+    pieChart = getViewById(R.id.piechart);
+    propertiesCard = getViewById(R.id.properties_layout);
+    versionSpinner = getViewById(R.id.binary_spinner);
+    pathSpinner = getViewById(R.id.directory_spinner);
+    infoButton = getViewById(R.id.properties_button);
     onRestoreInstanceState(savedInstanceState);
     versionSpinner.setItems(binaries);
     versionSpinner.setOnClickListener(this);
@@ -226,7 +224,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     pathSpinner.setOnNothingSelectedListener(onNothingSelectedListener);
     pathSpinner.setSelectedIndex(pathIndex);
     pathSpinner.setOnItemSelectedListener(onPathSelectedListener);
-    infoButton.setColorFilter(ColorScheme.getSubMenuIcon());
+    infoButton.setColorFilter(getRadiant().subMenuItemColor());
     uninstallButton.setOnClickListener(this);
     installButton.setOnClickListener(this);
     infoButton.setOnClickListener(this);
@@ -236,7 +234,7 @@ public class InstallerFragment extends BaseSupportFragment implements
       // fixes https://github.com/jrummyapps/BusyBox/issues/6
       Resources.Theme theme = getActivity().getTheme();
       Resources res = getResources();
-      if (Themes.isDark()) {
+      if (getRadiant().isDark()) {
         uninstallButton.setBackgroundTintList(res.getColorStateList(R.color.color_background_dark_lighter, theme));
       } else {
         uninstallButton.setBackgroundTintList(res.getColorStateList(R.color.color_background_light_lighter, theme));
@@ -259,8 +257,7 @@ public class InstallerFragment extends BaseSupportFragment implements
     outState.putBoolean("create_archive", createArchive);
   }
 
-  @Override public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
-    super.onRestoreInstanceState(savedInstanceState);
+  public void onRestoreInstanceState(@Nullable Bundle savedInstanceState) {
     if (savedInstanceState != null) {
       pathIndex = savedInstanceState.getInt("path_index", -1);
       paths = savedInstanceState.getStringArrayList("paths");
@@ -288,9 +285,6 @@ public class InstallerFragment extends BaseSupportFragment implements
     progressItem = menu.findItem(R.id.menu_item_progress);
     progressItem.setVisible(uninstalling || installing);
     menu.findItem(R.id.action_terminal).setVisible(isTerminalSupported());
-    if (getActivity() != null) {
-      ColorScheme.newMenuTint(menu).forceIcons().apply(getActivity());
-    }
     super.onCreateOptionsMenu(menu, inflater);
   }
 
@@ -338,13 +332,13 @@ public class InstallerFragment extends BaseSupportFragment implements
       installBusyBox();
     } else if (v == infoButton) {
       Intent intent = new Intent(getActivity(), FilePropertiesActivity.class);
-      intent.putExtra(FileIntentUtils.INTENT_EXTRA_FILE, (Parcelable) busybox);
+      intent.putExtra(FileIntents.INTENT_EXTRA_FILE, (Parcelable) busybox);
       startActivity(intent);
     }
   }
 
-  @SuppressWarnings("ConstantConditions")
-  @EventBusHook public void onEvent(CreateZipDialog.CreateZipEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEvent(CreateZipDialog.CreateZipEvent event) {
     new AsyncTask<String, Void, Integer>() {
 
       @Override protected void onPreExecute() {
@@ -353,12 +347,12 @@ public class InstallerFragment extends BaseSupportFragment implements
 
       @Override protected Integer doInBackground(String... params) {
         try {
-          BusyBox busybox = BusyBox.from(params[0]);
+          BusyBox busybox = BusyBox.newInstance(params[0]);
           String installPath = params[1];
           if (!new File(installPath).getParentFile().exists()) {
             throw new RuntimeException("Invalid install path: " + installPath);
           }
-          Analytics.newEvent("create zip").put("busybox", busybox).put("path", installPath).log();
+          Analytics.newEvent("action_create_zip").put("busybox", busybox.path).put("path", installPath).log();
           BusyBoxZipHelper.createBusyboxRecoveryZip(busybox, installPath, new File(params[2]));
           return R.string.created_installable_zip;
         } catch (Exception e) {
@@ -411,7 +405,8 @@ public class InstallerFragment extends BaseSupportFragment implements
 
   // --------------------------------------------------------------------------------------------
 
-  @EventBusHook public void onEventMainThread(DownloadFinished event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEventMainThread(DownloadFinished event) {
     if (download != null && download.getId() == event.download.getId()) {
       Analytics.newEvent("downloaded binary")
           .put("command", downloadCompleteCommand)
@@ -429,7 +424,8 @@ public class InstallerFragment extends BaseSupportFragment implements
     }
   }
 
-  @EventBusHook public void onEventMainThread(DownloadError event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEventMainThread(DownloadError event) {
     if (download != null && download.getId() == event.download.getId()) {
       Log.i(TAG, "Error downloading " + event.download.getUrl() + ", error code " + event.download.getError());
       Analytics.newEvent("download error").put("error_code", event.download.getError()).log();
@@ -437,45 +433,48 @@ public class InstallerFragment extends BaseSupportFragment implements
     }
   }
 
-  @EventBusHook public void onEventMainThread(Installer.StartEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEventMainThread(Installer.StartEvent event) {
     installing = true;
     progressItem.setVisible(true);
     uninstallButton.setEnabled(false);
     installButton.setEnabled(false);
   }
 
-  @EventBusHook public void onEventMainThread(Installer.FinishedEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEventMainThread(Installer.FinishedEvent event) {
     installing = false;
     progressItem.setVisible(false);
     uninstallButton.setEnabled(true);
     installButton.setEnabled(true);
 
-    busybox = BusyBox.from(new LocalFile(event.installer.path, event.installer.filename).path);
+    busybox = BusyBox.newInstance(new LocalFile(event.installer.path, event.installer.filename).path);
 
-    Analytics.newEvent("installed busybox")
-        .put("is_ads_removed", Monetize.isAdsRemoved())
-        .put("pro_version", Monetize.isProVersion())
+    Analytics.newEvent("successfully_installed_busybox")
+        .put("is_ads_removed", String.valueOf(Monetize.isAdsRemoved()))
+        .put("pro_version", String.valueOf(Monetize.isProVersion()))
         .put("path", busybox.path)
         .log();
 
     new BusyBoxMetaTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, busybox);
 
     if (Monetize.isAdsRemoved()) {
-      showMessage(R.string.successfully_installed_s, busybox.filename);
+      showMessage(R.string.successfully_installed_s, busybox.name);
     } else {
       BusyboxSuccessDialog dialog = new BusyboxSuccessDialog();
       dialog.show(getActivity().getFragmentManager(), "BusyboxSuccessDialog");
     }
   }
 
-  @EventBusHook public void onEventMainThread(Installer.ErrorEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEventMainThread(Installer.ErrorEvent event) {
     installing = false;
     showMessage(R.string.installation_failed);
     progressItem.setVisible(false);
     uninstallButton.setEnabled(busybox != null && busybox.exists());
     installButton.setEnabled(true);
 
-    Analytics.newEvent("error installing busybox").put("error", event.error).log();
+    Analytics.newEvent("error_installing_busybox").put("error", event.error).log();
 
     if (TextUtils.equals(event.error, Installer.ERROR_NOT_ROOTED)) {
       RootRequiredDialog dialog = new RootRequiredDialog();
@@ -486,7 +485,8 @@ public class InstallerFragment extends BaseSupportFragment implements
     }
   }
 
-  @EventBusHook public void onEventMainThread(Uninstaller.StartEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEventMainThread(Uninstaller.StartEvent event) {
     if (busybox == null || !busybox.equals(event.file)) {
       return;
     }
@@ -496,23 +496,25 @@ public class InstallerFragment extends BaseSupportFragment implements
     progressItem.setVisible(true);
   }
 
-  @EventBusHook public void onEventMainThread(Uninstaller.FinishedEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEventMainThread(Uninstaller.FinishedEvent event) {
     if (busybox == null || !busybox.equals(event.file)) {
       return;
     }
-    Analytics.newEvent("uninstalled busybox").put("busybox", busybox).log();
+    Analytics.newEvent("request_uninstall_busybox").put("busybox", busybox.path).log();
     uninstalling = false;
     installButton.setEnabled(!installing);
     if (event.success) {
       new BusyBoxFinder().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
       progressItem.setVisible(uninstalling || installing);
-      showMessage(R.string.uninstalled_s, event.file.filename);
+      showMessage(R.string.uninstalled_s, event.file.name);
     } else {
-      showMessage(R.string.error_uninstalling_s, busybox.filename);
+      showMessage(R.string.error_uninstalling_s, busybox.name);
     }
   }
 
-  @EventBusHook public void onEvent(BusyBoxFinder.BusyboxFoundEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEvent(BusyBoxFinder.BusyboxFoundEvent event) {
     busybox = event.busybox;
     String defaultInstallPath = busybox == null ? DEFAULT_INSTALL_PATH : busybox.getParent();
     for (int i = 0; i < Storage.PATH.length; i++) {
@@ -523,7 +525,8 @@ public class InstallerFragment extends BaseSupportFragment implements
       }
     }
 
-    Analytics.newEvent("busybox found")
+    //noinspection Range
+    Analytics.newEvent("info_busybox_found")
         .put("install_path", defaultInstallPath)
         .put("busybox", busybox == null ? "[NOT INSTALLED]" : busybox.path)
         .log();
@@ -535,19 +538,22 @@ public class InstallerFragment extends BaseSupportFragment implements
     updateDiskUsagePieChart();
   }
 
-  @EventBusHook public void onEvent(BusyBoxMetaTask.BusyBoxPropertiesEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEvent(BusyBoxMetaTask.BusyBoxPropertiesEvent event) {
     setProperties(event.properties);
   }
 
-  @EventBusHook public void onEvent(DiskUsageTask.BusyBoxDiskUsageEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEvent(DiskUsageTask.BusyBoxDiskUsageEvent event) {
     long totalSize = event.total;
     long freeSize = event.free;
     long usedSize = totalSize - freeSize;
 
-    int color1 = ColorScheme.getAccent();
-    int color2 = ColorScheme.getAccentDark();
-    int color3 = ColorScheme.getPrimary();
-    if (color1 == color3) color3 = Color.invert(color1);
+    Radiant radiant = getRadiant();
+    int color1 = radiant.accentColor();
+    int color2 = radiant.accentColorDark();
+    int color3 = radiant.primaryColor();
+    if (color1 == color3) color3 = Colors.invert(color1);
 
     if (itemSlice == null || freeSlice == null || usedSlice == null) {
       usedSlice = new PieModel(usedSize - event.binaryInfo.size, color1);
@@ -569,13 +575,14 @@ public class InstallerFragment extends BaseSupportFragment implements
     setLegendText(R.id.text_free, getString(R.string.free).toUpperCase(), freeSize, totalSize, color2);
     setLegendText(R.id.text_item, item.toUpperCase(), event.binaryInfo.size, totalSize, color3);
 
-    findById(R.id.text_used).setVisibility(View.VISIBLE);
-    findById(R.id.text_free).setVisibility(View.VISIBLE);
-    findById(R.id.text_item).setVisibility(View.VISIBLE);
-    findById(R.id.progress).setVisibility(View.GONE);
+    getViewById(R.id.text_used).setVisibility(View.VISIBLE);
+    getViewById(R.id.text_free).setVisibility(View.VISIBLE);
+    getViewById(R.id.text_item).setVisibility(View.VISIBLE);
+    getViewById(R.id.progress).setVisibility(View.GONE);
   }
 
-  @EventBusHook public void onEvent(OpenTerminalEvent event) {
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onEvent(OpenTerminalEvent event) {
     openTerminal();
   }
 
@@ -617,10 +624,9 @@ public class InstallerFragment extends BaseSupportFragment implements
   }
 
   private boolean isTerminalSupported() {
-    return isIntentAvailable(getActivity(), new Intent("jackpal.androidterm.RUN_SCRIPT"))
-        || isIntentAvailable(getActivity(), new Intent("jrummy.androidterm.RUN_SCRIPT"))
-        || isIntentAvailable(getActivity(), new Intent(Intent.ACTION_VIEW,
-        Uri.parse("market://details?id=jackpal.androidterm")));
+    return isIntentAvailable(new Intent("jackpal.androidterm.RUN_SCRIPT"))
+        || isIntentAvailable(new Intent("jrummy.androidterm.RUN_SCRIPT"))
+        || isIntentAvailable(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=jackpal.androidterm")));
   }
 
   private void openTerminal() {
@@ -638,16 +644,17 @@ public class InstallerFragment extends BaseSupportFragment implements
       @Override protected Intent doInBackground(File... params) {
         File file = params[0];
         if (!file.exists()) {
-          boolean transferred = Assets.transferAsset(binaryInfo.url, binaryInfo.filename, FilePermission.MODE_0755);
-          Log.i(TAG, String.format(Locale.ENGLISH, "Transferred %s to %s: %b", binaryInfo.url, binaryInfo.filename, transferred));
+          boolean transferred = Assets.transferAsset(binaryInfo.url, binaryInfo.filename, FilePermission.RWXR_XR_X);
+          Log.i(TAG, String
+              .format(Locale.ENGLISH, "Transferred %s to %s: %b", binaryInfo.url, binaryInfo.filename, transferred));
         }
 
         Intent intent;
         String permission;
-        if (isIntentAvailable(getActivity(), new Intent("jackpal.androidterm.RUN_SCRIPT"))) {
+        if (isIntentAvailable(new Intent("jackpal.androidterm.RUN_SCRIPT"))) {
           intent = new Intent("jackpal.androidterm.RUN_SCRIPT");
           permission = "jackpal.androidterm.permission.RUN_SCRIPT";
-        } else if (isIntentAvailable(getActivity(), new Intent("jrummy.androidterm.RUN_SCRIPT"))) {
+        } else if (isIntentAvailable(new Intent("jrummy.androidterm.RUN_SCRIPT"))) {
           intent = new Intent("jrummy.androidterm.RUN_SCRIPT");
           permission = "jrummy.androidterm.permission.RUN_SCRIPT";
         } else {
@@ -676,9 +683,9 @@ public class InstallerFragment extends BaseSupportFragment implements
         bin.mkdirs();
 
         Log.i(TAG, "Installing busybox to " + bin.getAbsolutePath());
-        Os.chmod(file.getAbsolutePath(), FilePermission.MODE_0755);
-        Os.chmod(bin.getAbsolutePath(), FilePermission.MODE_0777);
-        Os.chmod(file.getParent(), FilePermission.MODE_0777);
+        Os.chmod(file.getAbsolutePath(), FilePermission.RWXR_XR_X);
+        Os.chmod(bin.getAbsolutePath(), FilePermission.RWXRWXRWX);
+        Os.chmod(file.getParent(), FilePermission.RWXRWXRWX);
         Shell.SH.run(file + " --install -s " + bin);
         Shell.SH.run(file + " ln -s " + file + " " + bin + "/busybox");
 
@@ -691,7 +698,7 @@ public class InstallerFragment extends BaseSupportFragment implements
       @Override protected void onPostExecute(Intent intent) {
         if (intent == null && openGooglePlay) {
           Log.i(TAG, "Opening Google Play to download Terminal Emulator by JackPal");
-          intent = IntentUtils.newMarketForAppIntent(getActivity(), "jackpal.androidterm");
+          intent = Intents.newAppStoreIntent("jackpal.androidterm");
         }
         try {
           startActivity(intent);
@@ -749,16 +756,16 @@ public class InstallerFragment extends BaseSupportFragment implements
     }
   }
 
-  private void updateDiskUsagePieChart() {
+  void updateDiskUsagePieChart() {
     BinaryInfo binaryInfo = binaries.get(versionSpinner.getSelectedIndex());
     String path = paths.get(pathSpinner.getSelectedIndex());
     new DiskUsageTask(binaryInfo, path) {
 
       @Override protected void onPreExecute() {
-        findById(R.id.progress).setVisibility(View.VISIBLE);
-        findById(R.id.text_used).setVisibility(View.GONE);
-        findById(R.id.text_free).setVisibility(View.GONE);
-        findById(R.id.text_item).setVisibility(View.GONE);
+        getViewById(R.id.progress).setVisibility(View.VISIBLE);
+        getViewById(R.id.text_used).setVisibility(View.GONE);
+        getViewById(R.id.text_free).setVisibility(View.GONE);
+        getViewById(R.id.text_item).setVisibility(View.GONE);
       }
 
     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -775,13 +782,13 @@ public class InstallerFragment extends BaseSupportFragment implements
       propertiesCard.setVisibility(View.VISIBLE);
     }
 
-    Analytics analytics = Analytics.newEvent("busybox properties");
+    Analytics.EventBuilder analytics = Analytics.newEvent("busybox properties");
     for (FileMeta property : properties) {
       analytics.put(property.label, property.value);
     }
     analytics.log();
 
-    TableLayout tableLayout = findById(R.id.table_properties);
+    TableLayout tableLayout = getViewById(R.id.table_properties);
 
     if (tableLayout.getChildCount() > 0) {
       tableLayout.removeAllViews();
@@ -826,23 +833,25 @@ public class InstallerFragment extends BaseSupportFragment implements
     TextDrawable legendDrawable = new TextDrawable(getActivity(), percent).setBackgroundColor(Color.TRANSPARENT);
     CircleDrawable drawable = new CircleDrawable(legendDrawable, color);
     drawable.setBounds(0, 0, ResUtils.dpToPx(32), ResUtils.dpToPx(32));
-    TextView textView = findById(id);
+    TextView textView = getViewById(id);
 
     final int WORD_LENGTH = getResources().getBoolean(R.bool.isTablet) ? 12 : 8;
 
     String text = "";
     for (int i = title.length(); i <= WORD_LENGTH; i++) text += 'A';
 
-    new HtmlBuilder()
-        .strong()
-        .append(title.toUpperCase())
-        .font()
-        .color(ColorScheme.getBackgroundLight(getActivity()))
-        .text(text)
-        .close()
-        .close()
-        .append(Formatter.formatFileSize(getActivity(), size))
-        .on(textView);
+    textView.setText(
+        new HtmlBuilder()
+            .strong()
+            .append(title.toUpperCase())
+            .font()
+            .color(getRadiant().backgroundColorLight())
+            .text(text)
+            .close()
+            .close()
+            .append(Formatter.formatFileSize(getActivity(), size))
+            .build()
+    );
 
     textView.setCompoundDrawables(drawable, null, null, null);
     textView.setVisibility(View.VISIBLE);
@@ -861,17 +870,17 @@ public class InstallerFragment extends BaseSupportFragment implements
     return String.format(Locale.ENGLISH, "%d%%", (int) (100.0f * result));
   }
 
-  private void showMessage(@StringRes int resid, Object... args) {
+  void showMessage(@StringRes int resid, Object... args) {
     showMessage(getString(resid, args));
   }
 
   private void showMessage(String message) {
-    Snackbar snackbar = Snackbar.make(findById(R.id.main), message, Snackbar.LENGTH_LONG);
+    Snackbar snackbar = Snackbar.make(getViewById(R.id.main), message, Snackbar.LENGTH_LONG);
     View view = snackbar.getView();
     TextView messageText = (TextView) view.findViewById(R.id.snackbar_text);
-    if (Themes.isDark()) {
-      messageText.setTextColor(ColorScheme.getPrimaryText(getActivity()));
-      view.setBackgroundColor(ColorScheme.getBackgroundDark(getActivity()));
+    if (getRadiant().isDark()) {
+      messageText.setTextColor(getRadiant().primaryTextColor());
+      view.setBackgroundColor(getRadiant().backgroundColorDark());
     } else {
       messageText.setTextColor(Color.WHITE);
     }
@@ -882,7 +891,7 @@ public class InstallerFragment extends BaseSupportFragment implements
 
   }
 
-  public static class RootRequiredDialog extends BaseDialogFragment {
+  public static class RootRequiredDialog extends DialogFragment {
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
       return new AlertDialog.Builder(getActivity())
@@ -892,7 +901,7 @@ public class InstallerFragment extends BaseSupportFragment implements
           .setNeutralButton(R.string.terminal, new DialogInterface.OnClickListener() {
 
             @Override public void onClick(DialogInterface dialog, int which) {
-              Events.post(new OpenTerminalEvent());
+              EventBus.getDefault().post(new OpenTerminalEvent());
             }
           })
           .setPositiveButton(R.string.root_info, new DialogInterface.OnClickListener() {
@@ -902,7 +911,7 @@ public class InstallerFragment extends BaseSupportFragment implements
                 PackageManager pm = getActivity().getPackageManager();
                 Intent intent = pm.getLaunchIntentForPackage("com.jrummyapps.rootchecker");
                 if (intent == null) {
-                  intent = IntentUtils.newGooglePlayIntent(getActivity(), "com.jrummyapps.rootchecker");
+                  intent = Intents.newGooglePlayIntent("com.jrummyapps.rootchecker");
                 }
                 startActivity(intent);
               } catch (ActivityNotFoundException ignored) {

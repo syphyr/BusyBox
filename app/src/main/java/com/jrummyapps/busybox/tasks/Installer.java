@@ -19,45 +19,41 @@ package com.jrummyapps.busybox.tasks;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.app.AlertDialog;
-
 import com.crashlytics.android.Crashlytics;
 import com.jrummyapps.android.app.App;
-import com.jrummyapps.android.dialog.BaseDialogFragment;
-import com.jrummyapps.android.eventbus.Events;
-import com.jrummyapps.android.io.common.Assets;
-import com.jrummyapps.android.io.common.FileUtils;
-import com.jrummyapps.android.io.files.FileOperation;
-import com.jrummyapps.android.io.files.LocalFile;
-import com.jrummyapps.android.io.permissions.FilePermission;
-import com.jrummyapps.android.io.storage.MountPoint;
-import com.jrummyapps.android.io.storage.Storage;
+import com.jrummyapps.android.files.FileOperation;
+import com.jrummyapps.android.files.LocalFile;
 import com.jrummyapps.android.prefs.Prefs;
+import com.jrummyapps.android.roottools.RootTools;
+import com.jrummyapps.android.roottools.box.BusyBox;
+import com.jrummyapps.android.roottools.commands.LsCommand;
+import com.jrummyapps.android.roottools.commands.RebootCommand;
+import com.jrummyapps.android.roottools.commands.ShellCommand;
 import com.jrummyapps.android.shell.Shell;
-import com.jrummyapps.android.shell.files.FileLister;
-import com.jrummyapps.android.shell.superuser.check.RootCheck;
-import com.jrummyapps.android.shell.tools.BusyBox;
-import com.jrummyapps.android.shell.tools.Reboot;
-import com.jrummyapps.android.shell.tools.RootTools;
+import com.jrummyapps.android.storage.MountPoint;
+import com.jrummyapps.android.storage.Storage;
+import com.jrummyapps.android.util.Assets;
+import com.jrummyapps.android.util.FileUtils;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.utils.BusyBoxZipHelper;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-
-import static com.jrummyapps.android.io.permissions.FilePermission.S_IRGRP;
-import static com.jrummyapps.android.io.permissions.FilePermission.S_IROTH;
-import static com.jrummyapps.android.io.permissions.FilePermission.S_IRUSR;
-import static com.jrummyapps.android.io.permissions.FilePermission.S_IWUSR;
-import static com.jrummyapps.android.io.permissions.FilePermission.S_IXGRP;
-import static com.jrummyapps.android.io.permissions.FilePermission.S_IXOTH;
-import static com.jrummyapps.android.io.permissions.FilePermission.S_IXUSR;
+import java.util.Set;
+import org.greenrobot.eventbus.EventBus;
+import static com.jrummyapps.android.files.FilePermission.S_IRGRP;
+import static com.jrummyapps.android.files.FilePermission.S_IROTH;
+import static com.jrummyapps.android.files.FilePermission.S_IRUSR;
+import static com.jrummyapps.android.files.FilePermission.S_IWUSR;
+import static com.jrummyapps.android.files.FilePermission.S_IXGRP;
+import static com.jrummyapps.android.files.FilePermission.S_IXOTH;
+import static com.jrummyapps.android.files.FilePermission.S_IXUSR;
 
 public class Installer implements Runnable {
 
@@ -78,7 +74,6 @@ public class Installer implements Runnable {
   public final boolean recovery;
 
   private Installer(Builder builder) {
-    FilePermission p;
     binary = builder.binary;
     asset = builder.asset;
     path = builder.path;
@@ -89,10 +84,10 @@ public class Installer implements Runnable {
   }
 
   @Override public void run() {
-    Events.post(new StartEvent(this));
+    EventBus.getDefault().post(new StartEvent(this));
 
-    if (!RootCheck.get().accessGranted) {
-      Events.post(new ErrorEvent(this, ERROR_NOT_ROOTED));
+    if (!RootTools.isAccessGiven()) {
+      EventBus.getDefault().post(new ErrorEvent(this, ERROR_NOT_ROOTED));
       return;
     }
 
@@ -109,98 +104,98 @@ public class Installer implements Runnable {
 
     if (recovery) {
       File updateZip = new File(App.getContext().getFilesDir(), "update.zip");
-      BusyBox busybox = BusyBox.from(srFile.path);
+      BusyBox busybox = BusyBox.newInstance(srFile.path);
       try {
         BusyBoxZipHelper.createBusyboxRecoveryZip(busybox, dtFile.getAbsolutePath(), updateZip);
 
         File commandTemp = new File(App.getContext().getFilesDir(), "command");
         FileUtils.write(commandTemp, "--update_package=CACHE:busybox.zip'");
-        RootTools.cp(commandTemp, new File("/cache/recovery/command"));
-        RootTools.chmod("755", "/cache/recovery/command");
-        RootTools.cp(updateZip, new File("/cache/busybox.zip"));
-        RootTools.chmod("755", "/cache/busybox.zip");
+        ShellCommand.cp(commandTemp, new File("/cache/recovery/command"));
+        ShellCommand.chmod("755", new File("/cache/recovery/command"));
+        ShellCommand.cp(updateZip, new File("/cache/busybox.zip"));
+        ShellCommand.chmod("755", new File("/cache/busybox.zip"));
 
         // TWRP reportedly does not find the update package
         FileUtils.write(commandTemp, "install /cache/busybox.zip");
-        RootTools.cp(commandTemp, new File("/cache/recovery/openrecoveryscript"));
-        RootTools.chmod("755", "/cache/recovery/openrecoveryscript");
+        ShellCommand.cp(commandTemp, new File("/cache/recovery/openrecoveryscript"));
+        ShellCommand.chmod("755", new File("/cache/recovery/openrecoveryscript"));
 
         commandTemp.delete();
         updateZip.delete();
 
-        Reboot.RECOVERY.execute();
+        RebootCommand.REBOOT_RECOVERY.execute();
 
-        Events.post(new FinishedEvent(this));
+        EventBus.getDefault().post(new FinishedEvent(this));
       } catch (IOException e) {
-        Events.post(new ErrorEvent(this, "Error creating installable zip"));
+        EventBus.getDefault().post(new ErrorEvent(this, "Error creating installable zip"));
         Crashlytics.logException(e);
       }
     } else {
       MountPoint mountPoint;
       try {
         mountPoint = MountPoint.findMountPoint(path);
-      } catch (MountPoint.InvalidMountPointException e) {
-        Events.post(new ErrorEvent(this, "Error getting mount point for " + path));
+      } catch (MountPoint.MountPointNotFoundException e) {
+        EventBus.getDefault().post(new ErrorEvent(this, "Error getting mount point for " + path));
         return;
       }
 
       boolean mountedReadWrite = mountPoint.isReadWrite();
 
       if (!mountPoint.remount("rw") && !mountedReadWrite) {
-        Events.post(new ErrorEvent(this, "Error mounting " + mountPoint.getMountPoint() + " read/write"));
+        EventBus.getDefault().post(new ErrorEvent(this, "Error mounting " + mountPoint.getMountPoint() + " read/write"));
         return;
       }
 
       if (parent != null && !parent.isDirectory()) {
-        if (parent.isOnRemovableStorage()) {
+        if (Storage.isOnRemovableStorage(parent)) {
           FileOperation.mkdir(parent);
-        } else if (parent.isOnExternalStorage()) {
+        } else if (Storage.isOnPrimaryStorage(parent)) {
           //noinspection ResultOfMethodCallIgnored
           parent.mkdirs();
         } else {
-          RootTools.mkdir(parent);
-          RootTools.chmod("0755", parent);
-          RootTools.chown("root", "shell", parent);
+          ShellCommand.mkdir(parent);
+          ShellCommand.chmod("0755", parent);
+          ShellCommand.chown("root", "shell", parent);
         }
       }
 
       if (dtFile.path.equals("/sbin/busybox")) {
-        dtFile.setFileInfo(FileLister.getFileInfo(dtFile.path));
+        dtFile.setEntry(LsCommand.getEntry(dtFile.path));
       }
 
       if (dtFile.exists()) {
         Uninstaller.uninstall(dtFile);
       }
 
-      if (!RootTools.cp(srFile, dtFile) && !dtFile.exists()) {
-        Events.post(new ErrorEvent(this, "Failed copying " + srFile + " to " + dtFile));
+      if (!ShellCommand.cp(srFile, dtFile) && !dtFile.exists()) {
+        EventBus.getDefault().post(new ErrorEvent(this, "Failed copying " + srFile + " to " + dtFile));
         return;
       }
 
-      RootTools.chmod("0755", dtFile);
-      RootTools.chown("root", "root", dtFile);
+      ShellCommand.chmod("0755", dtFile);
+      ShellCommand.chown("root", "root", dtFile);
 
-      BusyBox busyBox = BusyBox.from(dtFile.getAbsolutePath());
+      BusyBox busyBox = BusyBox.newInstance(dtFile.getAbsolutePath());
 
       if (overwrite && symlink && Storage.isSystemFile(dtFile)) {
         mountPoint.remount("rw");
-        List<String> applets = busyBox.getApplets();
+        Set<String> applets = busyBox.getApplets();
         for (String applet : applets) {
           File file = new File(path, applet);
           if (file.exists()) {
-            RootTools.rm(file);
+            ShellCommand.rm(file);
           }
         }
       }
 
       if (symlink && Storage.isSystemFile(dtFile)) {
         mountPoint.remount("rw");
-        if (!Shell.SU.run("\"" + busyBox.path + "\" --install -s \"" + path + "\"").success()) {
+        if (!Shell.SU.run("\"" + busyBox.path + "\" --install -s \"" + path + "\"").isSuccessful()) {
           // "--install" is not a command, symlink applets one by one.
-          List<String> applets = busyBox.getApplets();
+          Set<String> applets = busyBox.getApplets();
           for (String applet : applets) {
             LocalFile file = new LocalFile(path, applet);
-            RootTools.ln(busyBox, file);
+            ShellCommand.ln(busyBox, file);
           }
         }
       }
@@ -209,7 +204,7 @@ public class Installer implements Runnable {
         mountPoint.remount("ro");
       }
 
-      Events.post(new FinishedEvent(this));
+      EventBus.getDefault().post(new FinishedEvent(this));
     }
   }
 
@@ -347,7 +342,7 @@ public class Installer implements Runnable {
 
   }
 
-  public static class ConfirmInstallDialog extends BaseDialogFragment {
+  public static class ConfirmInstallDialog extends DialogFragment {
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
       final Builder builder = getArguments().getParcelable("builder");

@@ -19,6 +19,7 @@ package com.jrummyapps.busybox.dialogs;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -28,24 +29,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
 import com.jrummyapps.android.analytics.Analytics;
-import com.jrummyapps.android.dialog.BaseDialogFragment;
-import com.jrummyapps.android.eventbus.Events;
-import com.jrummyapps.android.theme.ColorScheme;
+import com.jrummyapps.android.radiant.Radiant;
 import com.jrummyapps.android.util.KeyboardUtils;
 import com.jrummyapps.busybox.R;
-
 import java.util.Locale;
+import org.greenrobot.eventbus.EventBus;
 
-public class CreateScriptDialog extends BaseDialogFragment {
+public class CreateScriptDialog extends DialogFragment {
 
-  private Button positiveButton;
-  private EditText editScriptName;
-  private EditText editFileName;
+  Button positiveButton;
+  EditText editScriptName;
+  EditText editFileName;
 
-  private boolean setFileNameText = true;
-  private boolean fromUser = false;
+   boolean setFileNameText = true;
+   boolean fromUser = false;
 
   private final TextWatcher fileNameTextWatcher = new TextWatcher() {
 
@@ -106,7 +104,7 @@ public class CreateScriptDialog extends BaseDialogFragment {
             Analytics.newEvent("created script").log();
             String name = editScriptName.getText().toString();
             String filename = editFileName.getText().toString();
-            Events.post(new CreateScriptEvent(name, filename));
+            EventBus.getDefault().post(new CreateScriptEvent(name, filename));
           }
         })
         .create();
@@ -116,11 +114,11 @@ public class CreateScriptDialog extends BaseDialogFragment {
     super.onStart();
 
     AlertDialog dialog = (AlertDialog) getDialog();
-
-    dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ColorScheme.getPrimaryText(getActivity()));
+    Radiant radiant = Radiant.getInstance(getActivity());
+    dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(radiant.primaryTextColor());
 
     positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-    positiveButton.setTextColor(ColorScheme.getAccent());
+    positiveButton.setTextColor(radiant.accentColor());
     positiveButton.setEnabled(false);
 
     editFileName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -141,7 +139,7 @@ public class CreateScriptDialog extends BaseDialogFragment {
     public final String name;
     public final String filename;
 
-    public CreateScriptEvent(String name, String filename) {
+    CreateScriptEvent(String name, String filename) {
       this.name = name;
       this.filename = filename;
     }

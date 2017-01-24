@@ -17,22 +17,13 @@
 
 package com.jrummyapps.busybox.activities;
 
-import android.app.Activity;
 import android.app.Fragment;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.jrummyapps.android.animations.Technique;
-import com.jrummyapps.android.easteregg.EasterEggCallback;
 import com.jrummyapps.android.preferences.activities.MainPreferenceActivity;
-import com.jrummyapps.android.util.ViewUtils;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.fragments.AboutFragment;
 import com.jrummyapps.busybox.fragments.SettingsFragment;
 
-import java.util.Random;
-
-public class SettingsActivity extends MainPreferenceActivity implements EasterEggCallback {
+public class SettingsActivity extends MainPreferenceActivity  {
 
   @Override protected Fragment getFragment(int position) {
     int stringId = getStringId(position);
@@ -42,39 +33,6 @@ public class SettingsActivity extends MainPreferenceActivity implements EasterEg
       return new AboutFragment();
     }
     return super.getFragment(position);
-  }
-
-  @Override public void onRequestEgg(Activity activity, int id, int count) {
-    Technique[] techniques = {
-        Technique.SHAKE,
-        Technique.BOUNCE,
-        Technique.FLASH,
-        Technique.PULSE,
-        Technique.ROTATE,
-        Technique.SWING,
-        Technique.TADA,
-        Technique.WAVE,
-        Technique.WOBBLE
-    };
-    Random random = new Random();
-    Technique technique = techniques[random.nextInt(techniques.length)];
-    ViewGroup viewGroup = ViewUtils.getRootView(activity);
-    if (random.nextInt(10) == 0) {
-      Technique.ROTATE.playOn(viewGroup);
-      return;
-    }
-    animate(viewGroup, technique);
-  }
-
-  private void animate(ViewGroup viewGroup, Technique technique) {
-    for (int i = 0, len = viewGroup.getChildCount(); i < len; i++) {
-      View child = viewGroup.getChildAt(i);
-      if (child instanceof ViewGroup) {
-        animate((ViewGroup) child, technique);
-      } else {
-        technique.playOn(child);
-      }
-    }
   }
 
 }

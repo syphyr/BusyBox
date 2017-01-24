@@ -28,31 +28,27 @@ import android.transition.Transition;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
 import com.jrummyapps.android.analytics.Analytics;
-import com.jrummyapps.android.base.BaseActivity;
-import com.jrummyapps.android.theme.BaseTheme;
-import com.jrummyapps.android.theme.Themes;
+import com.jrummyapps.android.radiant.Radiant;
+import com.jrummyapps.android.radiant.activity.RadiantActivity;
 import com.jrummyapps.android.transitions.FabDialogMorphSetup;
 import com.jrummyapps.android.transitions.TransitionUtils;
 import com.jrummyapps.android.util.KeyboardUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.busybox.R;
-
 import java.util.Locale;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-public class CreateScriptActivity extends BaseActivity implements View.OnClickListener {
+public class CreateScriptActivity extends RadiantActivity implements View.OnClickListener {
 
   public static final String EXTRA_SCRIPT_NAME = "script_name";
   public static final String EXTRA_FILE_NAME = "file_name";
 
-  private Button positiveButton;
-  private EditText editScriptName;
-  private EditText editFileName;
-
-  private boolean setFileNameText = true;
-  private boolean fromUser = false;
+  Button positiveButton;
+  EditText editScriptName;
+  EditText editFileName;
+  boolean setFileNameText = true;
+  boolean fromUser = false;
 
   private final TextWatcher fileNameTextWatcher = new TextWatcher() {
 
@@ -122,9 +118,9 @@ public class CreateScriptActivity extends BaseActivity implements View.OnClickLi
       }, 250);
     }
 
-    positiveButton = findById(R.id.positive_button);
-    editScriptName = findById(R.id.script_name);
-    editFileName = findById(R.id.file_name);
+    positiveButton = getViewById(R.id.positive_button);
+    editScriptName = getViewById(R.id.script_name);
+    editFileName = getViewById(R.id.file_name);
 
     editFileName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
@@ -153,15 +149,11 @@ public class CreateScriptActivity extends BaseActivity implements View.OnClickLi
     }
   }
 
-  @Override public int getActivityTheme() {
-    if (Themes.getBaseTheme() == BaseTheme.DARK) {
-      return R.style.Theme_Dark_NoActionBar_MaterialDialog;
+  @Override public int getThemeResId() {
+    if (getRadiant().getBaseTheme() == Radiant.BaseTheme.DARK) {
+      return R.style.Radiant_Dark_NoActionBar_MaterialDialog;
     }
-    return R.style.Theme_Light_NoActionBar_MaterialDialog;
-  }
-
-  @Override public void applyWindowBackground() {
-    // NO-OP
+    return R.style.Radiant_Light_NoActionBar_MaterialDialog;
   }
 
   public void dismiss(View view) {

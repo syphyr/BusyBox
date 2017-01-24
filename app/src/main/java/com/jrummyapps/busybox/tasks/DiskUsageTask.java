@@ -19,11 +19,10 @@ package com.jrummyapps.busybox.tasks;
 
 import android.os.AsyncTask;
 import android.os.StatFs;
-
-import com.jrummyapps.android.eventbus.Events;
-import com.jrummyapps.android.io.storage.MountPoint;
-import com.jrummyapps.android.io.storage.Storage;
+import com.jrummyapps.android.storage.MountPoint;
+import com.jrummyapps.android.storage.Storage;
 import com.jrummyapps.busybox.models.BinaryInfo;
+import org.greenrobot.eventbus.EventBus;
 
 public class DiskUsageTask extends AsyncTask<Void, Void, Long[]> {
 
@@ -39,7 +38,7 @@ public class DiskUsageTask extends AsyncTask<Void, Void, Long[]> {
     MountPoint mountPoint;
     try {
       mountPoint = MountPoint.findMountPoint(path);
-    } catch (MountPoint.InvalidMountPointException e) {
+    } catch (MountPoint.MountPointNotFoundException e) {
       mountPoint = null;
     }
 
@@ -47,7 +46,7 @@ public class DiskUsageTask extends AsyncTask<Void, Void, Long[]> {
 
     String fileSystemPath;
     if (mountPoint == null || mountPoint.getMountPoint().equals("/")) {
-      fileSystemPath = Storage.ANDROID_ROOT.getAbsolutePath();
+      fileSystemPath = "/system";
     } else {
       fileSystemPath = mountPoint.getMountPoint();
     }
@@ -58,7 +57,7 @@ public class DiskUsageTask extends AsyncTask<Void, Void, Long[]> {
     free = Storage.getFreeSpace(statFs);
 
     if (total == 0) {
-      statFs.restat(Storage.ANDROID_ROOT.getAbsolutePath());
+      statFs.restat("/system");
       total = Storage.getTotalSpace(statFs);
       free = Storage.getFreeSpace(statFs);
     }
@@ -67,7 +66,7 @@ public class DiskUsageTask extends AsyncTask<Void, Void, Long[]> {
   }
 
   @Override protected void onPostExecute(Long[] sizes) {
-    Events.post(new BusyBoxDiskUsageEvent(binaryInfo, path, sizes[0], sizes[1]));
+    EventBus.getDefault().post(new BusyBoxDiskUsageEvent(binaryInfo, path, sizes[0], sizes[1]));
   }
 
   public static final class BusyBoxDiskUsageEvent {

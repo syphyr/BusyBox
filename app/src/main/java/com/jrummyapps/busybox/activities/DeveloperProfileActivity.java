@@ -19,61 +19,58 @@ package com.jrummyapps.busybox.activities;
 
 import android.content.ActivityNotFoundException;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.transition.Transition;
 import android.view.View;
-import android.widget.ImageView;
-
 import com.jrummyapps.android.analytics.Analytics;
 import com.jrummyapps.android.animations.Rebound;
-import com.jrummyapps.android.base.BaseActivity;
-import com.jrummyapps.android.constants.Websites;
-import com.jrummyapps.android.theme.BaseTheme;
-import com.jrummyapps.android.theme.ColorScheme;
-import com.jrummyapps.android.theme.Themes;
+import com.jrummyapps.android.radiant.Radiant;
+import com.jrummyapps.android.radiant.activity.RadiantActivity;
 import com.jrummyapps.android.transitions.FabDialogMorphSetup;
 import com.jrummyapps.android.transitions.TransitionUtils;
-import com.jrummyapps.android.util.IntentUtils;
+import com.jrummyapps.android.util.Intents;
 import com.jrummyapps.android.util.OrientationUtils;
 import com.jrummyapps.android.util.ResUtils;
 import com.jrummyapps.android.widget.AnimatedSvgView;
 import com.jrummyapps.busybox.R;
 import com.jrummyapps.busybox.design.SvgIcons;
 
-public class DeveloperProfileActivity extends BaseActivity {
+public class DeveloperProfileActivity extends RadiantActivity {
 
-  private AnimatedSvgView twitterView;
-  private AnimatedSvgView googlePlusView;
-  private AnimatedSvgView githubView;
-  private AnimatedSvgView linkedinView;
+   AnimatedSvgView twitterView;
+   AnimatedSvgView googlePlusView;
+   AnimatedSvgView githubView;
+   AnimatedSvgView linkedinView;
 
   private final Rebound.SpringyTouchListener touchListener = new Rebound.SpringyTouchListener() {
 
     @Override public void onClick(View v) {
       if (v == twitterView) {
         try {
-          startActivity(IntentUtils.newTwitterIntent(getPackageManager(), Websites.getDeveloperTwitterPage()));
-          Analytics.newEvent("developer twitter").log();
+          startActivity(Intents.newTwitterIntent("https://twitter.com/jrummy16"));
+          Analytics.newEvent("clicked_developer_twitter").log();
         } catch (ActivityNotFoundException ignored) {
         }
       } else if (v == googlePlusView) {
         try {
-          startActivity(IntentUtils.newGooglePlusIntent(getPackageManager(), Websites.getDeveloperGooglePlusProfile()));
-          Analytics.newEvent("developer google plus").log();
+          startActivity(Intents.newGooglePlusIntent("https://plus.google.com/+JaredRummler"));
+          Analytics.newEvent("clicked_developer_google_plus").log();
         } catch (ActivityNotFoundException ignored) {
         }
       } else if (v == githubView) {
         try {
-          startActivity(IntentUtils.newOpenWebBrowserIntent(getString(R.string.website_developer_github_page)));
-          Analytics.newEvent("developer github").log();
+          startActivity(Intents.newOpenWebBrowserIntent("https://github.com/jaredrummler"));
+          Analytics.newEvent("clicked_developer_github").log();
         } catch (ActivityNotFoundException ignored) {
         }
       } else if (v == linkedinView) {
         try {
-          startActivity(IntentUtils.newOpenWebBrowserIntent(getString(R.string.website_developer_linkedin_page)));
-          Analytics.newEvent("developer linkedin").log();
+          startActivity(Intents.newOpenWebBrowserIntent("https://www.linkedin.com/in/jaredrummler"));
+          Analytics.newEvent("clicked_developer_linkedin").log();
         } catch (ActivityNotFoundException ignored) {
         }
       }
@@ -92,18 +89,12 @@ public class DeveloperProfileActivity extends BaseActivity {
 
     setContentView(R.layout.activity_developer_profile);
 
-    twitterView = findById(R.id.twitter);
-    googlePlusView = findById(R.id.google_plus);
-    githubView = findById(R.id.github);
-    linkedinView = findById(R.id.linkedin);
+    twitterView = getViewById(R.id.twitter);
+    googlePlusView = getViewById(R.id.google_plus);
+    githubView = getViewById(R.id.github);
+    linkedinView = getViewById(R.id.linkedin);
 
-    findViewById(R.id.bottom_container).setBackgroundColor(ColorScheme.getAccent());
-
-    if (VERSION.SDK_INT >= VERSION_CODES.M) {
-      // fix color scheme not applying on Android 6.0+
-      ImageView profileImageBackground = findById(R.id.profile_background);
-      profileImageBackground.setColorFilter(ColorScheme.getAccent());
-    }
+    findViewById(R.id.bottom_container).setBackgroundColor(getRadiant().accentColor());
 
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       FabDialogMorphSetup.setupSharedEelementTransitions(this, findViewById(R.id.container), ResUtils.dpToPx(2));
@@ -121,8 +112,15 @@ public class DeveloperProfileActivity extends BaseActivity {
     }
   }
 
-  private void loadView() {
-    Analytics.newEvent("viewed developer profile").log();
+  @Override protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+    super.onPostCreate(savedInstanceState);
+    if (getRadiant().isThemeChanged()) {
+      getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+    }
+  }
+
+  void loadView() {
+    Analytics.newEvent("clicked_developer_profile").log();
 
     SvgIcons.TWITTER.into(twitterView).start();
     SvgIcons.GOOGLE_PLUS.into(googlePlusView).start();
@@ -136,19 +134,11 @@ public class DeveloperProfileActivity extends BaseActivity {
     linkedinView.setOnTouchListener(touchListener);
   }
 
-  @Override public void applyWindowBackground() {
-    // NO-OP
-  }
-
-  @Override public int getActivityTheme() {
-    if (Themes.getBaseTheme() == BaseTheme.DARK) {
-      return R.style.Theme_Dark_NoActionBar_MaterialDialog;
+  @Override public int getThemeResId() {
+    if (getRadiant().getBaseTheme() == Radiant.BaseTheme.DARK) {
+      return R.style.Radiant_Dark_NoActionBar_MaterialDialog;
     }
-    return R.style.Theme_Light_NoActionBar_MaterialDialog;
-  }
-
-  @Override public boolean isSystemBarTintEnabled() {
-    return false;
+    return R.style.Radiant_Light_NoActionBar_MaterialDialog;
   }
 
   @Override public void onBackPressed() {

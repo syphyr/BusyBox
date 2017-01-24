@@ -18,19 +18,16 @@
 package com.jrummyapps.busybox.dialogs;
 
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-
 import com.jrummyapps.android.analytics.Analytics;
-import com.jrummyapps.android.dialog.BaseDialogFragment;
-import com.jrummyapps.android.eventbus.Events;
 import com.jrummyapps.busybox.R;
-import com.jrummyapps.busybox.monetize.RequestPremiumEvent;
-import com.jrummyapps.busybox.monetize.RequestRemoveAds;
-import com.jrummyapps.busybox.monetize.ShowInterstitalAdEvent;
+import com.jrummyapps.busybox.utils.Monetize;
+import org.greenrobot.eventbus.EventBus;
 
-public class BusyboxSuccessDialog extends BaseDialogFragment {
+public class BusyboxSuccessDialog extends DialogFragment {
 
   @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
     setCancelable(false);
@@ -42,24 +39,24 @@ public class BusyboxSuccessDialog extends BaseDialogFragment {
 
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
-            Events.post(new RequestPremiumEvent());
-            Analytics.newEvent("request in-app purchase").put("prodcut", "pro_version").log();
+            EventBus.getDefault().post(new Monetize.Event.RequestPremiumEvent());
+            Analytics.newEvent("monetize_request_pro_version").put("prodcut", "pro_version").log();
           }
         })
         .setNeutralButton(R.string.remove_ads, new DialogInterface.OnClickListener() {
 
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
-            Events.post(new RequestRemoveAds());
-            Analytics.newEvent("request in-app purchase").put("prodcut", "remove_ads").log();
+            EventBus.getDefault().post(new Monetize.Event.RequestRemoveAds());
+            Analytics.newEvent("monetize_request_remove_ads").put("prodcut", "remove_ads").log();
           }
         })
         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 
           @Override public void onClick(DialogInterface dialog, int which) {
             dialog.dismiss();
-            Events.post(new ShowInterstitalAdEvent());
-            Analytics.newEvent("show interstitial ad").log();
+            EventBus.getDefault().post(new Monetize.Event.RequestInterstitialAd());
+            Analytics.newEvent("monitize_interstitial_ad").log();
           }
         })
         .create();

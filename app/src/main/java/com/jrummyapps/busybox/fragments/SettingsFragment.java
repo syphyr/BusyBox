@@ -17,13 +17,13 @@
 
 package com.jrummyapps.busybox.fragments;
 
-import com.jrummyapps.android.preferences.fragments.AppearancePreferenceFragment;
+import com.jrummyapps.android.preferences.fragments.RadiantPreferenceFragment;
 import com.jrummyapps.busybox.R;
 
-public class SettingsFragment extends AppearancePreferenceFragment {
+public class SettingsFragment extends RadiantPreferenceFragment {
 
   @Override public int getPreferenceXmlResId() {
-    return R.xml.prefs_main;
+    return R.xml.prefs_busybox_main;
   }
 
 }

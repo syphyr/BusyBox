@@ -41,7 +41,7 @@
       android:paddingRight="24dp"
       android:paddingStart="16dp"
       android:paddingTop="24dp"
-      android:transitionName="@string/dialog_transition">
+      android:transitionName="@string/morphing_dialog_transition">
 
     <TextView
         android:id="@+id/dialog_title"

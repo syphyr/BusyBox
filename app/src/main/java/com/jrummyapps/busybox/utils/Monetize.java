@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Jared Rummler <jared.rummler@gmail.com>
+ * Copyright (C) 2017 JRummy Apps Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,13 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.jrummyapps.busybox.monetize;
+package com.jrummyapps.busybox.utils;
 
 import com.jrummyapps.android.app.App;
-import com.jrummyapps.android.crypto.Base64Obfuscate;
+import com.jrummyapps.android.obfuscate.LegacyObfuscate;
 import com.jrummyapps.android.prefs.Prefs;
 
 public class Monetize {
@@ -30,10 +29,8 @@ public class Monetize {
 
   public static final String ENCRYPTED_REMOVE_ADS_PRODUCT_ID = "S&#£)$J^O1E]S!¯¯";
 
-  private static final Base64Obfuscate ENCRYPTOR = Base64Obfuscate.getInstance();
-
   public static String decrypt(String value) {
-    return ENCRYPTOR.decrypt(value);
+    return LegacyObfuscate.getInstance().decrypt(value);
   }
 
   public static void removeAds() {
@@ -52,6 +49,25 @@ public class Monetize {
   public static boolean isProVersion() {
     boolean defValue = App.getContext().getPackageName().endsWith("pro");
     return Prefs.getInstance().get(ENCRYPTED_PRO_VERSION_PRODUCT_ID, defValue);
+  }
+
+  public static final class Event {
+
+    public static final class OnAdsRemovedEvent {
+    }
+
+    public static final class OnPurchasedPremiumEvent {
+    }
+
+    public static final class RequestInterstitialAd {
+    }
+
+    public static final class RequestPremiumEvent {
+    }
+
+    public static final class RequestRemoveAds {
+    }
+
   }
 
 }

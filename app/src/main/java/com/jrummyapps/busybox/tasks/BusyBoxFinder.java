@@ -19,32 +19,30 @@ package com.jrummyapps.busybox.tasks;
 
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
-
-import com.jrummyapps.android.eventbus.Events;
-import com.jrummyapps.android.io.storage.Storage;
-import com.jrummyapps.android.shell.files.FileInfo;
-import com.jrummyapps.android.shell.files.FileLister;
-import com.jrummyapps.android.shell.tools.BusyBox;
-
+import com.jrummyapps.android.roottools.box.BusyBox;
+import com.jrummyapps.android.roottools.commands.LsCommand;
+import com.jrummyapps.android.roottools.commands.LsEntry;
+import com.jrummyapps.android.storage.Storage;
 import java.io.File;
+import org.greenrobot.eventbus.EventBus;
 
 public class BusyBoxFinder extends AsyncTask<Void, Void, BusyBox> {
 
   @Override protected BusyBox doInBackground(Void... params) {
     for (String path : Storage.PATH) {
-      BusyBox busybox = BusyBox.from(new File(path, "busybox").getAbsolutePath());
+      BusyBox busybox = BusyBox.newInstance(new File(path, "busybox").getAbsolutePath());
       if (path.equals("/sbin")) {
         // /sbin is not readable. Get file info with root
-        FileInfo fileInfo = FileLister.getFileInfo("/sbin/busybox");
-        if (fileInfo != null) {
-          busybox.setFileInfo(fileInfo);
-          if (!fileInfo.isSymlink) {
+        LsEntry entry = LsCommand.getEntry("/sbin/busybox");
+        if (entry != null) {
+          busybox.setEntry(entry);
+          if (!entry.isSymlink) {
             return busybox;
           }
         }
         continue;
       }
-      if (busybox.exists() && !busybox.isSymbolicLink()) {
+      if (busybox.exists() && !busybox.isSymlink()) {
         return busybox;
       }
     }
@@ -52,14 +50,14 @@ public class BusyBoxFinder extends AsyncTask<Void, Void, BusyBox> {
   }
 
   @Override protected void onPostExecute(BusyBox busybox) {
-    Events.post(new BusyboxFoundEvent(busybox));
+    EventBus.getDefault().post(new BusyboxFoundEvent(busybox));
   }
 
   public static final class BusyboxFoundEvent {
 
     @Nullable public final BusyBox busybox;
 
-    public BusyboxFoundEvent(BusyBox busybox) {
+    BusyboxFoundEvent(BusyBox busybox) {
       this.busybox = busybox;
     }
 

@@ -18,13 +18,11 @@
 package com.jrummyapps.busybox.utils;
 
 import com.jrummyapps.android.app.App;
-import com.jrummyapps.android.io.common.Assets;
-import com.jrummyapps.android.io.common.FileUtils;
-import com.jrummyapps.android.io.common.IOUtils;
-import com.jrummyapps.android.io.permissions.FilePermission;
-import com.jrummyapps.android.shell.tools.BusyBox;
-import com.jrummyapps.busybox.signing.ZipSigner;
-
+import com.jrummyapps.android.files.FilePermission;
+import com.jrummyapps.android.roottools.box.BusyBox;
+import com.jrummyapps.android.util.Assets;
+import com.jrummyapps.android.util.FileUtils;
+import com.jrummyapps.android.util.IoUtils;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
@@ -63,7 +62,7 @@ public class BusyBoxZipHelper {
 
     if (!updateBinary.exists()) {
       //noinspection OctalInteger
-      Assets.transferAsset("signing/update-binary", "update-binary", FilePermission.MODE_0755);
+      Assets.transferAsset("signing/update-binary", "update-binary", FilePermission.RWXR_XR_X);
     }
 
     // create the ZIP
@@ -75,7 +74,7 @@ public class BusyBoxZipHelper {
         zipFile(arr[0], zos, arr[1]);
       }
     } finally {
-      IOUtils.closeQuietly(zos);
+      IoUtils.closeQuietly(zos);
     }
 
     // sign the package
@@ -103,7 +102,7 @@ public class BusyBoxZipHelper {
       } catch (ZipException e) {
         e.printStackTrace();
       } finally {
-        IOUtils.closeQuietly(in);
+        IoUtils.closeQuietly(in);
       }
     } else {
       String[] files = file.list();
@@ -144,7 +143,7 @@ public class BusyBoxZipHelper {
     sb.append("\n");
     sb.append("ui_print(\"creating symlinks...\");\n");
     sb.append("symlink(\"").append(installPath).append("\"");
-    List<String> applets = busybox.getApplets();
+    Set<String> applets = busybox.getApplets();
     String parent = new File(installPath).getParent();
     int n = 2;
     for (String applet : applets) {
