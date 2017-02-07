@@ -14,7 +14,7 @@ print_usage() {
 }
 
 BB_VERSION="1.26.2"
-VERSION_SUFFIX="jrummy"
+VERSION_SUFFIX="delta"
 ANDROID_NATIVE_API_LEVEL="android-21"
 GCC_VERSION="4.9"
 MARCH="$1"
